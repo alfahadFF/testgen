@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.6 - Dimensions 3-Col)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.7 - Final Polish)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -18,7 +18,7 @@
     body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
     
     .canvas-container { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 40px; padding-bottom: 100px; overflow-y: auto; gap: 30px; }
-    .a4-page { font-family: var(--main-font); font-size: var(--base-size); width: 210mm; height: 297mm; background-color: #fff; color: #000; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.5); transform: scale(0.65); transform-origin: top center; margin-bottom: -100mm; overflow: hidden; flex-shrink: 0; background-size: cover; background-position: center; }
+    .a4-page { font-family: var(--main-font); font-size: var(--base-size); width: 210mm; height: 297mm; background-color: #fff; color: #000; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.5); transform: scale(0.65); transform-origin: top center; margin-bottom: -100mm; overflow: hidden; flex-shrink: 0; background-size: cover; background-position: center; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .a4-page::before { content: ''; position: absolute; top: 0; bottom: 0; left: 5mm; width: 1px; border-left: 1px dashed rgba(245, 183, 0, 0.4); pointer-events: none; z-index: 1; }
     .a4-page::after { content: ''; position: absolute; top: 0; bottom: 0; right: 5mm; width: 1px; border-right: 1px dashed rgba(245, 183, 0, 0.4); pointer-events: none; z-index: 1; }
 
@@ -33,8 +33,10 @@
     
     .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; font-size: 14px; color: #111827; }
     .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: inherit; align-items: center; border-bottom: 1px solid #e5e7eb; }
-    .table-rows-wrapper > .spec-row:nth-child(even) { background-color: #f0f2f5 !important; }
-    .table-rows-wrapper > .spec-row:nth-child(odd) { background-color: #ffffff !important; }
+    
+    /* ضمان تلوين الصفوف بالشكل الصحيح في المتصفح والطباعة (PDF) */
+    .spec-block .spec-row:nth-child(even) { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .spec-block .spec-row:nth-child(odd) { background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
     
     .spec-key { font-weight: 700; color: inherit; outline: none; width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
@@ -206,7 +208,7 @@
       </button>
     </div>
 
-    <!-- الإضافة المطلوبة: الصور الحرة والحاويات المكونة من عدة أعمدة -->
+    <!-- الصور الحرة والحاويات المكونة من عدة أعمدة -->
     <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
       <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. إضافة الحاويات، الصور، والنصوص الحرة</h2>
       
@@ -238,7 +240,7 @@
 
 <script>
   // ==========================================
-  // محرك الربط بقاعدة بيانات Google Sheets مع الترجمة الدقيقة جداً
+  // محرك الربط بقاعدة بيانات Google Sheets
   // ==========================================
   const SHEETS_ID = "1TDSSCDfAQJxz_zeulBrM6M79p9fw7mE1xTSvD-P_fuQ";
   let database = { skid_steers: [], pumps: [] };
@@ -251,7 +253,6 @@
     'rated_payload': 'الحمولة المقدرة', 'rated_load': 'الحمولة المقننة', 'bucket_capacity': 'سعة الدلو', 'dump_height': 'ارتفاع التفريغ', 'arm_length': 'طول الذراع', 'breakout_force': 'قوة الكسر', 'lifting_capacity': 'قدرة الرفع', 'performance_productivity': 'الإنتاجية', 'performance_pressure': 'الضغط', 'pump_vertical_fine': 'ضخ رأسي', 'pump_horizontal_fine': 'ضخ أفقي', 'max_aggregate_size': 'أقصى حجم للركام',
     'operating_weight': 'الوزن التشغيلي', 'total_weight': 'الوزن الكلي', 'fuel_tank_capacity': 'سعة خزان الوقود', 'hydraulic_capacity': 'سعة الهيدروليك',
     'std_equip_1': 'تجهيز قياسي 1', 'std_equip_2': 'تجهيز قياسي 2', 'std_equip_3': 'تجهيز قياسي 3', 'opt_equip_1': 'تجهيز اختياري 1', 'feature_1': 'ميزة 1',
-    // الترجمة المخصصة لجدول الأبعاد المكون من 3 أعمدة
     'dim_a': 'الطول الكلي مع الدلو',
     'dim_b': 'الطول بدون الدلو',
     'dim_c': 'قاعدة العجلات',
@@ -317,7 +318,7 @@
   }
 
   // ==========================================
-  // الصور والخلفيات (الترويسة والتذييل)
+  // الصور والخلفيات
   // ==========================================
   let state = { headerImg: '', footerImg: '', lastFooterImg: '' };
 
@@ -354,7 +355,7 @@
   }
 
   // ==========================================
-  // شريط الأدوات الذكي لتنسيق النصوص والجداول
+  // شريط الأدوات الذكي (يتضمن أزرار الطبقات Z-Index)
   // ==========================================
   function createToolbarHTML(targetClasses) {
       return `
@@ -376,11 +377,17 @@
               <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='left')">يسار</button>
               <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='justify')">ضبط</button>
           </div>
+          <div class="flex gap-1 border-r border-gray-300 pr-1 mr-1" title="ترتيب الطبقات">
+              <button class="align-btn" title="مقدمة الكل" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
+              <button class="align-btn" title="خطوة للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
+              <button class="align-btn" title="خطوة للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
+              <button class="align-btn" title="خلف الكل" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
+          </div>
       </div>`;
   }
 
   // ==========================================
-  // محرك التخطيط (إدراج الحاويات الفارغة) - مع دعم خاص لجدول الأبعاد
+  // محرك التخطيط (إدراج الحاويات الفارغة)
   // ==========================================
   function insertPlaceholder() {
       const requestType = document.getElementById('dataSourceSelect').value;
@@ -426,7 +433,8 @@
       else if (action === 'table') {
           const container = document.createElement('div');
           container.className = 'free-container group'; 
-          container.style.width = '100mm'; container.style.height = 'auto'; container.style.minHeight = '30mm'; 
+          container.style.width = '97.5mm'; // 9.75 cm كما طلبت
+          container.style.height = 'auto'; container.style.minHeight = '30mm'; 
           container.style.top = '100mm'; container.style.left = '5mm'; container.style.padding = '0'; 
           container.style.background = 'transparent'; container.style.border = '1px dashed transparent'; 
           container.setAttribute('data-dynamic-type', 'table');
@@ -454,16 +462,10 @@
           const rowsWrapper = document.createElement('div');
           rowsWrapper.className = 'table-rows-wrapper';
           
-          // ميزة 3 أعمدة خاصة بجدول الأبعاد فقط
           if (key === 'dimensions') {
-              colResizer.style.display = 'none'; // تعطيل مقبض العمودين
-              rowsWrapper.innerHTML = `
-              <div class="spec-row flex-1" style="background-color: #374151 !important; color: #fff; padding: 6px 12px; border-bottom: 2px solid #1f2937;">
-                  <span style="width: 15%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">الرمز</span>
-                  <span style="width: 25%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">القياس</span>
-                  <span style="width: 60%; text-align: right; padding-right: 10px; flex-grow:1; font-weight: 900;">المتغير</span>
-              </div>
-              <div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل (الرمز | القياس | المتغير) هنا تلقائياً ]</div>`;
+              colResizer.style.display = 'none';
+              // تمت إزالة صف العناوين بالكامل
+              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل هنا تلقائياً بدون عناوين للأعمدة ]</div>`;
           } else {
               rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات هنا تلقائياً ]</div>`;
           }
@@ -511,18 +513,10 @@
               let tableHTML = '';
               
               if (key === 'dimensions') {
-                  // بناء جدول الأبعاد ذو الـ 3 أعمدة
-                  tableHTML = `
-                  <div class="spec-row flex-1" style="background-color: #374151 !important; color: #fff; padding: 6px 12px; border-bottom: 2px solid #1f2937;">
-                      <span style="width: 15%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">الرمز</span>
-                      <span style="width: 25%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">القياس</span>
-                      <span style="width: 60%; text-align: right; padding-right: 10px; flex-grow:1; font-weight: 900;">المتغير</span>
-                  </div>`;
-                  
+                  // تعبئة جدول الأبعاد (بدون عناوين أعمدة)
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           const displayKey = translationDict[colKey] || colKey;
-                          // استخراج الحرف (A, B, C...) من المفتاح (dim_a, dim_b...)
                           let symbol = colKey.replace('dim_', '').toUpperCase();
                           if(symbol.length > 1) symbol = '-'; 
                           
@@ -534,7 +528,7 @@
                       }
                   });
               } else {
-                  // بناء الجدول العادي ذو العمودين
+                  // تعبئة الجداول العادية
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           const displayKey = translationDict[colKey] || colKey;
@@ -543,7 +537,7 @@
                   });
               }
               
-              if(tableHTML === '' || tableHTML.indexOf('<span') === -1) {
+              if(tableHTML === '') {
                   tableHTML = `<div class="p-4 text-center text-red-400 font-bold bg-red-50 flex-1 border-t border-red-200">لا توفر المواصفات لهذا الموديل</div>`;
               }
               wrapper.innerHTML = tableHTML;
@@ -552,7 +546,7 @@
   }
 
   // ==========================================
-  // استعادة ميزة حاويات الشبكة (الأعمدة) والصورة الحرة
+  // إضافة الحاويات (الأعمدة) والصور والنصوص الحرة
   // ==========================================
   function addFloatingContainer(colCount) {
     const targetPageVal = document.getElementById('targetPageSelect').value;
@@ -609,7 +603,7 @@
         <div class="spec-block w-full h-full" style="--key-width: 50%;">
           <div class="table-col-resizer no-print" style="right: 50%;"></div>
           <div class="spec-header"><span style="position:relative; z-index:2;" contenteditable="true">عنوان الجدول</span></div>
-          <div class="flex-1 bg-white flex flex-col"><div class="spec-row flex-1"><span class="spec-key" contenteditable="true">مواصفة 1</span><span class="spec-val" contenteditable="true">قيمة</span></div></div>
+          <div class="table-rows-wrapper flex-1 bg-white flex flex-col"><div class="spec-row flex-1"><span class="spec-key" contenteditable="true">مواصفة 1</span><span class="spec-val" contenteditable="true">قيمة</span></div></div>
         </div>`;
       const block = col.querySelector('.spec-block');
       const resizer = col.querySelector('.table-col-resizer');
@@ -646,6 +640,17 @@
         const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
         wrapper.appendChild(dragHandle);
 
+        wrapper.insertAdjacentHTML('beforeend', `
+            <div class="text-toolbar no-print" style="top: -42px;">
+                <div class="flex gap-1 pr-1 mr-1" title="ترتيب الطبقات">
+                    <button class="align-btn" title="مقدمة الكل" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
+                    <button class="align-btn" title="خطوة للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
+                    <button class="align-btn" title="خطوة للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
+                    <button class="align-btn" title="خلف الكل" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
+                </div>
+            </div>
+        `);
+
         const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
         deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs cursor-pointer z-50 hover:bg-red-500 hover:text-white';
         deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
@@ -660,7 +665,6 @@
     }
   });
 
-  // نصوص حرة عادية مع شريط الأدوات
   function addFreeText() {
     const targetPageVal = document.getElementById('targetPageSelect').value;
     const targetPage = document.getElementById(`page-${targetPageVal}`);
@@ -690,7 +694,7 @@
   }
 
   // ==========================================
-  // الأساسيات (التحريك والتحجيم المستقر جداً)
+  // الأساسيات (التحريك والتحجيم المستقر)
   // ==========================================
   const scale = 0.65;
   const mmToPx = 3.7795275591;
