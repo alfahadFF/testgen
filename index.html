@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.1)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.2)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -493,8 +493,12 @@
   }
 
   // ==========================================
-  // الأساسيات (التحريك والتحجيم)
+  // الأساسيات (التحريك والتحجيم المطور)
   // ==========================================
+  const scale = 0.65;
+  const mmToPx = 3.7795275591;
+  const marginPx = 5 * mmToPx;
+
   function attachResizers(element, targetPage) {
     const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
     handlePositions.forEach(pos => {
@@ -505,78 +509,127 @@
     makeBoundedBoxResizable(element, targetPage);
   }
 
-  const scale = 0.65;
-  const mmToPx = 3.7795275591;
-  const marginPx = 5 * mmToPx;
-
+  // خوارزمية التحريك المطورة (تعتمد على الإحداثيات الدقيقة للصفحة وتتجاهل السكرول)
   function makeBoundedDraggable(element, handle, page) {
-    let isDragging = false, startX, startY, initialLeft, initialTop;
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
     let vGuide, hGuide;
 
     handle.addEventListener('mousedown', function(e) {
       if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; 
-      e.preventDefault(); e.stopPropagation(); isDragging = true; 
-      startX = e.clientX; startY = e.clientY;
-      initialLeft = element.offsetLeft; initialTop = element.offsetTop;
+      e.preventDefault(); 
+      e.stopPropagation(); 
+      isDragging = true; 
+      
+      const pageRect = page.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      
+      // حساب المسافة بين النقطة التي تم النقر عليها وبين زاوية العنصر
+      offsetX = (e.clientX - elementRect.left) / scale;
+      offsetY = (e.clientY - elementRect.top) / scale;
       
       vGuide = page.querySelector('.snap-guide-v');
       if(!vGuide) { vGuide = document.createElement('div'); vGuide.className = 'snap-guide-v'; page.appendChild(vGuide); }
       hGuide = page.querySelector('.snap-guide-h');
       if(!hGuide) { hGuide = document.createElement('div'); hGuide.className = 'snap-guide-h'; page.appendChild(hGuide); }
 
-      document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd);
+      document.addEventListener('mousemove', drag); 
+      document.addEventListener('mouseup', dragEnd);
     });
 
     function drag(e) {
       if (!isDragging) return;
-      const dx = (e.clientX - startX) / scale; const dy = (e.clientY - startY) / scale;
-      let newLeft = initialLeft + dx; let newTop = initialTop + dy;
       
-      const maxLeft = page.clientWidth - marginPx - element.offsetWidth;
+      const pageRect = page.getBoundingClientRect();
+      
+      // حساب الموضع الجديد استناداً لمكان الماوس الحالي مقسوماً على حجم الصفحة بالضبط
+      let newLeft = ((e.clientX - pageRect.left) / scale) - offsetX;
+      let newTop = ((e.clientY - pageRect.top) / scale) - offsetY;
+      
+      // تطبيق الحدود كي لا يخرج العنصر خارج الصفحة
+      const maxLeft = (page.clientWidth || 210 * mmToPx) - marginPx - element.offsetWidth;
+      const maxTop = (page.clientHeight || 297 * mmToPx) - marginPx - element.offsetHeight;
+      
       newLeft = Math.max(marginPx, Math.min(newLeft, maxLeft));
+      newTop = Math.max(marginPx, Math.min(newTop, maxTop));
 
+      // الجايدية والمحاذاة التلقائية
       let snappedX = false, snappedY = false;
       const snapThreshold = 5; 
-      const rect = { left: newLeft, right: newLeft + element.offsetWidth, top: newTop, bottom: newTop + element.offsetHeight, centerX: newLeft + element.offsetWidth/2, centerY: newTop + element.offsetHeight/2 };
+      const rect = { 
+          left: newLeft, right: newLeft + element.offsetWidth, 
+          top: newTop, bottom: newTop + element.offsetHeight, 
+          centerX: newLeft + element.offsetWidth / 2, centerY: newTop + element.offsetHeight / 2 
+      };
 
       vGuide.style.display = 'none'; hGuide.style.display = 'none';
 
       const pageCenterX = page.clientWidth / 2;
-      if(Math.abs(rect.centerX - pageCenterX) < snapThreshold) { newLeft = pageCenterX - element.offsetWidth/2; vGuide.style.left = `${pageCenterX}px`; vGuide.style.display = 'block'; snappedX = true; }
+      if(Math.abs(rect.centerX - pageCenterX) < snapThreshold) { 
+          newLeft = pageCenterX - element.offsetWidth / 2; 
+          vGuide.style.left = `${pageCenterX}px`; vGuide.style.display = 'block'; snappedX = true; 
+      }
 
       const siblings = Array.from(page.querySelectorAll('.draggable-wrapper, .free-container')).filter(el => el !== element);
       for(let sibling of siblings) {
           const sLeft = sibling.offsetLeft, sTop = sibling.offsetTop, sRight = sLeft + sibling.offsetWidth, sBottom = sTop + sibling.offsetHeight;
-          const sCenterX = sLeft + sibling.offsetWidth/2, sCenterY = sTop + sibling.offsetHeight/2;
+          const sCenterX = sLeft + sibling.offsetWidth / 2, sCenterY = sTop + sibling.offsetHeight / 2;
+          
           if(!snappedX) {
               if(Math.abs(rect.left - sLeft) < snapThreshold) { newLeft = sLeft; vGuide.style.left = `${sLeft}px`; vGuide.style.display = 'block'; snappedX = true; }
               else if(Math.abs(rect.right - sRight) < snapThreshold) { newLeft = sRight - element.offsetWidth; vGuide.style.left = `${sRight}px`; vGuide.style.display = 'block'; snappedX = true; }
+              else if(Math.abs(rect.centerX - sCenterX) < snapThreshold) { newLeft = sCenterX - element.offsetWidth/2; vGuide.style.left = `${sCenterX}px`; vGuide.style.display = 'block'; snappedX = true; }
           }
           if(!snappedY) {
               if(Math.abs(rect.top - sTop) < snapThreshold) { newTop = sTop; hGuide.style.top = `${sTop}px`; hGuide.style.display = 'block'; snappedY = true; }
               else if(Math.abs(rect.bottom - sBottom) < snapThreshold) { newTop = sBottom - element.offsetHeight; hGuide.style.top = `${sBottom}px`; hGuide.style.display = 'block'; snappedY = true; }
+              else if(Math.abs(rect.centerY - sCenterY) < snapThreshold) { newTop = sCenterY - element.offsetHeight/2; hGuide.style.top = `${sCenterY}px`; hGuide.style.display = 'block'; snappedY = true; }
           }
       }
 
-      element.style.left = `${newLeft}px`; element.style.top = `${newTop}px`;
+      element.style.left = `${newLeft}px`; 
+      element.style.top = `${newTop}px`;
     }
 
-    function dragEnd() { isDragging = false; if(vGuide) vGuide.style.display = 'none'; if(hGuide) hGuide.style.display = 'none'; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); }
+    function dragEnd() { 
+        isDragging = false; 
+        if(vGuide) vGuide.style.display = 'none'; 
+        if(hGuide) hGuide.style.display = 'none'; 
+        document.removeEventListener('mousemove', drag); 
+        document.removeEventListener('mouseup', dragEnd); 
+    }
   }
 
+  // خوارزمية التحجيم المطورة
   function makeBoundedBoxResizable(element, page) {
     const resizers = element.querySelectorAll('.resizer');
     resizers.forEach(resizer => {
       resizer.addEventListener('mousedown', function(e) {
         e.preventDefault(); e.stopPropagation();
-        let isResizing = true, startX = e.clientX, startY = e.clientY, startW = element.offsetWidth, startH = element.offsetHeight, startLeft = element.offsetLeft, startTop = element.offsetTop;
+        let isResizing = true;
+        
+        const pageRect = page.getBoundingClientRect();
+        let startPageX = (e.clientX - pageRect.left) / scale;
+        let startPageY = (e.clientY - pageRect.top) / scale;
+        
+        let startW = element.offsetWidth;
+        let startH = element.offsetHeight;
+        let startLeft = element.offsetLeft;
+        let startTop = element.offsetTop;
         
         function resize(e) {
           if (!isResizing) return;
-          let dx = (e.clientX - startX) / scale; let dy = (e.clientY - startY) / scale;
+          const currentRect = page.getBoundingClientRect();
+          let currentX = (e.clientX - currentRect.left) / scale;
+          let currentY = (e.clientY - currentRect.top) / scale;
+          
+          let dx = currentX - startPageX; 
+          let dy = currentY - startPageY;
           
           if (resizer.classList.contains('r') || resizer.classList.contains('tr') || resizer.classList.contains('br')) {
-            const maxW = page.clientWidth - marginPx - startLeft; element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
+            const maxW = page.clientWidth - marginPx - startLeft; 
+            element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
           }
           if (resizer.classList.contains('l') || resizer.classList.contains('tl') || resizer.classList.contains('bl')) {
             let newLeft = startLeft + dx;
@@ -584,10 +637,15 @@
             const newWidth = startW - dx;
             if (newWidth > 30) { element.style.width = newWidth + 'px'; element.style.left = newLeft + 'px'; }
           }
-          if (resizer.classList.contains('b') || resizer.classList.contains('bl') || resizer.classList.contains('br')) { element.style.height = Math.max(20, startH + dy) + 'px'; }
+          if (resizer.classList.contains('b') || resizer.classList.contains('bl') || resizer.classList.contains('br')) { 
+            const maxH = page.clientHeight - marginPx - startTop;
+            element.style.height = Math.min(maxH, Math.max(20, startH + dy)) + 'px'; 
+          }
           if (resizer.classList.contains('t') || resizer.classList.contains('tl') || resizer.classList.contains('tr')) {
-            const newHeight = Math.max(20, startH - dy);
-            if (newHeight > 20) { element.style.height = newHeight + 'px'; element.style.top = (startTop + dy) + 'px'; }
+            let newTop = startTop + dy;
+            if (newTop < marginPx) { const diff = marginPx - newTop; newTop = marginPx; dy += diff; }
+            const newHeight = startH - dy;
+            if (newHeight > 20) { element.style.height = newHeight + 'px'; element.style.top = newTop + 'px'; }
           }
         }
         function stopResize() { isResizing = false; document.removeEventListener('mousemove', resize); document.removeEventListener('mouseup', stopResize); }
@@ -633,7 +691,6 @@
     
     updateHeadersAndFooters();
     
-    // إعادة تفعيل الأحداث للحاويات
     document.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
         const dragHandle = wrapper.querySelector('.drag-handle');
         const targetPage = wrapper.closest('.a4-page');
@@ -672,7 +729,6 @@
       targetSelect.add(new Option(`صفحة ${i}`, i));
     }
     
-    // التأكد من تطبيق الخلفيات المحفوظة على الصفحات الجديدة مباشرة
     updateHeadersAndFooters();
   }
 
