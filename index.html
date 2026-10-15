@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.0)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.1)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
-    /* استيراد كافة أوزان خط كايرو */
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
     
-    /* تعريف أوزان خط سكور بشكل صحيح */
     @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
     @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; }
     @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; font-style: normal; }
@@ -35,7 +33,6 @@
     
     .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; }
     .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 1em; align-items: center; border-bottom: 1px solid #e5e7eb; }
-    /* التلوين الإجباري للصفوف (Zebra) */
     .table-rows-wrapper .spec-row:nth-child(even) { background-color: #f3f4f6 !important; }
     .table-rows-wrapper .spec-row:nth-child(odd) { background-color: #ffffff !important; }
     .table-rows-wrapper .spec-row:last-child { border-bottom: none; }
@@ -69,7 +66,7 @@
     .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; }
     .draggable-wrapper:hover .drag-handle { opacity: 1; }
 
-    /* شريط الأدوات الذكي (Smart Toolbar) */
+    /* Smart Toolbar */
     .text-toolbar { position: absolute; top: -38px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; gap: 6px; padding: 4px 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.15); align-items: center; }
     .group:hover .text-toolbar { opacity: 1; pointer-events: auto; }
     .text-toolbar input[type="color"] { width: 22px; height: 22px; padding: 0; border: none; border-radius: 4px; cursor: pointer; }
@@ -125,19 +122,25 @@
         <label class="text-xs font-bold text-gray-300">عدد الصفحات الداخلية:</label>
         <input type="number" id="pageCount" min="1" max="20" value="2" class="w-14 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-center text-xs" onchange="renderPages()">
       </div>
+      
+      <!-- استعادة حقول الترويسة والتذييل بالكامل -->
       <div class="flex gap-2 mt-2">
         <div class="w-1/2">
           <label class="block text-[10px] font-bold text-gray-400">الترويسة (Header):</label>
           <input type="file" id="globalHeader" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1">
         </div>
         <div class="w-1/2">
-          <label class="block text-[10px] font-bold text-gray-400">التذييل (Footer):</label>
+          <label class="block text-[10px] font-bold text-gray-400">التذييل (Footer العادي):</label>
           <input type="file" id="globalFooter" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1">
         </div>
       </div>
+      <div class="mt-1 pt-1 border-t border-[#282c35]">
+        <label class="block text-[10px] font-bold text-[#f5b700] mb-1">تذييل الصفحة الأخيرة فقط:</label>
+        <input type="file" id="lastFooter" accept="image/*" class="w-full text-[10px] text-[#f5b700] bg-[#181b22] border border-[#f5b700] rounded p-1">
+      </div>
     </div>
 
-    <!-- محرك بناء القوالب (الجديد) -->
+    <!-- محرك بناء القوالب -->
     <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2 relative shadow-lg">
       <h2 class="text-white font-black text-sm border-b border-[#282c35] pb-2 text-center text-[#f5b700]">2. بناء القالب وتعبئة البيانات آلياً</h2>
       
@@ -269,6 +272,43 @@
               modelSelector.appendChild(opt);
           }
       });
+  }
+
+  // ==========================================
+  // الصور والخلفيات (الترويسة والتذييل)
+  // ==========================================
+  let state = { headerImg: '', footerImg: '', lastFooterImg: '' };
+
+  document.getElementById('globalHeader').addEventListener('change', (e) => uploadImage(e, 'headerImg'));
+  document.getElementById('globalFooter').addEventListener('change', (e) => uploadImage(e, 'footerImg'));
+  document.getElementById('lastFooter').addEventListener('change', (e) => uploadImage(e, 'lastFooterImg'));
+  
+  function uploadImage(event, stateKey) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) { 
+        state[stateKey] = e.target.result; 
+        updateHeadersAndFooters(); 
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function updateHeadersAndFooters() {
+    document.querySelectorAll('.page-header').forEach(el => { 
+        if(state.headerImg) el.style.backgroundImage = `url(${state.headerImg})`; 
+    });
+    document.querySelectorAll('.is-normal-footer').forEach(el => { 
+        if(state.footerImg) el.style.backgroundImage = `url(${state.footerImg})`; 
+    });
+    document.querySelectorAll('.is-last-footer').forEach(el => {
+        if(state.lastFooterImg) { 
+            el.style.backgroundImage = `url(${state.lastFooterImg})`; 
+        } else if (state.footerImg) { 
+            el.style.backgroundImage = `url(${state.footerImg})`; 
+        }
+    });
   }
 
   // ==========================================
@@ -568,26 +608,72 @@
   }
 
   // ==========================================
-  // إدارة النظام وإعدادات الصفحة
+  // إدارة النظام، القوالب، وإعدادات الصفحة
   // ==========================================
+  function saveTemplate() {
+    const pagesHTML = document.getElementById('pagesContainer').innerHTML;
+    const templateData = { 
+        pages: pagesHTML, state: state,
+        pageCount: document.getElementById('pageCount').value, hasCover: document.getElementById('hasCover').checked
+    };
+    localStorage.setItem('scor_master_template_v9', JSON.stringify(templateData));
+    alert('تم حفظ ترتيب وتنسيق الصفحات كقالب بنجاح!');
+  }
+
+  function loadTemplate() {
+    const dataStr = localStorage.getItem('scor_master_template_v9');
+    if(!dataStr) { alert('لا يوجد قالب محفوظ مسبقاً!'); return; }
+    const templateData = JSON.parse(dataStr);
+    
+    document.getElementById('pageCount').value = templateData.pageCount;
+    document.getElementById('hasCover').checked = templateData.hasCover;
+    state = templateData.state || { headerImg: '', footerImg: '', lastFooterImg: '' };
+    
+    document.getElementById('pagesContainer').innerHTML = templateData.pages;
+    
+    updateHeadersAndFooters();
+    
+    // إعادة تفعيل الأحداث للحاويات
+    document.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
+        const dragHandle = wrapper.querySelector('.drag-handle');
+        const targetPage = wrapper.closest('.a4-page');
+        if(dragHandle && targetPage) makeBoundedDraggable(wrapper, dragHandle, targetPage);
+        attachResizers(wrapper, targetPage);
+    });
+
+    document.querySelectorAll('.free-container').forEach(container => {
+        const dragBar = container.querySelector('.drag-bar');
+        const targetPage = container.closest('.a4-page');
+        if(dragBar && targetPage) makeBoundedDraggable(container, dragBar, targetPage);
+        attachResizers(container, targetPage);
+
+        const block = container.querySelector('.spec-block');
+        const colResizer = container.querySelector('.table-col-resizer');
+        if(block && colResizer) makeTableColResizable(colResizer, block);
+    });
+    
+    alert('تم استرجاع القالب بنجاح!');
+  }
+
   function renderPages() {
     const container = document.getElementById('pagesContainer');
     const targetSelect = document.getElementById('targetPageSelect');
     const hasCover = document.getElementById('hasCover').checked;
     const pageCount = parseInt(document.getElementById('pageCount').value) || 1;
     
-    if(container.innerHTML === '') {
-        container.innerHTML = ''; targetSelect.innerHTML = '';
-        if (hasCover) {
-          container.appendChild(createPageElement('cover'));
-          targetSelect.add(new Option('الغلاف', 'cover'));
-        }
-        for (let i = 1; i <= pageCount; i++) {
-          const isLast = (i === pageCount);
-          container.appendChild(createPageElement(i, isLast));
-          targetSelect.add(new Option(`صفحة ${i}`, i));
-        }
+    container.innerHTML = ''; targetSelect.innerHTML = '';
+    if (hasCover) {
+      container.appendChild(createPageElement('cover'));
+      targetSelect.add(new Option('الغلاف', 'cover'));
     }
+    for (let i = 1; i <= pageCount; i++) {
+      const isLast = (i === pageCount);
+      container.appendChild(createPageElement(i, isLast));
+      targetSelect.add(new Option(`صفحة ${i}`, i));
+    }
+    
+    // التأكد من تطبيق الخلفيات المحفوظة على الصفحات الجديدة مباشرة
+    updateHeadersAndFooters();
   }
 
   function createPageElement(pageNum, isLast = false) {
