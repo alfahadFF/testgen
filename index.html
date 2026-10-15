@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.4 - Tables Fix)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.6 - Dimensions 3-Col)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -33,13 +33,10 @@
     
     .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; font-size: 14px; color: #111827; }
     .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: inherit; align-items: center; border-bottom: 1px solid #e5e7eb; }
-    
-    /* التلوين الإجباري للصفوف (Zebra) مع لون أكثر وضوحاً */
     .table-rows-wrapper > .spec-row:nth-child(even) { background-color: #f0f2f5 !important; }
     .table-rows-wrapper > .spec-row:nth-child(odd) { background-color: #ffffff !important; }
     .table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
     
-    /* جعل ألوان بنود الجدول تعتمد على وراثة الخصائص من شريط الأدوات */
     .spec-key { font-weight: 700; color: inherit; outline: none; width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
     .spec-val { font-weight: 900; color: inherit; outline: none; text-align: right; flex-grow: 1; padding-right: 10px; }
     
@@ -52,6 +49,13 @@
     .drag-bar { height: 24px; background: #282c35; color: #f5b700; display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 11px; opacity: 0; transition: opacity 0.2s; flex-shrink: 0;}
     .free-container:hover .drag-bar { opacity: 1; }
     .drag-title { flex: 1; text-align: center; cursor: grab; }
+
+    /* Grid Columns System */
+    .grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
+    .grid-col { flex: 1; min-width: 20px; padding: 5px; position: relative; display: flex; flex-direction: column; }
+    .col-resizer { width: 5mm; background: #e5e7eb; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
+    .free-container:hover .col-resizer { background: rgba(245, 183, 0, 0.4); }
+    .col-resizer:hover, .col-resizer:active { background: #f5b700; }
 
     /* 8-Directional Resizers */
     .resizer { position: absolute; background: #fff; border: 1px solid #f5b700; opacity: 0; z-index: 20; box-shadow: 0 0 3px rgba(0,0,0,0.2); transition: opacity 0.2s; }
@@ -145,7 +149,7 @@
 
     <!-- محرك بناء القوالب -->
     <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2 relative shadow-lg">
-      <h2 class="text-white font-black text-sm border-b border-[#282c35] pb-2 text-center text-[#f5b700]">2. بناء القالب وتعبئة البيانات آلياً</h2>
+      <h2 class="text-white font-black text-sm border-b border-[#282c35] pb-2 text-center text-[#f5b700]">2. بناء القالب الآلي (بيانات الشيت)</h2>
       
       <!-- الخطوة 1 -->
       <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 1: تخطيط الصفحة (إدراج الحاويات الفارغة)</label>
@@ -202,10 +206,26 @@
       </button>
     </div>
 
-    <!-- نصوص حرة وبيانات تواصل -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex gap-2">
-       <button onclick="addFreeText()" class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-xs font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر فارغ</button>
-       <button onclick="addContactBlock()" class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-xs font-bold py-1.5 rounded hover:bg-gray-700">+ بيانات تواصل</button>
+    <!-- الإضافة المطلوبة: الصور الحرة والحاويات المكونة من عدة أعمدة -->
+    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
+      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. إضافة الحاويات، الصور، والنصوص الحرة</h2>
+      
+      <div class="grid grid-cols-5 gap-1 mt-1">
+        <button onclick="addFloatingContainer(1)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">1 عمود</button>
+        <button onclick="addFloatingContainer(2)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">2 عمود</button>
+        <button onclick="addFloatingContainer(3)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">3 أعمدة</button>
+        <button onclick="addFloatingContainer(4)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">4 أعمدة</button>
+        <button onclick="addFloatingContainer(5)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">5 أعمدة</button>
+      </div>
+
+      <div class="flex gap-1 mt-1">
+        <button onclick="addFreeText()" class="w-1/3 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر</button>
+        <label class="w-1/3 bg-[#181b22] text-white border border-[#343946] text-center text-[10px] font-bold py-1.5 rounded cursor-pointer hover:bg-gray-700">
+          + صورة حرة
+          <input type="file" id="freeImageUpload" accept="image/*" class="hidden">
+        </label>
+        <button onclick="addContactBlock()" class="w-1/3 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ بيانات تواصل</button>
+      </div>
     </div>
 
     <button onclick="window.print()" class="w-full bg-white text-black font-black py-3 rounded-lg mt-auto hover:bg-gray-200 border-2 border-black">
@@ -218,7 +238,7 @@
 
 <script>
   // ==========================================
-  // محرك الربط بقاعدة بيانات Google Sheets
+  // محرك الربط بقاعدة بيانات Google Sheets مع الترجمة الدقيقة جداً
   // ==========================================
   const SHEETS_ID = "1TDSSCDfAQJxz_zeulBrM6M79p9fw7mE1xTSvD-P_fuQ";
   let database = { skid_steers: [], pumps: [] };
@@ -231,7 +251,26 @@
     'rated_payload': 'الحمولة المقدرة', 'rated_load': 'الحمولة المقننة', 'bucket_capacity': 'سعة الدلو', 'dump_height': 'ارتفاع التفريغ', 'arm_length': 'طول الذراع', 'breakout_force': 'قوة الكسر', 'lifting_capacity': 'قدرة الرفع', 'performance_productivity': 'الإنتاجية', 'performance_pressure': 'الضغط', 'pump_vertical_fine': 'ضخ رأسي', 'pump_horizontal_fine': 'ضخ أفقي', 'max_aggregate_size': 'أقصى حجم للركام',
     'operating_weight': 'الوزن التشغيلي', 'total_weight': 'الوزن الكلي', 'fuel_tank_capacity': 'سعة خزان الوقود', 'hydraulic_capacity': 'سعة الهيدروليك',
     'std_equip_1': 'تجهيز قياسي 1', 'std_equip_2': 'تجهيز قياسي 2', 'std_equip_3': 'تجهيز قياسي 3', 'opt_equip_1': 'تجهيز اختياري 1', 'feature_1': 'ميزة 1',
-    'dim_a': 'البعد A', 'dim_b': 'البعد B', 'dim_c': 'البعد C', 'dim_length': 'الطول', 'dim_width': 'العرض', 'dim_height': 'الارتفاع'
+    // الترجمة المخصصة لجدول الأبعاد المكون من 3 أعمدة
+    'dim_a': 'الطول الكلي مع الدلو',
+    'dim_b': 'الطول بدون الدلو',
+    'dim_c': 'قاعدة العجلات',
+    'dim_d': 'الارتفاع الكلي',
+    'dim_e': 'ارتفاع الكابينة',
+    'dim_f': 'ارتفاع محور الدوران',
+    'dim_g': 'ارتفاع الدلو في أقصى وضع',
+    'dim_h': 'ارتفاع التفريغ',
+    'dim_i': 'مدى التفريغ',
+    'dim_j': 'زاوية إرجاع الدلو عند الرفع',
+    'dim_k': 'زاوية التفريغ عند أقصى ارتفاع',
+    'dim_l': 'عمق الحفر أسفل مستوى الأرض',
+    'dim_m': 'الخلوص الأرضي',
+    'dim_n': 'العرض الكلي',
+    'dim_o': 'عرض المسار',
+    'dim_p': 'عرض الدلو',
+    'dim_q': 'عرض الدلو الداخلي',
+    'dim_r': 'نصف قطر الدوران الأمامي (بدون دلو)',
+    'dim_s': 'نصف قطر الدوران الأمامي (مع دلو)'
   };
 
   const tableGroups = {
@@ -240,7 +279,7 @@
       'drive': ['drive_type', 'travel_speed', 'max_travel_speed', 'gradeability', 'max_gradeability', 'tires', 'steering_type', 'steering_type_2'],
       'performance': ['rated_payload', 'rated_load', 'bucket_capacity', 'std_bucket_capacity', 'dump_height', 'arm_length', 'breakout_force', 'bucket_breakout_force', 'lifting_capacity', 'max_lifting_force', 'rollback_angle_ground', 'max_dump_angle', 'rear_departure_angle', 'front_approach_angle', 'performance_productivity', 'performance_pressure', 'pump_vertical_fine', 'pump_horizontal_fine', 'pump_vertical_coarse', 'pump_horizontal_coarse', 'max_aggregate_size', 'cooling_system_performance'],
       'weights': ['operating_weight', 'operating_weight_2', 'total_weight', 'fuel_tank_capacity', 'fuel_tank_2', 'hydraulic_capacity'],
-      'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s', 'dim_length', 'dim_width', 'dim_height'],
+      'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s'],
       'equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10','opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6', 'feature_1', 'feature_2', 'feature_3', 'feature_4', 'feature_5', 'feature_6']
   };
 
@@ -315,7 +354,7 @@
   }
 
   // ==========================================
-  // شريط الأدوات الذكي المطور (يدعم جداول ونصوص)
+  // شريط الأدوات الذكي لتنسيق النصوص والجداول
   // ==========================================
   function createToolbarHTML(targetClasses) {
       return `
@@ -341,7 +380,7 @@
   }
 
   // ==========================================
-  // محرك التخطيط (إدراج الحاويات الفارغة)
+  // محرك التخطيط (إدراج الحاويات الفارغة) - مع دعم خاص لجدول الأبعاد
   // ==========================================
   function insertPlaceholder() {
       const requestType = document.getElementById('dataSourceSelect').value;
@@ -398,7 +437,6 @@
           dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ سحب جدول: ${title}</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
           container.appendChild(dragBar);
 
-          // إدراج شريط الأدوات للجدول ليستهدف صفوف الجدول وعنوانه
           container.insertAdjacentHTML('beforeend', createToolbarHTML('.table-rows-wrapper, .spec-header span'));
 
           const block = document.createElement('div'); block.className = 'spec-block';
@@ -415,7 +453,20 @@
 
           const rowsWrapper = document.createElement('div');
           rowsWrapper.className = 'table-rows-wrapper';
-          rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات هنا تلقائياً ]</div>`;
+          
+          // ميزة 3 أعمدة خاصة بجدول الأبعاد فقط
+          if (key === 'dimensions') {
+              colResizer.style.display = 'none'; // تعطيل مقبض العمودين
+              rowsWrapper.innerHTML = `
+              <div class="spec-row flex-1" style="background-color: #374151 !important; color: #fff; padding: 6px 12px; border-bottom: 2px solid #1f2937;">
+                  <span style="width: 15%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">الرمز</span>
+                  <span style="width: 25%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">القياس</span>
+                  <span style="width: 60%; text-align: right; padding-right: 10px; flex-grow:1; font-weight: 900;">المتغير</span>
+              </div>
+              <div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل (الرمز | القياس | المتغير) هنا تلقائياً ]</div>`;
+          } else {
+              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات هنا تلقائياً ]</div>`;
+          }
           
           block.appendChild(rowsWrapper);
           container.appendChild(block);
@@ -423,7 +474,9 @@
           targetPage.appendChild(container);
           makeBoundedDraggable(container, dragBar, targetPage);
           attachResizers(container, targetPage);
-          makeTableColResizable(colResizer, block);
+          if (key !== 'dimensions') {
+              makeTableColResizable(colResizer, block);
+          }
       }
       document.getElementById('sectionTitle').value = '';
   }
@@ -456,20 +509,158 @@
           if(wrapper) {
               const colsToInclude = tableGroups[key];
               let tableHTML = '';
-              colsToInclude.forEach(colKey => {
-                  if(rowData[colKey] && rowData[colKey].trim() !== '') {
-                      const displayKey = translationDict[colKey] || colKey;
-                      tableHTML += `<div class="spec-row flex-1"><span class="spec-key" contenteditable="true">${displayKey}</span><span class="spec-val" contenteditable="true">${rowData[colKey]}</span></div>`;
-                  }
-              });
               
-              if(tableHTML === '') tableHTML = `<div class="p-4 text-center text-red-400 font-bold bg-red-50 flex-1 border-t border-red-200">لا توفر المواصفات لهذا الموديل</div>`;
+              if (key === 'dimensions') {
+                  // بناء جدول الأبعاد ذو الـ 3 أعمدة
+                  tableHTML = `
+                  <div class="spec-row flex-1" style="background-color: #374151 !important; color: #fff; padding: 6px 12px; border-bottom: 2px solid #1f2937;">
+                      <span style="width: 15%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">الرمز</span>
+                      <span style="width: 25%; text-align: center; border-left: 1px solid #4b5563; flex-shrink:0; font-weight: 900;">القياس</span>
+                      <span style="width: 60%; text-align: right; padding-right: 10px; flex-grow:1; font-weight: 900;">المتغير</span>
+                  </div>`;
+                  
+                  colsToInclude.forEach(colKey => {
+                      if(rowData[colKey] && rowData[colKey].trim() !== '') {
+                          const displayKey = translationDict[colKey] || colKey;
+                          // استخراج الحرف (A, B, C...) من المفتاح (dim_a, dim_b...)
+                          let symbol = colKey.replace('dim_', '').toUpperCase();
+                          if(symbol.length > 1) symbol = '-'; 
+                          
+                          tableHTML += `<div class="spec-row flex-1" style="padding: 4px 12px;">
+                              <span contenteditable="true" style="width: 15%; text-align: center; font-weight: 900; color: #f5b700; border-left: 1px solid #e5e7eb; flex-shrink:0;">${symbol}</span>
+                              <span contenteditable="true" style="width: 25%; text-align: center; font-weight: 900; border-left: 1px solid #e5e7eb; flex-shrink:0;">${rowData[colKey]}</span>
+                              <span contenteditable="true" style="width: 60%; font-weight: 700; text-align: right; padding-right: 10px; flex-grow:1;">${displayKey}</span>
+                          </div>`;
+                      }
+                  });
+              } else {
+                  // بناء الجدول العادي ذو العمودين
+                  colsToInclude.forEach(colKey => {
+                      if(rowData[colKey] && rowData[colKey].trim() !== '') {
+                          const displayKey = translationDict[colKey] || colKey;
+                          tableHTML += `<div class="spec-row flex-1"><span class="spec-key" contenteditable="true">${displayKey}</span><span class="spec-val" contenteditable="true">${rowData[colKey]}</span></div>`;
+                      }
+                  });
+              }
+              
+              if(tableHTML === '' || tableHTML.indexOf('<span') === -1) {
+                  tableHTML = `<div class="p-4 text-center text-red-400 font-bold bg-red-50 flex-1 border-t border-red-200">لا توفر المواصفات لهذا الموديل</div>`;
+              }
               wrapper.innerHTML = tableHTML;
           }
       });
   }
 
-  // نصوص حرة عادية مع شريط الأدوات الجديد
+  // ==========================================
+  // استعادة ميزة حاويات الشبكة (الأعمدة) والصورة الحرة
+  // ==========================================
+  function addFloatingContainer(colCount) {
+    const targetPageVal = document.getElementById('targetPageSelect').value;
+    const targetPage = document.getElementById(`page-${targetPageVal}`);
+    if(!targetPage) return;
+
+    const container = document.createElement('div');
+    container.className = 'free-container group';
+    container.style.width = '200mm'; container.style.height = '45mm'; 
+    container.style.top = '100mm'; container.style.left = '5mm';   
+
+    const dragBar = document.createElement('div');
+    dragBar.className = 'drag-bar no-print';
+    dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ اسحب الحاوية (${colCount} أعمدة)</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
+    container.appendChild(dragBar);
+
+    const row = document.createElement('div'); row.className = 'grid-row';
+    for (let i = 0; i < colCount; i++) {
+      const col = document.createElement('div'); col.className = 'grid-col';
+      col.innerHTML = `
+        <div class="flex flex-col gap-1 items-center justify-center h-full no-print bg-gray-100 rounded border border-gray-300 p-2">
+          <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
+          <button onclick="insertGridContent(this, 'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📝 نص</button>
+          <button onclick="insertGridContent(this, 'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">🖼️ صورة</button>
+          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 جدول</button>
+        </div>`;
+      row.appendChild(col);
+      if (i < colCount - 1) {
+        const gutter = document.createElement('div'); gutter.className = 'col-resizer';
+        row.appendChild(gutter); makeColResizable(col, gutter, row);
+      }
+    }
+    container.appendChild(row);
+
+    targetPage.appendChild(container);
+    makeBoundedDraggable(container, dragBar, targetPage);
+    attachResizers(container, targetPage);
+  }
+
+  function insertGridContent(btn, type) {
+    const col = btn.closest('.grid-col');
+    if (type === 'text') {
+      col.innerHTML = `
+        <div class="relative w-full h-full flex flex-col group">
+            <div contenteditable="true" class="w-full h-full outline-none text-sm text-gray-800 p-1 break-words">اكتب النص هنا...</div>
+        </div>`;
+    } else if (type === 'image') {
+      col.innerHTML = `
+        <label class="w-full h-full flex flex-col items-center justify-center bg-gray-50 cursor-pointer text-gray-400 text-xs border-2 border-dashed border-gray-300 hover:bg-gray-100 no-print">
+          <span class="font-bold">+ اختر صورة</span><input type="file" class="hidden" accept="image/*" onchange="loadGridImage(this)">
+        </label>`;
+    } else if (type === 'table') {
+      col.innerHTML = `
+        <div class="spec-block w-full h-full" style="--key-width: 50%;">
+          <div class="table-col-resizer no-print" style="right: 50%;"></div>
+          <div class="spec-header"><span style="position:relative; z-index:2;" contenteditable="true">عنوان الجدول</span></div>
+          <div class="flex-1 bg-white flex flex-col"><div class="spec-row flex-1"><span class="spec-key" contenteditable="true">مواصفة 1</span><span class="spec-val" contenteditable="true">قيمة</span></div></div>
+        </div>`;
+      const block = col.querySelector('.spec-block');
+      const resizer = col.querySelector('.table-col-resizer');
+      makeTableColResizable(resizer, block);
+    }
+  }
+
+  function loadGridImage(input) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => { 
+        input.closest('.grid-col').innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:contain; pointer-events:none;">`; 
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  document.getElementById('freeImageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const targetPageVal = document.getElementById('targetPageSelect').value;
+    const targetPage = document.getElementById(`page-${targetPageVal}`);
+
+    if (file && targetPage) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper flex flex-col p-1 group';
+        wrapper.style.width = '100mm'; wrapper.style.top = '100mm'; wrapper.style.left = '5mm';
+        
+        const img = document.createElement('img'); img.src = event.target.result; 
+        img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'contain';
+        wrapper.appendChild(img);
+        
+        const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
+        wrapper.appendChild(dragHandle);
+
+        const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
+        deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs cursor-pointer z-50 hover:bg-red-500 hover:text-white';
+        deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
+        wrapper.appendChild(deleteBtn);
+        
+        targetPage.appendChild(wrapper);
+        makeBoundedDraggable(wrapper, dragHandle, targetPage); 
+        attachResizers(wrapper, targetPage);
+        document.getElementById('freeImageUpload').value = '';
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // نصوص حرة عادية مع شريط الأدوات
   function addFreeText() {
     const targetPageVal = document.getElementById('targetPageSelect').value;
     const targetPage = document.getElementById(`page-${targetPageVal}`);
@@ -516,30 +707,43 @@
   }
 
   function makeBoundedDraggable(element, handle, page) {
-    let isDragging = false, startX, startY, initialLeft, initialTop;
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
     let vGuide, hGuide;
 
     handle.addEventListener('mousedown', function(e) {
       if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; 
-      e.preventDefault(); e.stopPropagation(); isDragging = true; 
-      startX = e.clientX; startY = e.clientY;
-      initialLeft = element.offsetLeft; initialTop = element.offsetTop;
+      e.preventDefault(); 
+      e.stopPropagation(); 
+      isDragging = true; 
+      
+      const pageRect = page.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      
+      offsetX = (e.clientX - elementRect.left) / scale;
+      offsetY = (e.clientY - elementRect.top) / scale;
       
       vGuide = page.querySelector('.snap-guide-v');
       if(!vGuide) { vGuide = document.createElement('div'); vGuide.className = 'snap-guide-v'; page.appendChild(vGuide); }
       hGuide = page.querySelector('.snap-guide-h');
       if(!hGuide) { hGuide = document.createElement('div'); hGuide.className = 'snap-guide-h'; page.appendChild(hGuide); }
 
-      document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd);
+      document.addEventListener('mousemove', drag); 
+      document.addEventListener('mouseup', dragEnd);
     });
 
     function drag(e) {
       if (!isDragging) return;
-      const dx = (e.clientX - startX) / scale; const dy = (e.clientY - startY) / scale;
-      let newLeft = initialLeft + dx; let newTop = initialTop + dy;
       
-      const maxLeft = page.clientWidth - marginPx - element.offsetWidth;
-      const maxTop = page.clientHeight - marginPx - element.offsetHeight;
+      const pageRect = page.getBoundingClientRect();
+      
+      let newLeft = ((e.clientX - pageRect.left) / scale) - offsetX;
+      let newTop = ((e.clientY - pageRect.top) / scale) - offsetY;
+      
+      const maxLeft = (page.clientWidth || 210 * mmToPx) - marginPx - element.offsetWidth;
+      const maxTop = (page.clientHeight || 297 * mmToPx) - marginPx - element.offsetHeight;
+      
       newLeft = Math.max(marginPx, Math.min(newLeft, maxLeft));
       newTop = Math.max(marginPx, Math.min(newTop, maxTop));
 
@@ -590,14 +794,29 @@
     resizers.forEach(resizer => {
       resizer.addEventListener('mousedown', function(e) {
         e.preventDefault(); e.stopPropagation();
-        let isResizing = true, startX = e.clientX, startY = e.clientY, startW = element.offsetWidth, startH = element.offsetHeight, startLeft = element.offsetLeft, startTop = element.offsetTop;
+        let isResizing = true;
+        
+        const pageRect = page.getBoundingClientRect();
+        let startPageX = (e.clientX - pageRect.left) / scale;
+        let startPageY = (e.clientY - pageRect.top) / scale;
+        
+        let startW = element.offsetWidth;
+        let startH = element.offsetHeight;
+        let startLeft = element.offsetLeft;
+        let startTop = element.offsetTop;
         
         function resize(e) {
           if (!isResizing) return;
-          let dx = (e.clientX - startX) / scale; let dy = (e.clientY - startY) / scale;
+          const currentRect = page.getBoundingClientRect();
+          let currentX = (e.clientX - currentRect.left) / scale;
+          let currentY = (e.clientY - currentRect.top) / scale;
+          
+          let dx = currentX - startPageX; 
+          let dy = currentY - startPageY;
           
           if (resizer.classList.contains('r') || resizer.classList.contains('tr') || resizer.classList.contains('br')) {
-            const maxW = page.clientWidth - marginPx - startLeft; element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
+            const maxW = page.clientWidth - marginPx - startLeft; 
+            element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
           }
           if (resizer.classList.contains('l') || resizer.classList.contains('tl') || resizer.classList.contains('bl')) {
             let newLeft = startLeft + dx;
@@ -631,6 +850,18 @@
           if (pctRight > 15 && pctRight < 85) { block.style.setProperty('--key-width', `${pctRight}%`); resizer.style.right = `${pctRight}%`; resizer.style.left = 'auto'; }
       });
       document.addEventListener('mouseup', function() { if (isResizing) { isResizing = false; document.body.style.cursor = 'default'; } });
+  }
+
+  function makeColResizable(leftCol, gutter, row) {
+    let isResizingCol = false;
+    gutter.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); isResizingCol = true; document.body.style.cursor = 'col-resize'; });
+    document.addEventListener('mousemove', function(e) {
+      if (!isResizingCol) return;
+      const rowRect = row.getBoundingClientRect(); const mouseXFromRight = rowRect.right - e.clientX;
+      const percentage = (mouseXFromRight / rowRect.width) * 100;
+      if (percentage > 5 && percentage < 95) leftCol.style.flex = `0 0 ${percentage}%`;
+    });
+    document.addEventListener('mouseup', function() { if (isResizingCol) { isResizingCol = false; document.body.style.cursor = 'default'; } });
   }
 
   // ==========================================
@@ -675,6 +906,14 @@
         const block = container.querySelector('.spec-block');
         const colResizer = container.querySelector('.table-col-resizer');
         if(block && colResizer) makeTableColResizable(colResizer, block);
+
+        const row = container.querySelector('.grid-row');
+        if(row) {
+           container.querySelectorAll('.col-resizer').forEach(gutter => {
+               const leftCol = gutter.previousElementSibling;
+               if(leftCol) makeColResizable(leftCol, gutter, row);
+           });
+        }
     });
     
     alert('تم استرجاع القالب بنجاح!');
