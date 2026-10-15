@@ -1,882 +1,261 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 8.0)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- مكتبة PapaParse لقراءة ملفات Google Sheets -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-    
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; }
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; font-style: normal; }
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; }
-
-    :root { --main-font: 'SCORFont', 'Cairo', sans-serif; --base-size: 14px; }
-    body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
-    
-    .canvas-container { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 40px; padding-bottom: 100px; overflow-y: auto; gap: 30px; }
-    .a4-page { font-family: var(--main-font); font-size: var(--base-size); width: 210mm; height: 297mm; background-color: #fff; color: #000; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.5); transform: scale(0.65); transform-origin: top center; margin-bottom: -100mm; overflow: hidden; flex-shrink: 0; background-size: cover; background-position: center; }
-    .a4-page::before { content: ''; position: absolute; top: 0; bottom: 0; left: 5mm; width: 1px; border-left: 1px dashed rgba(245, 183, 0, 0.4); pointer-events: none; z-index: 1; }
-    .a4-page::after { content: ''; position: absolute; top: 0; bottom: 0; right: 5mm; width: 1px; border-right: 1px dashed rgba(245, 183, 0, 0.4); pointer-events: none; z-index: 1; }
-
-    .page-header { position: absolute; top: 0; left: 0; width: 100%; height: 35mm; background-size: 100% auto; background-position: top center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
-    .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
-    .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
-
-    .spec-block { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; }
-    .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); }
-    .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
-    .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #e5e7eb; font-size: 1em; align-items: center; }
-    .spec-row:last-child { border-bottom: none; }
-    .spec-key { font-weight: 700; color: #374151; outline: none; }
-    .spec-val { font-weight: 900; color: #000; outline: none; text-align: left; }
-
-    .free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248, 249, 250, 0.9); display: flex; flex-direction: column; z-index: 5; }
-    .free-container:hover { border-color: #f5b700; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
-    .drag-bar { height: 24px; background: #282c35; color: #f5b700; display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 11px; opacity: 0; transition: opacity 0.2s; flex-shrink: 0;}
-    .free-container:hover .drag-bar { opacity: 1; }
-    .drag-title { flex: 1; text-align: center; cursor: grab; }
-    .drag-title:active { cursor: grabbing; }
-
-    .grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
-    .grid-col { flex: 1; min-width: 20px; padding: 5px; position: relative; display: flex; flex-direction: column; }
-    .col-resizer { width: 5mm; background: #e5e7eb; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
-    .free-container:hover .col-resizer { background: rgba(245, 183, 0, 0.4); }
-    .col-resizer:hover, .col-resizer:active { background: #f5b700; }
-
-    .resizer { position: absolute; background: #fff; border: 1px solid #f5b700; opacity: 0; z-index: 20; box-shadow: 0 0 3px rgba(0,0,0,0.2); }
-    .free-container:hover .resizer { opacity: 1; }
-    .resizer.t { top: -4px; left: 50%; width: 10px; height: 8px; transform: translateX(-50%); cursor: ns-resize; }
-    .resizer.b { bottom: -4px; left: 50%; width: 10px; height: 8px; transform: translateX(-50%); cursor: ns-resize; }
-    .resizer.l { left: -4px; top: 50%; width: 8px; height: 10px; transform: translateY(-50%); cursor: ew-resize; }
-    .resizer.r { right: -4px; top: 50%; width: 8px; height: 10px; transform: translateY(-50%); cursor: ew-resize; }
-    .resizer.tl { top: -4px; left: -4px; width: 8px; height: 8px; cursor: nwse-resize; }
-    .resizer.tr { top: -4px; right: -4px; width: 8px; height: 8px; cursor: nesw-resize; }
-    .resizer.bl { bottom: -4px; left: -4px; width: 8px; height: 8px; cursor: nesw-resize; }
-    .resizer.br { bottom: -4px; right: -4px; width: 8px; height: 8px; cursor: nwse-resize; }
-
-    .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; }
-    .draggable-wrapper:hover { border: 2px dashed #f5b700; z-index: 10; }
-    .draggable-wrapper img { width: 100%; height: auto; pointer-events: none; display: block; }
-    .simple-resizer { width: 15px; height: 15px; background-color: #f5b700; position: absolute; bottom: -2px; left: -2px; cursor: sw-resize; opacity: 0; transition: opacity 0.2s; }
-    .draggable-wrapper:hover .simple-resizer { opacity: 1; }
-    .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; }
-    .draggable-wrapper:hover .drag-handle { opacity: 1; }
-    .drag-handle:active { cursor: grabbing; }
-
-    a.contact-text, span.contact-text { text-decoration: none; outline: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-    a.contact-text:hover { text-decoration: underline; color: #f5b700 !important; }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #15171c; }
-    ::-webkit-scrollbar-thumb { background: #f5b700; border-radius: 4px; }
-
-    @media print {
-      body { background: none; }
-      .w-\[45\%\] { display: none !important; }
-      .w-\[55\%\] { width: 100% !important; padding: 0 !important; background: none !important; overflow: visible !important; }
-      .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
-      .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; width: 210mm !important; height: 297mm !important; page-break-after: always; }
-      .a4-page::before, .a4-page::after { display: none !important; }
-      .drag-bar, .resizer, .col-resizer, .simple-resizer, .drag-handle, .no-print, .delete-btn { display: none !important; }
-      .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
-    }
-  </style>
-</head>
-<body class="h-screen flex overflow-hidden">
-
-  <!-- لوحة التحكم -->
-  <div class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50">
-    <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
-      <h1 class="text-2xl font-black text-[#f5b700]">SCOR Studio</h1>
-      <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
-    </div>
-
-    <!-- 0. إدارة القوالب -->
-    <div class="bg-[#1f2937] p-2.5 rounded-lg border border-[#f5b700] flex gap-2">
-      <button onclick="saveTemplate()" class="w-1/2 bg-[#f5b700] text-black font-bold text-xs py-2 rounded hover:brightness-110 shadow-lg">💾 حفظ كقالب افتراضي</button>
-      <button onclick="loadTemplate()" class="w-1/2 bg-[#374151] text-white font-bold text-xs py-2 rounded hover:bg-[#4b5563]">📂 استرجاع القالب</button>
-      <button onclick="clearTemplate()" class="w-1/6 bg-red-900 text-white font-bold text-xs py-2 rounded hover:bg-red-700" title="مسح القالب المحفوظ">🗑️</button>
-    </div>
-
-    <!-- 1. أداة الخطوط المستهدفة -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#343946] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">1. تخصيص الخطوط لكل قسم بشكل منفصل</h2>
-      <select id="fontTargetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
-        <option value=".spec-header span">عناوين الجداول (نطاق العمل، الأبعاد...)</option>
-        <option value=".spec-row">نصوص وصفوف الجداول</option>
-        <option value=".contact-text">بيانات التواصل (الفوتر)</option>
-        <option value=".draggable-wrapper div[contenteditable]">النصوص الحرة والمنفصلة</option>
-      </select>
-      <div class="flex gap-2 mt-1">
-        <select id="globalFontFamily" class="w-2/3 bg-[#181b22] border border-[#343946] p-1.5 rounded text-[#f5b700] text-xs font-bold outline-none">
-          <option value="'SCORFont', 'Cairo', sans-serif">الخط الافتراضي (SCOR)</option>
-          <option value="'Cairo', sans-serif">خط بديل (Cairo)</option>
-          <option value="Arial, sans-serif">خط عادي (Arial)</option>
-        </select>
-        <div class="w-1/3 flex items-center bg-[#181b22] border border-[#343946] rounded px-2">
-          <span class="text-[10px] text-gray-400 ml-1">حجم:</span>
-          <input type="number" id="globalFontSize" value="14" min="6" max="40" class="w-full bg-transparent text-white text-xs outline-none text-center">
-        </div>
-      </div>
-      <button onclick="applyTargetedFontSettings()" class="w-full bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black transition">✓ تطبيق الخط على القسم المحدد</button>
-    </div>
-
-    <!-- 2. إعدادات المستند والخلفيات -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">2. إعدادات المستند والهيكل</h2>
-      <div class="flex items-center justify-between">
-        <label class="text-xs font-bold text-gray-300">تضمين غلاف أمامي (Cover):</label>
-        <input type="checkbox" id="hasCover" class="w-4 h-4 accent-[#f5b700]" onchange="renderPages()">
-      </div>
-      <div class="flex items-center justify-between">
-        <label class="text-xs font-bold text-gray-300">عدد الصفحات الداخلية:</label>
-        <input type="number" id="pageCount" min="1" max="20" value="2" class="w-14 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-center text-xs" onchange="renderPages()">
-      </div>
-      <div class="mt-1 pt-1 border-t border-[#282c35]">
-        <label class="block text-[10px] font-bold text-gray-400 mb-1">تخصيص خلفية لصفحة محددة:</label>
-        <div class="flex gap-2">
-          <select id="customBgPage" class="w-1/3 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-xs"></select>
-          <input type="file" id="customBgUpload" accept="image/*" class="w-2/3 text-[10px] text-gray-400 bg-[#181b22] rounded p-1">
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. الهوية البصرية -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. الترويسات والتذييلات</h2>
-      <div class="flex gap-2">
-        <div class="w-1/2">
-          <label class="block text-[10px] font-bold text-gray-400">الترويسة (Header):</label>
-          <input type="file" id="globalHeader" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1">
-        </div>
-        <div class="w-1/2">
-          <label class="block text-[10px] font-bold text-gray-400">التذييل (Footer العادي):</label>
-          <input type="file" id="globalFooter" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1">
-        </div>
-      </div>
-      <div class="mt-1 pt-1 border-t border-[#282c35]">
-        <label class="block text-[10px] font-bold text-[#f5b700] mb-1">تذييل الصفحة الأخيرة فقط:</label>
-        <input type="file" id="lastFooter" accept="image/*" class="w-full text-[10px] text-[#f5b700] bg-[#181b22] border border-[#f5b700] rounded p-1">
-      </div>
-    </div>
-
-    <!-- 4. محرك الجداول الذكي -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#343946] flex flex-col gap-2 relative">
-      <h2 class="text-white font-bold text-xs border-b border-[#282c35] pb-1">4. إدراج الجداول المركزية (متصل بـ Sheets)</h2>
-      
-      <div class="flex gap-2 mt-1">
-          <div class="w-1/2">
-              <label class="text-[10px] font-bold text-[#f5b700]">1. الفئة:</label>
-              <select id="sheetCategory" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="updateModelsList()">
-                <option value="skid_steers">معدات انزلاقية</option>
-                <option value="pumps">مضخات بيتون</option>
-              </select>
-          </div>
-          <div class="w-1/2">
-              <label class="text-[10px] font-bold text-[#f5b700]">2. الموديل:</label>
-              <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
-                  <option value="">جاري التحميل...</option>
-              </select>
-          </div>
-      </div>
-
-      <label class="text-[10px] font-bold text-gray-400 mt-1">3. ماذا تريد أن تدرج للموديل المحدد؟</label>
-      <select id="dataSourceSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
-        <optgroup label="نصوص حرة (للعناوين والترويسات)">
-            <option value="text:marketing_slogan">العبارة التسويقية (نص)</option>
-            <option value="text:short_description">الوصف المختصر (نص)</option>
-            <option value="text:marketing_description">الوصف التسويقي (نص - للمضخات)</option>
-        </optgroup>
-        <optgroup label="جداول المواصفات الفنية">
-            <option value="table:engine">جدول المحرك</option>
-            <option value="table:hydraulic">جدول النظام الهيدروليكي</option>
-            <option value="table:drive">جدول نظام الدفع</option>
-            <option value="table:performance">جدول الأداء ونطاق العمل</option>
-            <option value="table:weights">جدول الأوزان والسعات</option>
-            <option value="table:equipment">جدول التجهيزات</option>
-            <option value="table:dimensions">جدول الأبعاد</option>
-        </optgroup>
-      </select>
-      
-      <input type="text" id="sectionTitle" placeholder="عنوان الجدول (اختياري - مثلاً: المحرك)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold focus:border-[#f5b700] outline-none mt-1">
-
-      <button onclick="insertDynamicData(event)" id="insertDataBtn" disabled class="w-full bg-[#343946] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-[#f5b700] hover:text-black transition flex items-center justify-center gap-2">
-        <span>إدراج البيانات للموديل المختار ↓</span>
-      </button>
-    </div>
-
-    <!-- 5. محرك تخطيط الحاويات -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-3">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">5. بناء الشبكة والحاويات الفارغة</h2>
-      <div class="flex gap-2 items-center">
-        <label class="text-xs font-bold text-gray-400 w-1/3">العمليات على صفحة:</label>
-        <select id="targetPageSelect" class="w-2/3 bg-[#181b22] border border-[#f5b700] p-1 rounded text-[#f5b700] font-bold text-xs outline-none"></select>
-      </div>
-      <div class="grid grid-cols-5 gap-1">
-        <button onclick="addFloatingContainer(1)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">1 عمود</button>
-        <button onclick="addFloatingContainer(2)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">2 عمود</button>
-        <button onclick="addFloatingContainer(3)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">3 أعمدة</button>
-        <button onclick="addFloatingContainer(4)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">4 أعمدة</button>
-        <button onclick="addFloatingContainer(5)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">5 أعمدة</button>
-      </div>
-      <div class="flex gap-2 mt-1 pt-2 border-t border-[#282c35]">
-        <button onclick="addFreeText()" class="w-1/2 bg-[#181b22] text-[#f5b700] border border-[#f5b700] text-xs font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">+ نص فارغ</button>
-        <label class="w-1/2 bg-[#181b22] text-[#f5b700] border border-[#f5b700] text-center text-xs font-bold py-1.5 rounded cursor-pointer hover:bg-[#f5b700] hover:text-black">
-          + صورة حرة
-          <input type="file" id="freeImageUpload" accept="image/*" class="hidden">
-        </label>
-      </div>
-    </div>
-
-    <!-- 6. بيانات التواصل التفاعلية -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">6. إدراج بيانات التواصل (تفاعلية للـ PDF)</h2>
-      <select id="contactPresetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none focus:border-[#f5b700]">
-        <option value="4915118316638" data-type="phone">004915118316638</option>
-        <option value="4917634389434" data-type="phone">004917634389434</option>
-        <option value="963939062887" data-type="phone">00963939062887</option>
-        <option value="963941435541" data-type="phone">00963941435541</option>
-        <option value="https://www.scor-sy.de" data-type="web">www.scor-sy.de</option>
-        <option value="mailto:info@scor-sy.de" data-type="web">info@scor-sy.de</option>
-      </select>
-      <button onclick="addContactBlock()" class="w-full bg-[#f5b700] text-black text-xs font-bold py-2 rounded hover:brightness-110 transition mt-1">
-        + إدراج الرابط التفاعلي
-      </button>
-    </div>
-
-    <button onclick="window.print()" class="w-full bg-white text-black font-black py-3 rounded-lg mt-auto hover:bg-gray-200 border-2 border-black">
-      طباعة / تصدير KTLG النهائي (PDF)
-    </button>
-  </div>
-
-  <!-- مساحة العمل الحية -->
-  <div class="w-[55%] h-full bg-[#181b22] canvas-container" id="pagesContainer"></div>
-
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>alfa Studio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+@font-face{font-family:SCORFont;src:url(SCOR-Typeface-Regular.woff2);font-weight:400}
+@font-face{font-family:SCORFont;src:url(SCOR-Typeface-Bold.woff2);font-weight:700}
+@font-face{font-family:SCORFont;src:url(SCOR-Typeface-Black.woff2);font-weight:900}
+:root{--ac:#f5b700;--bg:#0b0c0e;--p:#15171c;--l:#282c35}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Cairo,sans-serif}
+button,input,select,textarea{font:inherit}
+#app{display:grid;height:100%;grid-template-columns:320px 1fr;grid-template-rows:auto auto minmax(0,1fr)}
+#tb,#bc{grid-column:1/-1;display:flex;align-items:center;gap:4px;padding:6px 10px;background:var(--p);border-bottom:1px solid var(--l);overflow-x:auto;white-space:nowrap}
+#bc{padding:3px 10px;font-size:12px;background:#10121a;color:#9ca3af}
+#tb button,#bc button{background:#282c35;color:#fff;border:0;border-radius:6px;min-width:34px;height:34px;padding:0 8px;cursor:pointer}
+#bc button{height:24px;min-width:0;background:none;color:var(--ac)}
+#tb button:hover{background:var(--ac);color:#000}
+#tb i{width:1px;height:20px;background:var(--l);margin:0 4px;flex:none}
+.lg{color:var(--ac);font-weight:900;margin-left:6px}
+#panel{background:var(--p);border-left:1px solid var(--l);display:flex;flex-direction:column;min-height:0}
+#tabs{display:flex;border-bottom:1px solid var(--l);flex:none}
+#tabs button{flex:1;height:46px;background:none;color:#9ca3af;border:0;border-bottom:3px solid transparent;cursor:pointer;font-weight:700}
+#tabs button.on{color:var(--ac);border-color:var(--ac)}
+#pb{padding:12px;overflow:auto;flex:1}
+#pb h4{margin:14px 0 8px;color:var(--ac);font-size:13px}#pb h4:first-child{margin-top:0}
+.hint{color:#6b7280;font-size:13px}
+.sg{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#0e1014;border:1px solid #343946;border-radius:8px;padding:8px;margin-bottom:8px;font-size:12px;line-height:1.6}
+.sg button{background:var(--ac);color:#000;border:0;border-radius:6px;padding:5px 10px;cursor:pointer;font-weight:700;flex:none}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px}
+.gr button{background:#1f2937;color:#fff;border:1px solid #343946;border-radius:6px;padding:9px 4px;cursor:pointer;font-size:12px}
+.gr button:hover{border-color:var(--ac);color:var(--ac)}
+.f{display:block;margin:0 0 10px;font-size:12px;color:#9ca3af}.f span{display:block;margin-bottom:3px}
+.f input,.f select,.f textarea{width:100%;background:#0e1014;border:1px solid #343946;color:#fff;border-radius:6px;padding:6px;font-size:13px}
+.f input[type=color]{height:34px;padding:2px;width:calc(100% - 38px)}.f input[type=checkbox]{width:auto}.f input[type=file]{margin-top:4px;font-size:11px}
+.f button{background:#282c35;color:#fff;border:0;border-radius:6px;height:34px;width:34px;vertical-align:top;cursor:pointer}
+#cv{overflow:auto;padding:16px 8px 120px;background:#181b22}
+.pw{width:calc(793.7px*var(--s));height:calc(1122.5px*var(--s));margin:38px auto 14px;position:relative}
+.pg{position:absolute;left:0;top:0;width:210mm;height:297mm;background:#fff center/cover;color:#000;overflow:hidden;transform:scale(var(--s));transform-origin:0 0;font-family:var(--ff);font-size:var(--fs);box-shadow:0 12px 36px #0008}
+.pg.over::after{content:'⚠ المحتوى يتجاوز الصفحة';position:absolute;top:2mm;left:50%;transform:translateX(-50%);background:#dc2626;color:#fff;padding:2px 12px;border-radius:99px;font-size:12px;z-index:9}
+.hd,.ft{position:absolute;left:0;width:100%;background:center/100% auto no-repeat;pointer-events:none}
+.hd{top:0;height:35mm}.ft{bottom:0;height:25mm;background-position:bottom}.ft.l{height:80mm}
+.ct{position:absolute;left:8mm;right:8mm;overflow:hidden;display:flex;flex-direction:column}
+.ct:empty::before{content:'الصفحة فارغة — أضف قسماً من تبويب «إضافة»';color:#bbb;padding:20mm;text-align:center}
+.sc{display:flex;flex:none}.cl{display:flex;flex-direction:column;min-width:0}.w{cursor:pointer}
+.sc:hover{outline:1px dashed #f5b70088}.cl:hover{outline:1px dashed #38bdf8aa}.w:hover{outline:1px dashed #f5b700}
+.sel{outline:2px solid var(--ac)!important;outline-offset:-2px}
+.fw{position:absolute;overflow:hidden;touch-action:none;z-index:5;cursor:move}
+.hl{position:absolute;z-index:9;pointer-events:none;outline:2px solid var(--ac)}
+.hl i{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;background:#fff;border:2px solid var(--ac);border-radius:4px;pointer-events:auto;touch-action:none;transform:scale(calc(1/var(--s)))}
+.tbr{position:absolute;bottom:100%;margin-bottom:6px;display:flex;gap:2px;background:#15171c;border:1px solid var(--ac);border-radius:8px;padding:2px;pointer-events:auto;white-space:nowrap;transform:scale(calc(1/var(--s)))}
+.hl.al .tbr{left:0;transform-origin:0 100%}.hl.ar .tbr{right:0;transform-origin:100% 100%}
+.hl.in .tbr{bottom:auto;top:6px;margin:0}.hl.in.al .tbr{transform-origin:0 0}.hl.in.ar .tbr{transform-origin:100% 0}
+.tbr button,.tbr b{background:#282c35;color:#fff;border:0;border-radius:6px;min-width:30px;height:30px;font-size:14px;cursor:pointer;padding:0 6px;display:inline-flex;align-items:center;justify-content:center}
+.tbr b{background:var(--ac);color:#000;cursor:grab;touch-action:none}.tbr button:hover{background:var(--ac);color:#000}
+.pb2{position:absolute;top:-32px;left:0;right:0;display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:#9ca3af}
+.pb2 button{background:#282c35;color:#fff;border:0;border-radius:6px;min-width:30px;height:26px;cursor:pointer}.pb2 button:hover{background:var(--ac);color:#000}
+[data-r=tl],[data-r=br]{cursor:nwse-resize}[data-r=tr],[data-r=bl]{cursor:nesw-resize}[data-r=t],[data-r=b]{cursor:ns-resize}[data-r=l],[data-r=r]{cursor:ew-resize}
+[contenteditable]{outline:none;cursor:text}
+.ph{border:2px dashed #ccc;color:#aaa;display:flex;align-items:center;justify-content:center;font-size:13px}
+.tbx{background:#f8f9fa;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden}
+.th{position:relative;background:#1f2937;color:#fff;padding:8px 15px 8px 50px;font-weight:900;clip-path:polygon(15px 0,100% 0,100% 100%,0 100%)}
+.th::after{content:'';position:absolute;inset:0 auto 0 0;width:40px;background:var(--pa);clip-path:polygon(15px 0,100% 0,calc(100% - 15px) 100%,0 100%)}
+.th span{position:relative;z-index:1}
+.tr{display:flex;justify-content:space-between;gap:8px;padding:5px 12px;border-bottom:1px solid #e5e7eb;background:#fff}.tr b:last-child{text-align:left}
+.ctw{display:flex;gap:8px;justify-content:center;align-items:center;font-weight:700}.ctw a{text-decoration:none;color:inherit}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:8px 16px;border-radius:99px;opacity:0;transition:.3s;pointer-events:none;z-index:50}
+@media(max-width:1100px){#app{grid-template-columns:260px 1fr}}
+@media(max-width:720px){
+#app{grid-template-columns:1fr}
+#panel{position:fixed;left:0;right:0;bottom:0;height:56vh;z-index:20;transform:translateY(calc(100% - 46px));transition:transform .25s;border-radius:14px 14px 0 0;border:1px solid var(--l)}
+#panel.open{transform:none}#cv{padding-bottom:80px}}
+@page{margin:0}
+@media print{
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact;outline:none!important}
+html,body{height:auto;background:#fff}#app{display:block;height:auto}
+#tb,#bc,#panel,#toast,.hl,.pb2{display:none!important}
+#cv{overflow:visible;padding:0;background:none}
+.pw{width:210mm;height:297mm;margin:0;break-after:page}.pw:last-child{break-after:auto}
+.pg{transform:none;box-shadow:none}.pg.over::after,.ct:empty::before{content:none}.ph{visibility:hidden}}
+</style><style id="pgs"></style></head><body>
+<div id="app">
+<div id="tb">
+<b class="lg">SCOR Studio</b><span id="st">⏳</span><i></i>
+<button data-a="undo" title="تراجع">↩</button><button data-a="redo" title="إعادة">↪</button><i></i>
+<button data-a="up" title="تحريك للأعلى/اليمين">▲</button><button data-a="dn" title="تحريك للأسفل/اليسار">▼</button><button data-a="dup" title="تكرار">⧉</button><button data-a="del" title="حذف">🗑</button><i></i>
+<button data-a="zo">−</button><button data-a="fit" title="ملاءمة العرض">⤢</button><button data-a="zi">＋</button><i></i>
+<button data-a="sync" title="تحديث البيانات">🔄</button><button data-a="exp" title="تصدير JSON">⬇</button><button data-a="imp" title="استيراد JSON">⬆</button><button data-a="prn">🖨 PDF</button>
+<input type="file" id="impf" accept=".json" hidden>
+</div>
+<div id="bc"></div>
+<div id="panel"><div id="tabs"><button data-t="a">إضافة</button><button data-t="s">الإعدادات</button><button data-t="g">✨ ذكي</button><button data-t="t">الهوية</button></div><div id="pb"></div></div>
+<div id="cv"></div>
+</div>
+<div id="toast"></div>
 <script>
-  // ==========================================
-  // محرك الربط بقاعدة بيانات Google Sheets
-  // ==========================================
-  const SHEETS_ID = "1TDSSCDfAQJxz_zeulBrM6M79p9fw7mE1xTSvD-P_fuQ";
-  let database = { skid_steers: [], pumps: [] };
-  
-  // قاموس الترجمة للعناوين (يجمع بين مفاتيح الانزلاقية والمضخات)
-  const translationDict = {
-    // عام
-    'model_name': 'الاسم', 'marketing_slogan': 'العبارة التسويقية', 'short_description': 'الوصف المختصر', 'sub_type': 'النوع الفرعي', 'marketing_description': 'الوصف التسويقي', 'general_model': 'الموديل', 'equipment_type': 'نوع المعدة', 'general_design': 'التصميم', 'operating_system': 'نظام التشغيل', 'general_usage': 'الاستخدام',
-    // محرك
-    'engine_type': 'نوع المحرك', 'engine_model': 'موديل المحرك', 'engine_capacity': 'سعة المحرك', 'engine_power': 'قدرة المحرك', 'engine_torque': 'عزم المحرك', 'engine_emissions': 'الانبعاثات', 'engine_cooling': 'تبريد المحرك', 'engine_start_system': 'تشغيل المحرك',
-    // هيدروليك
-    'hydraulic_system_type': 'نوع النظام', 'main_pump': 'المضخة الرئيسية', 'standard_flow': 'التدفق القياسي', 'max_pressure': 'الضغط الأقصى', 'aux_hydraulic_system': 'نظام هيدروليكي إضافي', 'aux_system_flow': 'تدفق النظام الإضافي', 'quick_couplers': 'توصيلات سريعة', 'total_hydraulic_system': 'النظام الهيدروليكي الكلي',
-    // دفع وتوجيه
-    'drive_type': 'نوع الدفع', 'travel_speed': 'سرعة السير', 'max_travel_speed': 'السرعة القصوى', 'gradeability': 'قدرة التسلق', 'max_gradeability': 'قدرة التسلق القصوى', 'tires': 'الإطارات', 'steering_type': 'نمط التوجيه', 'steering_type_2': 'نمط التوجيه الإضافي',
-    // أداء ونطاق عمل
-    'rated_payload': 'الحمولة المقدرة', 'rated_load': 'الحمولة المقننة', 'bucket_capacity': 'سعة الدلو', 'std_bucket_capacity': 'سعة الدلو القياسية', 'dump_height': 'ارتفاع التفريغ', 'arm_length': 'طول الذراع', 'breakout_force': 'قوة الكسر', 'bucket_breakout_force': 'قوة كسر الدلو', 'lifting_capacity': 'قدرة الرفع', 'max_lifting_force': 'قوة الرفع القصوى', 'rollback_angle_ground': 'زاوية إرجاع الأرض', 'max_dump_angle': 'زاوية التفريغ القصوى', 'rear_departure_angle': 'زاوية الخروج الخلفية', 'front_approach_angle': 'زاوية الاقتراب الأمامية',
-    // أوزان وسعات
-    'operating_weight': 'الوزن التشغيلي', 'operating_weight_2': 'وزن التشغيل الأساسي', 'total_weight': 'الوزن الكلي', 'fuel_tank_capacity': 'سعة خزان الوقود', 'fuel_tank_2': 'خزان الوقود', 'hydraulic_capacity': 'سعة الهيدروليك',
-    // مضخات (خاص)
-    'mixer_type': 'نوع الخلاط', 'mixer_capacity': 'سعة الخلاط', 'max_mixing_volume': 'أقصى حجم خلط', 'mixing_system': 'نظام العمل', 'performance_productivity': 'الإنتاجية', 'performance_pressure': 'الضغط', 'pump_vertical_fine': 'ضخ رأسي (ناعم)', 'pump_horizontal_fine': 'ضخ أفقي (ناعم)', 'pump_vertical_coarse': 'ضخ رأسي (كبير)', 'pump_horizontal_coarse': 'ضخ أفقي (كبير)', 'max_aggregate_size': 'أقصى حجم للركام', 'cooling_system_performance': 'أداء نظام التبريد', 'mech_oil_cylinder': 'أسطوانة الزيت', 'mech_material_cylinder': 'أسطوانة المواد', 'mech_valve_type': 'الصمام', 'mech_inner_pipe_diameter': 'قطر الأنبوب الداخلي',
-    // تجهيزات وميزات
-    'std_equip_1': 'تجهيز قياسي 1', 'std_equip_2': 'تجهيز قياسي 2', 'std_equip_3': 'تجهيز قياسي 3', 'std_equip_4': 'تجهيز قياسي 4', 'std_equip_5': 'تجهيز قياسي 5', 'std_equip_6': 'تجهيز قياسي 6', 'std_equip_7': 'تجهيز قياسي 7', 'std_equip_8': 'تجهيز قياسي 8', 'std_equip_9': 'تجهيز قياسي 9', 'std_equip_10': 'تجهيز قياسي 10', 'opt_equip_1': 'تجهيز اختياري 1', 'opt_equip_2': 'تجهيز اختياري 2', 'opt_equip_3': 'تجهيز اختياري 3', 'opt_equip_4': 'تجهيز اختياري 4', 'opt_equip_5': 'تجهيز اختياري 5', 'opt_equip_6': 'تجهيز اختياري 6', 'feature_1': 'ميزة 1', 'feature_2': 'ميزة 2', 'feature_3': 'ميزة 3', 'feature_4': 'ميزة 4', 'feature_5': 'ميزة 5', 'feature_6': 'ميزة 6',
-    // أبعاد وملاحظات
-    'dim_a': 'البعد A', 'dim_b': 'البعد B', 'dim_c': 'البعد C', 'dim_d': 'البعد D', 'dim_e': 'البعد E', 'dim_f': 'البعد F', 'dim_g': 'البعد G', 'dim_h': 'البعد H', 'dim_i': 'البعد I', 'dim_j': 'البعد J', 'dim_k': 'البعد K', 'dim_l': 'البعد L', 'dim_m': 'البعد M', 'dim_n': 'البعد N', 'dim_o': 'البعد O', 'dim_p': 'البعد P', 'dim_q': 'البعد Q', 'dim_r': 'البعد R', 'dim_s': 'البعد S', 'dim_length': 'الطول', 'dim_width': 'العرض', 'dim_height': 'الارتفاع', 'note_1': 'ملاحظة 1', 'note_2': 'ملاحظة 2', 'note_3': 'ملاحظة 3'
-  };
-
-  // مجموعات الجداول لتحديد أي الأعمدة ستدرج مع كل جدول
-  const tableGroups = {
-      'engine': ['engine_type', 'engine_model', 'engine_capacity', 'engine_power', 'engine_torque', 'engine_emissions', 'engine_cooling', 'engine_start_system'],
-      'hydraulic': ['hydraulic_system_type', 'main_pump', 'standard_flow', 'max_pressure', 'aux_hydraulic_system', 'aux_system_flow', 'quick_couplers', 'total_hydraulic_system'],
-      'drive': ['drive_type', 'travel_speed', 'max_travel_speed', 'gradeability', 'max_gradeability', 'tires', 'steering_type', 'steering_type_2'],
-      'performance': ['rated_payload', 'rated_load', 'bucket_capacity', 'std_bucket_capacity', 'dump_height', 'arm_length', 'breakout_force', 'bucket_breakout_force', 'lifting_capacity', 'max_lifting_force', 'rollback_angle_ground', 'max_dump_angle', 'rear_departure_angle', 'front_approach_angle', 'performance_productivity', 'performance_pressure', 'pump_vertical_fine', 'pump_horizontal_fine', 'pump_vertical_coarse', 'pump_horizontal_coarse', 'max_aggregate_size', 'cooling_system_performance'],
-      'weights': ['operating_weight', 'operating_weight_2', 'total_weight', 'fuel_tank_capacity', 'fuel_tank_2', 'hydraulic_capacity'],
-      'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s', 'dim_length', 'dim_width', 'dim_height'],
-      'equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10','opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6', 'feature_1', 'feature_2', 'feature_3', 'feature_4', 'feature_5', 'feature_6']
-  };
-
-  async function fetchSheetData() {
-      const statusBadge = document.getElementById('dataStatus');
-      try {
-          const skidUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:csv&sheet=skid_steers`;
-          const pumpUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:csv&sheet=pumps`;
-          
-          await Promise.all([
-            new Promise((resolve) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }})),
-            new Promise((resolve) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }}))
-          ]);
-          
-          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
-          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-          document.getElementById('insertDataBtn').disabled = false;
-          updateModelsList();
-      } catch (error) {
-          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
-          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
-      }
-  }
-
-  function updateModelsList() {
-      const category = document.getElementById('sheetCategory').value;
-      const modelSelector = document.getElementById('modelSelector');
-      modelSelector.innerHTML = '';
-      
-      const models = database[category];
-      if(!models || models.length === 0) {
-          modelSelector.innerHTML = '<option value="">لا يوجد موديلات</option>';
-          return;
-      }
-      
-      models.forEach((row, index) => {
-          if(row.model_name && row.model_name.trim() !== '') {
-              const opt = document.createElement('option');
-              opt.value = index; 
-              opt.text = row.model_name;
-              modelSelector.appendChild(opt);
-          }
-      });
-  }
-
-  function insertDynamicData(e) {
-      const btn = e.currentTarget;
-      const category = document.getElementById('sheetCategory').value;
-      const modelIndex = document.getElementById('modelSelector').value;
-      const requestType = document.getElementById('dataSourceSelect').value;
-      let title = document.getElementById('sectionTitle').value;
-      
-      const targetPageVal = document.getElementById('targetPageSelect').value;
-      const targetPage = document.getElementById(`page-${targetPageVal}`);
-      
-      if(!targetPage || modelIndex === "") return;
-      
-      const rowData = database[category][modelIndex];
-      const typeParts = requestType.split(':');
-      const action = typeParts[0]; // text أو table
-      const key = typeParts[1];
-
-      if (action === 'text') {
-          // إدراج نص حر (مثل العبارة التسويقية)
-          const textValue = rowData[key] || '';
-          if(textValue.trim() === '') { alert('هذا الحقل فارغ في قاعدة البيانات لهذا الموديل!'); return; }
-          
-          const wrapper = document.createElement('div'); 
-          wrapper.className = 'draggable-wrapper flex items-start gap-1 p-2';
-          wrapper.style.top = '50mm'; wrapper.style.left = '5mm'; wrapper.style.width = 'max-content';
-
-          const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
-          
-          const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = textValue; 
-          editableText.className = 'outline-none text-[#f5b700] font-black text-2xl bg-transparent w-full whitespace-nowrap'; wrapper.appendChild(editableText);
-          
-          const resizer = document.createElement('div'); resizer.className = 'simple-resizer no-print'; wrapper.appendChild(resizer);
-
-          const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-          deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-          deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-          wrapper.appendChild(deleteBtn);
-          
-          targetPage.appendChild(wrapper);
-          makeBoundedDraggable(wrapper, dragHandle, targetPage);
-          makeSimpleResizable(wrapper, resizer, targetPage); 
-      } 
-      else if (action === 'table') {
-          // إدراج جدول مواصفات (مثل المحرك)
-          const colsToInclude = tableGroups[key];
-          let tableData = [];
-          
-          colsToInclude.forEach(colKey => {
-              if(rowData[colKey] && rowData[colKey].trim() !== '') {
-                  tableData.push({ k: translationDict[colKey] || colKey, v: rowData[colKey] });
-              }
-          });
-
-          if(tableData.length === 0) { alert('لا توجد بيانات متوفرة لهذا الجدول في الموديل المحدد.'); return; }
-          if(!title) title = document.querySelector(`#dataSourceSelect option[value="${requestType}"]`).text;
-
-          const container = document.createElement('div');
-          container.className = 'free-container';
-          container.style.width = '100mm'; container.style.height = 'auto'; container.style.minHeight = '30mm'; 
-          container.style.top = '100mm'; container.style.left = '5mm'; container.style.padding = '0'; 
-          container.style.background = 'transparent'; container.style.border = '1px dashed transparent'; 
-
-          const dragBar = document.createElement('div');
-          dragBar.className = 'drag-bar no-print';
-          dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ سحب وتغيير مقاس الجدول</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
-          container.appendChild(dragBar);
-
-          const block = document.createElement('div'); block.className = 'spec-block flex-1';
-          const header = document.createElement('div'); header.className = 'spec-header'; 
-          header.innerHTML = `<span style="position:relative; z-index:2;">${title}</span>`; 
-          block.appendChild(header);
-
-          const rowsWrapper = document.createElement('div');
-          rowsWrapper.className = 'flex-1 overflow-hidden flex flex-col bg-white';
-          tableData.forEach(item => {
-            const rowDiv = document.createElement('div'); rowDiv.className = 'spec-row flex-1';
-            rowDiv.innerHTML = `<span class="spec-key" contenteditable="true">${item.k}</span><span class="spec-val" contenteditable="true">${item.v}</span>`;
-            rowsWrapper.appendChild(rowDiv);
-          });
-          block.appendChild(rowsWrapper);
-          container.appendChild(block);
-
-          const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
-          handlePositions.forEach(pos => {
-            const handle = document.createElement('div'); handle.className = `resizer ${pos}`; container.appendChild(handle);
-          });
-
-          targetPage.appendChild(container);
-          makeBoundedDraggable(container, dragBar, targetPage);
-          makeBoundedBoxResizable(container, targetPage);
-      }
-      
-      // تفريغ حقل العنوان بعد الإدراج
-      document.getElementById('sectionTitle').value = '';
-  }
-
-  // ==========================================
-  // الإعدادات العامة والمتغيرات
-  // ==========================================
-  let state = { headerImg: '', footerImg: '', lastFooterImg: '' };
-  const scale = 0.65;
-  const mmToPx = 3.7795275591;
-  const marginMm = 5;
-  const marginPx = marginMm * mmToPx;
-  let dynamicStyles = {};
-  
-  function applyTargetedFontSettings() {
-    const targetSel = document.getElementById('fontTargetSelect').value;
-    const fontFamily = document.getElementById('globalFontFamily').value;
-    const fontSize = document.getElementById('globalFontSize').value + 'px';
-    dynamicStyles[targetSel] = `{ font-family: ${fontFamily} !important; font-size: ${fontSize} !important; }`;
-    updateDynamicStyles();
-  }
-
-  function updateDynamicStyles() {
-    let styleTag = document.getElementById('dynamic-typography');
-    if(!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = 'dynamic-typography';
-        document.head.appendChild(styleTag);
-    }
-    let css = '';
-    for(let sel in dynamicStyles) { css += `${sel} ${dynamicStyles[sel]}\n`; }
-    styleTag.innerHTML = css;
-  }
-
-  function saveTemplate() {
-    const pagesHTML = document.getElementById('pagesContainer').innerHTML;
-    const templateData = { 
-        pages: pagesHTML, state: state, styles: dynamicStyles,
-        pageCount: document.getElementById('pageCount').value, hasCover: document.getElementById('hasCover').checked
-    };
-    localStorage.setItem('scor_master_template', JSON.stringify(templateData));
-    alert('تم حفظ ترتيب وتنسيق الصفحات كقالب بنجاح!');
-  }
-
-  function loadTemplate() {
-    const dataStr = localStorage.getItem('scor_master_template');
-    if(!dataStr) { alert('لا يوجد قالب محفوظ مسبقاً!'); return; }
-    const templateData = JSON.parse(dataStr);
-    document.getElementById('pageCount').value = templateData.pageCount;
-    document.getElementById('hasCover').checked = templateData.hasCover;
-    state = templateData.state;
-    dynamicStyles = templateData.styles || {};
-    document.getElementById('pagesContainer').innerHTML = templateData.pages;
-    updateHeadersAndFooters();
-    updateDynamicStyles();
-    updateDropdowns(document.getElementById('customBgPage'), document.getElementById('targetPageSelect'), templateData.hasCover, templateData.pageCount);
-    reAttachAllEvents();
-    alert('تم استرجاع القالب بنجاح!');
-  }
-
-  function clearTemplate() {
-      if(confirm('هل أنت متأكد من مسح القالب المحفوظ؟')) localStorage.removeItem('scor_master_template');
-  }
-
-  function reAttachAllEvents() {
-    document.querySelectorAll('.free-container').forEach(container => {
-       const dragBar = container.querySelector('.drag-bar');
-       const page = container.closest('.a4-page');
-       if(dragBar && page) makeBoundedDraggable(container, dragBar, page);
-       makeBoundedBoxResizable(container, page);
-       const row = container.querySelector('.grid-row');
-       if(row) {
-           container.querySelectorAll('.col-resizer').forEach(gutter => {
-               const leftCol = gutter.previousElementSibling;
-               if(leftCol) makeColResizable(leftCol, gutter, row);
-           });
-       }
-    });
-    document.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
-       const page = wrapper.closest('.a4-page');
-       const dragHandle = wrapper.querySelector('.drag-handle') || wrapper;
-       if(page) makeBoundedDraggable(wrapper, dragHandle, page);
-       const simpleResizer = wrapper.querySelector('.simple-resizer');
-       if(simpleResizer && page) makeSimpleResizable(wrapper, simpleResizer, page);
-    });
-  }
-
-  function renderPages() {
-    const container = document.getElementById('pagesContainer');
-    const customBgSelect = document.getElementById('customBgPage');
-    const targetSelect = document.getElementById('targetPageSelect');
-    const hasCover = document.getElementById('hasCover').checked;
-    const pageCount = parseInt(document.getElementById('pageCount').value) || 1;
-    if(container.innerHTML === '') { buildPagesDOM(container, customBgSelect, targetSelect, hasCover, pageCount); } 
-    else { updateDropdowns(customBgSelect, targetSelect, hasCover, pageCount); }
-  }
-
-  function buildPagesDOM(container, s1, s2, hasCover, pageCount) {
-    container.innerHTML = ''; s1.innerHTML = ''; s2.innerHTML = ''; 
-    if (hasCover) {
-      container.appendChild(createPageElement('cover'));
-      s1.add(new Option('الغلاف', 'cover')); s2.add(new Option('الغلاف', 'cover'));
-    }
-    for (let i = 1; i <= pageCount; i++) {
-      const isLast = (i === pageCount);
-      container.appendChild(createPageElement(i, isLast));
-      s1.add(new Option(`صفحة ${i}`, i)); s2.add(new Option(`صفحة ${i}`, i));
-    }
-  }
-
-  function updateDropdowns(s1, s2, hasCover, pageCount) {
-     s1.innerHTML = ''; s2.innerHTML = '';
-     if (hasCover) { s1.add(new Option('الغلاف', 'cover')); s2.add(new Option('الغلاف', 'cover')); }
-     for (let i = 1; i <= pageCount; i++) { s1.add(new Option(`صفحة ${i}`, i)); s2.add(new Option(`صفحة ${i}`, i)); }
-  }
-
-  function createPageElement(pageNum, isLast = false) {
-    const page = document.createElement('div');
-    page.className = 'a4-page'; page.id = `page-${pageNum}`;
-    const watermark = document.createElement('div');
-    watermark.className = 'no-print';
-    watermark.innerHTML = pageNum === 'cover' ? 'الغلاف (Cover)' : `صفحة ${pageNum}`;
-    watermark.style = "position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#e5e7eb; font-size:40px; font-weight:900; z-index:0; opacity: 0.2;";
-    page.appendChild(watermark);
-    if (pageNum !== 'cover') {
-      const header = document.createElement('div'); header.className = 'page-header'; page.appendChild(header);
-      const footer = document.createElement('div'); footer.className = isLast ? 'is-last-footer' : 'is-normal-footer'; page.appendChild(footer);
-    }
-    return page;
-  }
-
-  document.getElementById('globalHeader').addEventListener('change', (e) => uploadImage(e, 'headerImg'));
-  document.getElementById('globalFooter').addEventListener('change', (e) => uploadImage(e, 'footerImg'));
-  document.getElementById('lastFooter').addEventListener('change', (e) => uploadImage(e, 'lastFooterImg'));
-  
-  function uploadImage(event, stateKey) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) { state[stateKey] = e.target.result; updateHeadersAndFooters(); }
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function updateHeadersAndFooters() {
-    document.querySelectorAll('.page-header').forEach(el => { if(state.headerImg) el.style.backgroundImage = `url(${state.headerImg})`; });
-    document.querySelectorAll('.is-normal-footer').forEach(el => { if(state.footerImg) el.style.backgroundImage = `url(${state.footerImg})`; });
-    document.querySelectorAll('.is-last-footer').forEach(el => {
-      if(state.lastFooterImg) { el.style.backgroundImage = `url(${state.lastFooterImg})`; } 
-      else if (state.footerImg) { el.style.backgroundImage = `url(${state.footerImg})`; }
-    });
-  }
-
-  function addFloatingContainer(colCount) {
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-    if(!targetPage) return;
-
-    const container = document.createElement('div');
-    container.className = 'free-container';
-    container.style.width = '200mm'; container.style.height = '45mm'; 
-    container.style.top = '100mm'; container.style.left = '5mm';   
-
-    const dragBar = document.createElement('div');
-    dragBar.className = 'drag-bar no-print';
-    dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ اسحب الحاوية (${colCount} أعمدة)</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
-    container.appendChild(dragBar);
-
-    const row = document.createElement('div'); row.className = 'grid-row';
-    for (let i = 0; i < colCount; i++) {
-      const col = document.createElement('div'); col.className = 'grid-col';
-      col.innerHTML = `
-        <div class="flex flex-col gap-1 items-center justify-center h-full no-print bg-gray-100 rounded border border-gray-300 p-2">
-          <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
-          <button onclick="insertGridContent(this, 'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📝 نص</button>
-          <button onclick="insertGridContent(this, 'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">🖼️ صورة</button>
-          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 جدول</button>
-        </div>`;
-      row.appendChild(col);
-      if (i < colCount - 1) {
-        const gutter = document.createElement('div'); gutter.className = 'col-resizer';
-        row.appendChild(gutter); makeColResizable(col, gutter, row);
-      }
-    }
-    container.appendChild(row);
-
-    const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
-    handlePositions.forEach(pos => {
-      const handle = document.createElement('div'); handle.className = `resizer ${pos}`; container.appendChild(handle);
-    });
-    targetPage.appendChild(container);
-    makeBoundedDraggable(container, dragBar, targetPage);
-    makeBoundedBoxResizable(container, targetPage);
-  }
-
-  function insertGridContent(btn, type) {
-    const col = btn.closest('.grid-col');
-    if (type === 'text') {
-      col.innerHTML = '<div contenteditable="true" class="w-full h-full outline-none text-sm text-gray-800 p-1">اكتب النص هنا...</div>';
-    } else if (type === 'image') {
-      col.innerHTML = `
-        <label class="w-full h-full flex flex-col items-center justify-center bg-gray-50 cursor-pointer text-gray-400 text-xs border-2 border-dashed border-gray-300 hover:bg-gray-100 no-print">
-          <span class="font-bold">+ اختر صورة</span><input type="file" class="hidden" accept="image/*" onchange="loadGridImage(this)">
-        </label>`;
-    } else if (type === 'table') {
-      col.innerHTML = `
-        <div class="spec-block w-full h-full">
-          <div class="spec-header"><span style="position:relative; z-index:2;" contenteditable="true">عنوان الجدول</span></div>
-          <div class="flex-1 bg-white flex flex-col"><div class="spec-row flex-1"><span class="spec-key" contenteditable="true">مواصفة 1</span><span class="spec-val" contenteditable="true">قيمة</span></div></div>
-        </div>`;
-    }
-  }
-
-  function loadGridImage(input) {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => { input.closest('.grid-col').innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;">`; }
-      reader.readAsDataURL(file);
-    }
-  }
-
-  document.getElementById('freeImageUpload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-
-    if (file && targetPage) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper cursor-grab';
-        wrapper.style.width = '100mm'; wrapper.style.top = '100mm'; wrapper.style.left = '5mm';
-        const img = document.createElement('img'); img.src = event.target.result; wrapper.appendChild(img);
-        const resizer = document.createElement('div'); resizer.className = 'simple-resizer no-print'; wrapper.appendChild(resizer);
-        const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-        deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-        deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-        wrapper.appendChild(deleteBtn);
-        targetPage.appendChild(wrapper);
-        makeBoundedDraggable(wrapper, wrapper, targetPage); makeSimpleResizable(wrapper, resizer, targetPage);
-        document.getElementById('freeImageUpload').value = '';
-      }
-      reader.readAsDataURL(file);
-    }
-  });
-
-  function addFreeText() {
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-    if (!targetPage) return;
-    
-    const wrapper = document.createElement('div'); 
-    wrapper.className = 'draggable-wrapper flex items-start gap-1 p-2';
-    wrapper.style.top = '50mm'; wrapper.style.left = '5mm';
-    wrapper.style.width = 'max-content';
-
-    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
-    
-    const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "عنوان حر"; 
-    editableText.className = 'outline-none text-[#f5b700] font-black text-2xl bg-transparent w-full whitespace-nowrap'; wrapper.appendChild(editableText);
-    
-    const resizer = document.createElement('div'); resizer.className = 'simple-resizer no-print'; wrapper.appendChild(resizer);
-
-    const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-    deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-    deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-    wrapper.appendChild(deleteBtn);
-    
-    targetPage.appendChild(wrapper);
-    makeBoundedDraggable(wrapper, dragHandle, targetPage);
-    makeSimpleResizable(wrapper, resizer, targetPage); 
-  }
-
-  function addContactBlock() {
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-    if (!targetPage) return;
-
-    const presetSelect = document.getElementById('contactPresetSelect');
-    const selectedOpt = presetSelect.options[presetSelect.selectedIndex];
-    const textVal = selectedOpt.text; 
-    const linkVal = selectedOpt.value;
-    const isPhone = selectedOpt.getAttribute('data-type') === 'phone';
-
-    const wrapper = document.createElement('div'); 
-    wrapper.className = 'draggable-wrapper flex items-center justify-center p-1';
-    wrapper.style.top = '275mm'; wrapper.style.left = '50mm';
-    wrapper.style.width = 'max-content'; 
-    
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'flex items-center gap-2 justify-center whitespace-nowrap';
-
-    if (isPhone) {
-      const waLink = document.createElement('a');
-      waLink.href = 'https://wa.me/' + linkVal;
-      waLink.target = '_blank';
-      waLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
-      waLink.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>`;
-
-      const callLink = document.createElement('a');
-      callLink.href = 'tel:+' + linkVal;
-      callLink.target = '_blank';
-      callLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
-      callLink.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="#ef4444"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`;
-
-      const numText = document.createElement('span');
-      numText.className = 'contact-text font-bold outline-none text-[#ffffff] whitespace-nowrap';
-      numText.style.textShadow = '0px 1px 2px rgba(0,0,0,0.5)';
-      numText.contentEditable = true;
-      numText.innerText = textVal;
-
-      contentDiv.appendChild(waLink);
-      contentDiv.appendChild(callLink);
-      contentDiv.appendChild(numText);
-    } else {
-      const aTag = document.createElement('a'); 
-      aTag.href = linkVal; aTag.target = '_blank';
-      aTag.style.color = '#ffffff'; aTag.style.textShadow = '0px 1px 2px rgba(0,0,0,0.5)';
-      aTag.className = 'contact-text font-bold outline-none hover:text-[#f5b700] transition block w-full text-center whitespace-nowrap';
-      aTag.contentEditable = true; aTag.innerText = textVal;
-      contentDiv.appendChild(aTag);
-    }
-
-    wrapper.appendChild(contentDiv);
-
-    const resizer = document.createElement('div'); 
-    resizer.className = 'simple-resizer no-print'; 
-    wrapper.appendChild(resizer);
-
-    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
-    const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-    deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-    deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-    wrapper.appendChild(deleteBtn);
-
-    targetPage.appendChild(wrapper);
-    makeBoundedDraggable(wrapper, dragHandle, targetPage);
-    makeSimpleResizable(wrapper, resizer, targetPage); 
-  }
-
-  function makeSimpleResizable(wrapper, resizer, page) {
-    let isResizing = false, startX, startWidth, startLeft;
-    resizer.addEventListener('mousedown', function(e) { 
-      e.preventDefault(); e.stopPropagation(); isResizing = true; 
-      startX = e.clientX; startWidth = wrapper.offsetWidth; startLeft = wrapper.offsetLeft;
-      document.addEventListener('mousemove', resize); document.addEventListener('mouseup', stopResize); 
-    });
-    function resize(e) { 
-      if (!isResizing) return; 
-      let dx = (startX - e.clientX) / scale; let newLeft = startLeft + dx;
-      if (newLeft < marginPx) { dx += (marginPx - newLeft); newLeft = marginPx; }
-      const newWidth = startWidth + dx;
-      if (newWidth > 15) { wrapper.style.width = `${newWidth}px`; wrapper.style.left = `${newLeft}px`; }
-    }
-    function stopResize() { isResizing = false; document.removeEventListener('mousemove', resize); document.removeEventListener('mouseup', stopResize); }
-  }
-
-  function makeBoundedDraggable(element, handle, page) {
-    let isDragging = false, startX, startY, initialLeft, initialTop;
-    handle.addEventListener('mousedown', function(e) {
-      if(e.target.tagName === 'BUTTON') return; 
-      e.preventDefault(); e.stopPropagation(); isDragging = true; startX = e.clientX; startY = e.clientY;
-      initialLeft = element.offsetLeft; initialTop = element.offsetTop;
-      document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd);
-    });
-    function drag(e) {
-      if (!isDragging) return;
-      const dx = (e.clientX - startX) / scale; const dy = (e.clientY - startY) / scale;
-      let newLeft = initialLeft + dx; const maxLeft = page.clientWidth - marginPx - element.offsetWidth;
-      newLeft = Math.max(marginPx, Math.min(newLeft, maxLeft));
-      element.style.left = `${newLeft}px`; element.style.top = `${initialTop + dy}px`;
-    }
-    function dragEnd() { isDragging = false; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); }
-  }
-
-  function makeBoundedBoxResizable(element, page) {
-    const resizers = element.querySelectorAll('.resizer');
-    resizers.forEach(resizer => {
-      resizer.addEventListener('mousedown', function(e) {
-        e.preventDefault(); e.stopPropagation();
-        let isResizing = true, startX = e.clientX, startY = e.clientY, startW = element.offsetWidth, startH = element.offsetHeight, startLeft = element.offsetLeft, startTop = element.offsetTop;
-        function resize(e) {
-          if (!isResizing) return;
-          let dx = (e.clientX - startX) / scale; let dy = (e.clientY - startY) / scale;
-          if (resizer.classList.contains('r') || resizer.classList.contains('tr') || resizer.classList.contains('br')) {
-            const maxW = page.clientWidth - marginPx - startLeft; element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
-          }
-          if (resizer.classList.contains('l') || resizer.classList.contains('tl') || resizer.classList.contains('bl')) {
-            let newLeft = startLeft + dx;
-            if (newLeft < marginPx) { const diff = marginPx - newLeft; newLeft = marginPx; dx += diff; }
-            const newWidth = startW - dx;
-            if (newWidth > 30) { element.style.width = newWidth + 'px'; element.style.left = newLeft + 'px'; }
-          }
-          if (resizer.classList.contains('b') || resizer.classList.contains('bl') || resizer.classList.contains('br')) { element.style.height = Math.max(20, startH + dy) + 'px'; }
-          if (resizer.classList.contains('t') || resizer.classList.contains('tl') || resizer.classList.contains('tr')) {
-            const newHeight = Math.max(20, startH - dy);
-            if (newHeight > 20) { element.style.height = newHeight + 'px'; element.style.top = (startTop + dy) + 'px'; }
-          }
-        }
-        function stopResize() { isResizing = false; document.removeEventListener('mousemove', resize); document.removeEventListener('mouseup', stopResize); }
-        document.addEventListener('mousemove', resize); document.addEventListener('mouseup', stopResize);
-      });
-    });
-  }
-
-  function makeColResizable(leftCol, gutter, row) {
-    let isResizingCol = false;
-    gutter.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); isResizingCol = true; document.body.style.cursor = 'col-resize'; });
-    document.addEventListener('mousemove', function(e) {
-      if (!isResizingCol) return;
-      const rowRect = row.getBoundingClientRect(); const mouseXFromRight = rowRect.right - e.clientX;
-      const percentage = (mouseXFromRight / rowRect.width) * 100;
-      if (percentage > 5 && percentage < 95) leftCol.style.flex = `0 0 ${percentage}%`;
-    });
-    document.addEventListener('mouseup', function() { if (isResizingCol) { isResizingCol = false; document.body.style.cursor = 'default'; } });
-  }
-
-  // 1. هنا نعرّف الدالة خارج الحدث
-  async function fetchSheetData() {
-      const statusBadge = document.getElementById('dataStatus');
-      try {
-          // الروابط الصحيحة 100% مع أرقام الـ GID الدقيقة
-          const skidUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=546876457&single=true&output=csv";
-          const pumpUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=1201691755&single=true&output=csv";
-          
-          await Promise.all([
-            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
-            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
-          ]);
-          
-          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
-          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-          document.getElementById('insertDataBtn').disabled = false;
-          updateModelsList();
-      } catch (error) {
-          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
-          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
-      }
-  }
-
-  // 2. وهنا نقوم بتشغيلها عند فتح الصفحة
-  window.onload = function() {
-      renderPages();
-      fetchSheetData(); // هذا هو سطر الاستدعاء المفقود
-  };
-</script>
-</body>
-</html>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* ===== مصدر البيانات: لاحقاً استبدل load() بجلب من Supabase يرجع نفس الشكل {فئة:{label,rows:[{model_name,...}]}} ===== */
+const SRC={skid_steers:{label:'معدات انزلاقية',url:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=546876457&single=true&output=csv'},
+pumps:{label:'مضخات بيتون',url:'https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=1201691755&single=true&output=csv'}};
+const CT=[['4915118316638','p'],['4917634389434','p'],['963939062887','p'],['963941435541','p'],['https://www.scor-sy.de','w','www.scor-sy.de'],['mailto:info@scor-sy.de','w','info@scor-sy.de']];
+const GR={engine:/^engine_/,hydraulic:/^(hydraulic_system_type|main_pump|standard_flow|max_pressure|aux_|quick_couplers|total_hydraulic)/,drive:/^(drive_type|travel_speed|max_travel|gradeab|max_grade|tires|steering)/,performance:/^(rated_|bucket|std_bucket|dump|arm_length|breakout|lifting|max_lifting|rollback|max_dump|rear_dep|front_app|performance_|pump_(vert|horiz)|max_aggregate|cooling_system)/,weights:/^(operating_weight|total_weight|fuel_tank|hydraulic_capacity)/,dimensions:/^dim_/,equipment:/^(std_equip|opt_equip|feature_)/};
+const GL={engine:'المحرك',hydraulic:'النظام الهيدروليكي',drive:'نظام الحركة',performance:'الأداء',weights:'الأوزان والسعات',dimensions:'الأبعاد',equipment:'التجهيزات والميزات'};
+const LB=Object.fromEntries('engine_type:نوع المحرك|engine_model:موديل المحرك|engine_capacity:سعة المحرك|engine_power:قدرة المحرك|engine_torque:عزم المحرك|engine_emissions:الانبعاثات|engine_cooling:تبريد المحرك|engine_start_system:تشغيل المحرك|hydraulic_system_type:نوع النظام|main_pump:المضخة الرئيسية|standard_flow:التدفق القياسي|max_pressure:الضغط الأقصى|aux_hydraulic_system:نظام هيدروليكي إضافي|aux_system_flow:تدفق النظام الإضافي|quick_couplers:توصيلات سريعة|total_hydraulic_system:النظام الهيدروليكي الكلي|drive_type:نوع الدفع|travel_speed:سرعة السير|max_travel_speed:السرعة القصوى|gradeability:قدرة التسلق|max_gradeability:قدرة التسلق القصوى|tires:الإطارات|steering_type:نمط التوجيه|steering_type_2:نمط التوجيه الإضافي|rated_payload:الحمولة المقدرة|rated_load:الحمولة المقننة|bucket_capacity:سعة الدلو|std_bucket_capacity:سعة الدلو القياسية|dump_height:ارتفاع التفريغ|arm_length:طول الذراع|breakout_force:قوة الكسر|bucket_breakout_force:قوة كسر الدلو|lifting_capacity:قدرة الرفع|max_lifting_force:قوة الرفع القصوى|rollback_angle_ground:زاوية إرجاع الأرض|max_dump_angle:زاوية التفريغ القصوى|rear_departure_angle:زاوية الخروج الخلفية|front_approach_angle:زاوية الاقتراب الأمامية|performance_productivity:الإنتاجية|performance_pressure:الضغط|pump_vertical_fine:ضخ رأسي (ناعم)|pump_horizontal_fine:ضخ أفقي (ناعم)|pump_vertical_coarse:ضخ رأسي (كبير)|pump_horizontal_coarse:ضخ أفقي (كبير)|max_aggregate_size:أقصى حجم للركام|cooling_system_performance:أداء نظام التبريد|operating_weight:الوزن التشغيلي|operating_weight_2:وزن التشغيل الأساسي|total_weight:الوزن الكلي|fuel_tank_capacity:سعة خزان الوقود|fuel_tank_2:خزان الوقود|hydraulic_capacity:سعة الهيدروليك|dim_length:الطول|dim_width:العرض|dim_height:الارتفاع'.split('|').map(s=>s.split(':')));
+function lb(k){let m;if(LB[k])return LB[k];if(m=k.match(/^dim_([a-s])$/))return'البعد '+m[1].toUpperCase();if(m=k.match(/^(std_equip|opt_equip|feature)_(\d+)$/))return{std_equip:'تجهيز قياسي',opt_equip:'تجهيز اختياري',feature:'ميزة'}[m[1]]+' '+m[2];return k}
+const csv=t=>{const r=[];let a=[''],q=0,c;for(let i=0;i<t.length;i++){c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){a[a.length-1]+='"';i++}else q=0}else a[a.length-1]+=c}else if(c=='"')q=1;else if(c==',')a.push('');else if(c=='\n'||c=='\r'){if(c=='\r'&&t[i+1]=='\n')i++;r.push(a);a=['']}else a[a.length-1]+=c}if(a.length>1||a[0])r.push(a);const h=r.shift().map(x=>x.trim());return r.map(v=>Object.fromEntries(h.map((k,j)=>[k,(v[j]||'').trim()])))};
+let DB={};
+async function load(){const st=$('#st');st.textContent='⏳';try{const d={};for(const k in SRC)d[k]={label:SRC[k].label,rows:csv(await(await fetch(SRC[k].url)).text())};DB=d;try{localStorage.setItem('scor3db',JSON.stringify(DB))}catch{}st.textContent='🟢'}catch(e){try{DB=JSON.parse(localStorage.getItem('scor3db'))||{}}catch{DB={}}st.textContent=Object.keys(DB).length?'🟡 نسخة محفوظة':'🔴'}render()}
+/* ===== النموذج: صفحة > قسم > عمود > عنصر ===== */
+const LAY={'1':[1],'2':[1,1],'3':[1,1,1],'4':[1,1,1,1],'30/70':[3,7],'70/30':[7,3]},KS=['secs','cols','ws'];
+const nc=()=>({w:1,pad:0,bg:'',jc:'flex-start',ws:[]}),ns=k=>({lay:k,gap:4,pt:2,pb:2,bg:'',ai:'stretch',cols:LAY[k].map(w=>({...nc(),w}))});
+const MK={h:()=>({k:'h',x:'عنوان',fs:26,al:'right',co:'#1f2937',mb:2}),t:()=>({k:'t',x:'اكتب النص هنا',fs:14,al:'right',co:'#111111',mb:2}),i:()=>({k:'i',src:'',h:50,fit:'cover',mb:2}),tb:()=>({k:'tb',cat:Object.keys(DB)[0]||'skid_steers',m:'',g:'engine',ti:'',mb:3}),ct:()=>({k:'ct',n:0,co:'#111111',mb:0}),sp:()=>({k:'sp',h:8,mb:0})};
+const WN={h:'عنوان',t:'نص',i:'صورة',tb:'جدول بيانات',ct:'تواصل',sp:'فراغ'},NM={p:'الصفحة',s:'القسم',c:'العمود',...WN};
+const AL=[['right','يمين'],['center','وسط'],['left','يسار']],JC=[['flex-start','أعلى'],['center','وسط'],['flex-end','أسفل'],['space-between','مباعدة']];
+const F={p:[['bg','خلفية الصفحة','f'],['cover','صفحة غلاف (بدون ترويسة/تذييل)','b']],
+s:[['lay','التوزيع','o',()=>Object.keys(LAY).map(k=>[k,k])],['gap','المسافة بين الأعمدة (mm)','n'],['pt','حشو علوي (mm)','n'],['pb','حشو سفلي (mm)','n'],['bg','لون الخلفية','c'],['ai','محاذاة الأعمدة','o',()=>[['stretch','ملء'],...JC.slice(0,3)]]],
+c:[['w','العرض (نسبة)','n'],['pad','حشو (mm)','n'],['bg','لون الخلفية','c'],['jc','توزيع المحتوى','o',()=>JC]],
+h:[['x','النص','s'],['fs','الحجم (px)','n'],['al','المحاذاة','o',()=>AL],['co','اللون','c']],
+t:[['x','النص','a'],['fs','الحجم (px)','n'],['al','المحاذاة','o',()=>AL],['co','اللون','c']],
+i:[['src','الصورة','f'],['h','الارتفاع (mm)','n'],['fit','الملاءمة','o',()=>[['cover','قص'],['contain','احتواء']]]],
+tb:[['cat','الفئة','o',()=>Object.entries(DB).map(([k,v])=>[k,v.label])],['m','الموديل','o',n=>[['','— اختر —'],...((DB[n.cat]?.rows||[]).filter(r=>r.model_name).map(r=>[r.model_name,r.model_name]))]],['g','المجموعة','o',()=>Object.entries(GL)],['ti','عنوان مخصص','s']],
+ct:[['n','جهة التواصل','o',()=>CT.map((c,i)=>[i,c[2]||'00'+c[0]])],['co','اللون','c']],
+sp:[['h','الارتفاع (mm)','n']]};
+const FT=[['ff','الخط','o',()=>[["'SCORFont',Cairo,sans-serif",'SCOR + Cairo'],['Cairo,sans-serif','Cairo'],['Arial,sans-serif','Arial']]],['fs','حجم الخط الأساسي (px)','n'],['ac','اللون الرئيسي','c'],['hd','صورة الترويسة','f'],['ft','صورة التذييل','f'],['lf','تذييل الصفحة الأخيرة','f']];
+let D=null,sel=null,tab='a',Z=0,S=1,H=[],hi=-1;
+try{D=JSON.parse(localStorage.getItem('scor3'))}catch{}
+if(!D||!D.pages)D={t:{ff:"'SCORFont',Cairo,sans-serif",fs:14,ac:'#f5b700',hd:'',ft:'',lf:''},pages:[{cover:false,bg:'',secs:[(()=>{const s=ns('1');s.cols[0].ws.push(MK.h());return s})()]}]};
+const node=P=>{let n=D.pages[P[0]];for(let i=1;i<P.length;i++)n=n[KS[i-1]][P[i]];return n},arr=P=>P.length==1?D.pages:node(P.slice(0,-1))[KS[P.length-2]],ok=P=>{try{return!!P&&!!node(P)}catch{return false}},tgt=()=>tab=='t'?D.t:node(sel);
+const save=()=>{try{localStorage.setItem('scor3',JSON.stringify(D))}catch{toast('تعذّر الحفظ التلقائي (حجم الصور) — استخدم تصدير JSON')}};
+function toast(m){const t=$('#toast');t.textContent=m;t.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.opacity=0,2800)}
+function commit(r=true){H=H.slice(0,hi+1);H.push(JSON.stringify(D));if(H.length>60)H.shift();hi=H.length-1;save();if(sel&&!ok(sel))sel=null;r?render():renderPanel()}
+function undo(){if(hi>0){D=JSON.parse(H[--hi]);save();if(!ok(sel))sel=null;render()}}
+function redo(){if(hi<H.length-1){D=JSON.parse(H[++hi]);save();if(!ok(sel))sel=null;render()}}
+/* ===== رسم الصفحات ===== */
+const bi=u=>u?`background-image:url('${String(u).replace(/'/g,'%27')}')`:'';
+function wH(x,P,f){switch(x.k){
+case'h':case't':return`<div contenteditable data-e="${P}" style="font-size:${x.fs}px;text-align:${x.al};color:${x.co};white-space:pre-wrap;font-weight:${x.k=='h'?900:400}">${esc(x.x)}</div>`;
+case'i':return x.src?`<img src="${esc(x.src)}" style="width:100%;height:${f?'100%':x.h+'mm'};object-fit:${x.fit};display:block">`:`<div class="ph" style="height:${f?'100%':x.h+'mm'}">صورة</div>`;
+case'sp':return`<div style="height:${x.h}mm"></div>`;
+case'ct':{const c=CT[+x.n]||CT[0];return c[1]=='p'?`<div class="ctw" style="color:${x.co}"><a href="https://wa.me/${c[0]}" target="_blank">💬</a><a href="tel:+${c[0]}">📞</a><span dir="ltr">00${c[0]}</span></div>`:`<div class="ctw" style="color:${x.co}"><a href="${esc(c[0])}" target="_blank">${esc(c[2])}</a></div>`}
+case'tb':{const r=(DB[x.cat]?.rows||[]).find(r=>r.model_name==x.m);if(!r)return`<div class="ph" style="height:30mm">اختر الفئة والموديل</div>`;
+const it=Object.keys(r).filter(k=>GR[x.g].test(k)&&r[k]).map(k=>`<div class="tr"><span>${esc(lb(k))}</span><b>${esc(r[k])}</b></div>`).join('');
+return`<div class="tbx"><div class="th"><span>${esc(x.ti||GL[x.g])}</span></div>${it||'<div class="tr">لا توجد بيانات</div>'}</div>`}}}
+const secH=(s,P)=>`<div class="sc" data-p="${P}" style="gap:${s.gap}mm;padding:${s.pt}mm 0 ${s.pb}mm;align-items:${s.ai};${s.bg?'background:'+s.bg:''}">`+s.cols.map((c,ci)=>`<div class="cl" data-p="${[...P,ci]}" style="flex:${c.w} 1 0;padding:${c.pad}mm;justify-content:${c.jc};${c.bg?'background:'+c.bg:''}">`+c.ws.map((w,wi)=>w.fr?'':`<div class="w" data-p="${[...P,ci,wi]}" style="margin-bottom:${w.mb}mm">${wH(w,[...P,ci,wi])}</div>`).join('')+`</div>`).join('')+`</div>`;
+const box=n=>`left:${n.fx}mm;top:${n.fy}mm;width:${n.fw}mm;height:${n.fh}mm`,HD=[['tl',0,0],['t',50,0],['tr',100,0],['l',0,50],['r',100,50],['bl',0,100],['b',50,100],['br',100,100]];
+const fr=(pg,pi)=>pg.secs.flatMap((s,si)=>s.cols.flatMap((c,ci)=>c.ws.map((w,wi)=>w.fr?`<div class="w fw" data-p="${[pi,si,ci,wi]}" style="${box(w)}">${wH(w,[pi,si,ci,wi],1)}</div>`:''))).join('');
+function cvHTML(){const t=D.t;return D.pages.map((pg,pi)=>{const L=pi==D.pages.length-1;return`<div class="pw"><div class="pb2"><span>صفحة ${pi+1}</span><button data-a="pgup" data-i="${pi}" title="تقديم">▲</button><button data-a="pgdn" data-i="${pi}" title="تأخير">▼</button><button data-a="pgdup" data-i="${pi}" title="تكرار الصفحة">⧉</button><button data-a="pgadd" data-i="${pi}" title="صفحة جديدة بعدها">＋</button><button data-a="pgdel" data-i="${pi}" title="حذف الصفحة">🗑</button></div><div class="pg" data-p="${pi}" style="${esc(bi(pg.bg))}">`+(pg.cover?'':`<div class="hd" style="${esc(bi(t.hd))}"></div><div class="ft${L?' l':''}" style="${esc(bi(L&&t.lf?t.lf:t.ft))}"></div>`)+`<div class="ct" style="top:${pg.cover?0:35}mm;bottom:${pg.cover?0:L?80:25}mm">`+pg.secs.map((s,si)=>secH(s,[pi,si])).join('')+`</div>${fr(pg,pi)}</div></div>`}).join('')}
+function mark(){document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));document.querySelectorAll('.hl').forEach(e=>e.remove());if(!sel||!ok(sel))return;const e=$(`[data-p="${sel}"]`);e?.classList.add('sel');
+if(sel.length<2||!e)return;const n=node(sel),b=rm(e),w=sel.length==4,o=document.createElement('div'),bt=(a,t,l)=>`<button data-a="${a}" title="${l}">${t}</button>`;
+o.className='hl'+(b.fy<9?' in':'')+(b.fx+b.fw/2>105?' ar':' al');o.style.cssText=box(b);
+o.innerHTML='<div class="tbr">'+(w?'<b data-r="mv" title="تحريك">☩</b>':'')+bt('up','▲','تقديم')+bt('dn','▼','تأخير')+bt('dup','⧉','تكرار')+bt('del','🗑','حذف')+(w&&n.fr?bt('unfree','↩','إرجاع للتدفق'):'')+bt('cfg','⚙','الإعدادات')+'</div>'+(w?HD.map(([r,x,y])=>`<i data-r="${r}" style="left:${x}%;top:${y}%"></i>`).join(''):'');
+e.closest('.pg').appendChild(o)}
+function rc(){const y=$('#cv').scrollTop,c=$('#cv').style;c.setProperty('--ff',D.t.ff);c.setProperty('--fs',D.t.fs+'px');c.setProperty('--pa',D.t.ac);$('#cv').innerHTML=cvHTML();$('#cv').scrollTop=y;mark();document.querySelectorAll('.pg').forEach(p=>{const c=p.querySelector('.ct');p.classList.toggle('over',c.scrollHeight>c.clientHeight+2)})}
+function fit(){const cv=$('#cv');S=Z||Math.min(1.3,Math.max(.2,(cv.clientWidth-16)/793.7));cv.style.setProperty('--s',S)}
+function renderBC(){$('#bc').innerHTML=sel&&ok(sel)?sel.map((_,i)=>{const P=sel.slice(0,i+1),n=node(P);return`<button data-b="${P}">${NM[['p','s','c',n.k][i]]}</button>`}).join('›'):'اضغط على أي عنصر في الصفحة لتحديده'}
+function fld(n,[k,l,t,o]){const v=n[k];let h;
+if(t=='o')h=`<select data-k="${k}">`+o(n).map(([a,b])=>`<option value="${esc(a)}"${a==v?' selected':''}>${esc(b)}</option>`).join('')+`</select>`;
+else if(t=='b')h=`<input type="checkbox" data-k="${k}"${v?' checked':''}>`;
+else if(t=='a')h=`<textarea data-k="${k}" rows="4">${esc(v)}</textarea>`;
+else if(t=='f')h=`<input data-k="${k}" value="${esc(v)}" placeholder="رابط الصورة"><input type="file" accept="image/*" data-f="${k}">`;
+else if(t=='c')h=`<input type="color" data-k="${k}" value="${esc(v||'#ffffff')}"><button type="button" data-clr="${k}" title="مسح">✕</button>`;
+else h=`<input data-k="${k}" type="${t=='n'?'number':'text'}" step="any" value="${esc(v)}">`;
+return`<label class="f"><span>${l}</span>${h}</label>`}
+function renderPanel(){const b=$('#pb');document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.t==tab));
+if(tab=='a')b.innerHTML=`<h4>أضف قسماً (التوزيع)</h4><div class="gr">${Object.keys(LAY).map(k=>`<button data-s="${k}">${k}</button>`).join('')}</div><h4>أضف عنصراً</h4><div class="gr">${Object.entries(WN).map(([k,v])=>`<button data-w="${k}">${v}</button>`).join('')}</div><h4>الصفحات</h4><div class="gr"><button data-pg>＋ صفحة جديدة</button></div><p class="hint">اسحب أي عنصر مباشرة لتحريكه، واستعمل المقابض لتغيير قياسه (يتحول تلقائياً لعنصر حر). للنص: انقر مرة للتحديد ومرة للكتابة. الأسهم تحرّك 0.5mm (Shift = 5mm)، وDelete يحذف.</p>`;
+else if(tab=='g'){const c=GEN.cat||Object.keys(DB)[0]||'',sg=sugg();SG=sg.map(x=>x[1]);
+b.innerHTML=`<h4>توليد كتالوج موديل تلقائياً</h4><label class="f"><span>الفئة</span><select id="gc">${Object.entries(DB).map(([k,v])=>`<option value="${k}"${k==c?' selected':''}>${esc(v.label)}</option>`).join('')}</select></label><label class="f"><span>الموديل</span><select id="gm"><option value="">— اختر —</option>${(DB[c]?.rows||[]).filter(r=>r.model_name).map(r=>`<option${r.model_name==GEN.m?' selected':''}>${esc(r.model_name)}</option>`).join('')}</select></label><div class="gr"><button data-gen>✨ ولّد ووزّع</button></div><p class="hint">يوزّع الجداول على عمودين حسب عدد صفوف كل مجموعة، وينشئ صفحات إضافية عند الحاجة.</p><h4>مقترحات (${sg.length})</h4>`+(sg.length?sg.map((x,i)=>`<div class="sg"><span>${x[0]}</span>${x[1]?`<button data-sg="${i}">طبّق</button>`:''}</div>`).join(''):'<p class="hint">لا ملاحظات، التخطيط سليم ✓</p>')}
+else if(tab=='t')b.innerHTML=FT.map(f=>fld(D.t,f)).join('');
+else if(!ok(sel))b.innerHTML='<p class="hint">اضغط على أي عنصر في الصفحة لتعديل خصائصه، أو استخدم مسار التنقل بالأعلى لاختيار القسم/العمود/الصفحة.</p>';
+else{const n=node(sel),ty=['p','s','c',n.k][sel.length-1];b.innerHTML=`<h4>${NM[ty]}</h4>`+F[ty].concat(sel.length==4?[['mb','مسافة سفلية (mm)','n'],['fr','حر (سحب وتغيير مقاس)','b'],...(n.fr?[['fx','X (mm)','n'],['fy','Y (mm)','n'],['fw','العرض (mm)','n'],['fh','الارتفاع (mm)','n']]:[])]:[]).map(f=>fld(n,f)).join('')}}
+let GEN={cat:'',m:''},SG=[];
+const nrows=w=>{const r=(DB[w.cat]?.rows||[]).find(r=>r.model_name==w.m);return r?Object.keys(r).filter(k=>GR[w.g].test(k)&&r[k]).length:0};
+const est=w=>{const m=w.mb||0,f=D.t.fs/14;switch(w.k){case'tb':return((nrows(w)||3)*9+12)*f+m;case'h':return w.fs*.45*Math.max(1,Math.ceil(w.x.length/40))+m;case't':return w.fs*.45*Math.max(1,w.x.split('\n').length+Math.floor(w.x.length/50))+m;case'i':return w.h+m;default:return(w.h||8)+m}};
+function bal(s){const ws=s.cols.flatMap(c=>c.ws.filter(w=>!w.fr)),fx=s.cols.map(c=>c.ws.filter(w=>w.fr)),h=s.cols.map(()=>0);s.cols.forEach((c,i)=>c.ws=fx[i]);ws.forEach(w=>{const i=h.indexOf(Math.min(...h));s.cols[i].ws.push(w);h[i]+=est(w)})}
+function sugg(){const L=[],ov=[...document.querySelectorAll('.pg')].map(p=>p.classList.contains('over'));
+D.pages.forEach((pg,pi)=>{const n=pi+1;
+if(!pg.secs.length&&!pg.bg)L.push([`الصفحة ${n} فارغة — احذفها`,()=>pgop('del',pi)]);
+if(ov[pi]&&pg.secs.length>1)L.push([`الصفحة ${n} تتجاوز المساحة — انقل آخر قسم لصفحة جديدة`,()=>{const s=pg.secs.pop();D.pages.splice(pi+1,0,{cover:false,bg:'',secs:[s]});sel=[pi+1];commit()}]);
+if(ov[pi]&&pg.secs.length<2)L.push([`الصفحة ${n} تتجاوز المساحة — صغّر العناصر أو وزّعها على أعمدة`]);
+pg.secs.forEach((s,si)=>{const tb=s.cols.flatMap(c=>c.ws.filter(w=>!w.fr&&w.k=='tb')).length,h=s.cols.map(c=>c.ws.reduce((a,w)=>a+(w.fr?0:est(w)),0));
+if(s.cols.length==1&&tb>1)L.push([`ص${n}/قسم ${si+1}: ${tb} جداول في عمود واحد — وزّعها على عمودين`,()=>{setLay(s,'2');bal(s);commit()}]);
+else if(s.cols.length>1&&Math.max(...h)-Math.min(...h)>40)L.push([`ص${n}/قسم ${si+1}: الأعمدة غير متوازنة (${Math.round(Math.max(...h))} / ${Math.round(Math.min(...h))}mm) — وازنها`,()=>{bal(s);commit()}]);
+s.cols.forEach((c,ci)=>c.ws.forEach((w,wi)=>{if(w.k=='tb'&&!w.m)L.push([`ص${n}: جدول بلا موديل — اختر الموديل`,()=>{sel=[pi,si,ci,wi];tab='s';render()}])}))})});return L}
+function gen(cat,m){cat=cat||Object.keys(DB)[0];const r=(DB[cat]?.rows||[]).find(r=>r.model_name==m);if(!r)return toast('اختر الفئة والموديل أولاً');
+const T=Object.keys(GR).map(g=>({k:'tb',cat,m,g,ti:'',mb:3})).filter(w=>nrows(w)>0),hd=[{k:'h',x:m,fs:30,al:'right',co:'#1f2937',mb:2}];
+if(r.marketing_slogan)hd.push({k:'h',x:r.marketing_slogan,fs:18,al:'right',co:D.t.ac,mb:2});
+const ds=r.short_description||r.marketing_description;if(ds)hd.push({k:'t',x:ds,fs:14,al:'right',co:'#111111',mb:2});
+if(r.image_url)hd.push({k:'i',src:r.image_url,h:60,fit:'contain',mb:2});
+const P=[{cols:[[],[]],hh:[0,0],head:hd.reduce((a,w)=>a+est(w),6)}];
+T.forEach(w=>{let p=P.at(-1),cap=237-p.head,h=est(w),c=p.hh[0]<=p.hh[1]?0:1;
+if(p.hh[c]+h>cap&&p.cols[c].length){c=1-c;if(p.hh[c]+h>cap&&p.cols[c].length){p={cols:[[],[]],hh:[0,0],head:0};P.push(p);c=0}}
+p.cols[c].push(w);p.hh[c]+=h});
+const L=P.at(-1);if(Math.max(...L.hh)>182-L.head){const c=L.hh[0]>=L.hh[1]?0:1;if(L.cols[c].length>1){const w=L.cols[c].pop();P.push({cols:[[w],[]],hh:[est(w),0],head:0})}}
+if(D.pages.length==1&&D.pages[0].secs.length<=1&&JSON.stringify(D.pages[0]).length<400)D.pages=[];
+const at=D.pages.length;
+P.forEach((p,i)=>{const secs=[];if(i==0)secs.push({...ns('1'),cols:[{...nc(),ws:hd}]});const s=ns('2');s.cols[0].ws=p.cols[0];s.cols[1].ws=p.cols[1];secs.push(s);D.pages.push({cover:false,bg:'',secs})});
+sel=[at];commit();setTimeout(()=>$(`.pg[data-p="${at}"]`)?.scrollIntoView({block:'start'}),60)}
+function render(){rc();fit();renderBC();renderPanel()}
+/* ===== العمليات ===== */
+function setLay(s,k){const old=s.cols;s.cols=LAY[k].map((w,i)=>{const c=old[i]||nc();c.w=w;return c});old.slice(LAY[k].length).forEach(c=>s.cols.at(-1).ws.push(...c.ws));s.lay=k}
+function addSec(k){const pi=sel?sel[0]:D.pages.length-1,pg=D.pages[pi],at=sel&&sel.length>1?sel[1]+1:pg.secs.length;pg.secs.splice(at,0,ns(k));sel=[pi,at];commit()}
+function addPg(){const at=(sel?sel[0]:D.pages.length-1)+1;D.pages.splice(at,0,{cover:false,bg:'',secs:[]});sel=[at];commit()}
+function addW(k){const w=MK[k](),P=sel||[D.pages.length-1];
+if(P.length==1){const s=ns('1');s.cols[0].ws.push(w);D.pages[P[0]].secs.push(s);sel=[P[0],D.pages[P[0]].secs.length-1,0,0]}
+else if(P.length==2){const c=node(P).cols[0];c.ws.push(w);sel=[...P,0,c.ws.length-1]}
+else if(P.length==3){node(P).ws.push(w);sel=[...P,node(P).ws.length-1]}
+else{arr(P).splice(P[3]+1,0,w);sel=[...P.slice(0,3),P[3]+1]}
+commit()}
+function mv(d){if(!sel)return;const a=arr(sel),i=sel.at(-1),j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];sel=[...sel.slice(0,-1),j];commit()}
+function dup(){if(!sel)return;const a=arr(sel),i=sel.at(-1);a.splice(i+1,0,JSON.parse(JSON.stringify(a[i])));sel=[...sel.slice(0,-1),i+1];commit()}
+function del(){if(!sel)return;const a=arr(sel),i=sel.at(-1);if((sel.length==1||sel.length==3)&&a.length<2)return toast('لا يمكن حذف العنصر الوحيد');a.splice(i,1);sel=sel.length>1?sel.slice(0,-1):[Math.min(i,a.length-1)];commit()}
+const zoom=m=>{Z=Math.max(.2,Math.min(2,S*m));fit()};
+const rm=e=>{const pr=e.closest('.pg').getBoundingClientRect(),r=e.getBoundingClientRect(),q=S*3.7795;return{fx:(r.left-pr.left)/q,fy:(r.top-pr.top)/q,fw:r.width/q,fh:r.height/q}};
+function freeze(P){const n=node(P),e=$(`[data-p="${P}"]`);n.fr=true;if(n.fx==null){if(e){const q=rm(e);Object.assign(n,{fx:Math.round(q.fx),fy:Math.round(q.fy),fw:Math.round(q.fw),fh:Math.round(q.fh)})}else Object.assign(n,{fx:10,fy:50,fw:80,fh:30})}}
+function pgop(o,i){const a=D.pages;if(o=='del'){if(a.length<2)return toast('لا يمكن حذف الصفحة الوحيدة');a.splice(i,1);sel=[Math.min(i,a.length-1)]}
+else if(o=='dup'){a.splice(i+1,0,JSON.parse(JSON.stringify(a[i])));sel=[i+1]}
+else if(o=='add'){a.splice(i+1,0,{cover:false,bg:'',secs:[]});sel=[i+1]}
+else{const j=i+(o=='up'?-1:1);if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];sel=[j]}
+commit()}
+function setv(k,v){const n=tgt();if(k=='lay')setLay(n,v);else if(k=='fr'){if(v)freeze(sel);else{n.fr=false;n.fx=null}}else{n[k]=v;if(k=='cat')n.m=''}}
+/* ===== الأحداث ===== */
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]'),a=el?.dataset.a;if(!a)return;const pi=+el.dataset.i;
+({undo,redo,up:()=>mv(-1),dn:()=>mv(1),dup,del,zo:()=>zoom(1/1.15),zi:()=>zoom(1.15),fit:()=>{Z=0;fit()},sync:load,
+exp:()=>{const l=document.createElement('a');l.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:'application/json'}));l.download='scor-catalog.json';l.click()},
+imp:()=>$('#impf').click(),prn:()=>print(),
+unfree:()=>{if(sel?.length==4){const n=node(sel);n.fr=false;n.fx=null;commit()}},
+cfg:()=>{tab='s';$('#panel').classList.add('open');renderPanel()},
+pgup:()=>pgop('up',pi),pgdn:()=>pgop('dn',pi),pgdup:()=>pgop('dup',pi),pgadd:()=>pgop('add',pi),pgdel:()=>pgop('del',pi)})[a]?.()});
+$('#impf').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.pages||!d.t)throw 0;D=d;sel=null;commit()}catch{toast('ملف غير صالح')}});e.target.value=''};
+$('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;const same=b.dataset.t==tab,p=$('#panel');tab=b.dataset.t;p.classList.toggle('open',same?!p.classList.contains('open'):true);renderPanel()};
+$('#bc').onclick=e=>{const b=e.target.closest('[data-b]');if(b){sel=b.dataset.b.split(',').map(Number);tab='s';mark();renderBC();renderPanel()}};
+$('#cv').onclick=e=>{if(e.target.closest('a'))e.preventDefault();if(e.target.closest('.hl'))return;const t=e.target.closest('[data-p]');if(t){sel=t.dataset.p.split(',').map(Number);tab='s';mark();renderBC();renderPanel()}};
+$('#cv').addEventListener('focusout',e=>{const t=e.target,p=t.dataset?.e;if(!p)return;const n=node(p.split(',').map(Number)),v=t.innerText.replace(/\n$/,'');if(n.x!==v){n.x=v;commit(false)}});
+$('#pb').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+if(d.s)addSec(d.s);else if(d.w)addW(d.w);else if('pg'in d)addPg();else if(d.clr){tgt()[d.clr]='';commit()}else if('gen'in d)gen(GEN.cat,GEN.m);else if(d.sg!=null)SG[d.sg]?.()};
+const onf=e=>{const t=e.target,k=t.dataset.k;
+if(t.id=='gc'){GEN.cat=t.value;GEN.m='';return renderPanel()}if(t.id=='gm'){GEN.m=t.value;return}
+if(t.dataset.f){const r=new FileReader();r.onload=()=>{tgt()[t.dataset.f]=r.result;commit()};r.readAsDataURL(t.files[0]);return}
+if(!k)return;setv(k,t.type=='checkbox'?t.checked:t.type=='number'?(+t.value||0):t.value);e.type=='change'?commit():(rc())};
+$('#pb').oninput=onf;$('#pb').onchange=onf;
+document.onkeydown=e=>{if(e.target.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+if(e.ctrlKey||e.metaKey){if(e.key=='z'){e.preventDefault();e.shiftKey?redo():undo()}else if(e.key=='y'){e.preventDefault();redo()}return}
+if(e.key=='Delete'&&sel){e.preventDefault();del();return}
+if(sel?.length==4&&ok(sel)&&node(sel).fr&&e.key.startsWith('Arrow')){e.preventDefault();const n=node(sel),d=e.shiftKey?5:.5;if(e.key=='ArrowLeft')n.fx-=d;if(e.key=='ArrowRight')n.fx+=d;if(e.key=='ArrowUp')n.fy-=d;if(e.key=='ArrowDown')n.fy+=d;rc();clearTimeout(kt);kt=setTimeout(()=>commit(false),400)}};
+let dr=null,kt;
+$('#cv').addEventListener('pointerdown',e=>{if(e.target.closest('.tbr button,.pb2'))return;const h=e.target.closest('[data-r]'),w=e.target.closest('.w');let P,m;
+if(h&&sel){P=sel;m=h.dataset.r}
+else if(w&&w.dataset.p.split(',').length==4){P=w.dataset.p.split(',').map(Number);m='mv';const same=String(sel)==String(P);if(same&&e.target.closest('[contenteditable]'))return;if(!same){sel=P;tab='s';mark();renderBC();renderPanel()}}
+else return;
+e.preventDefault();dr={n:node(P),P,m,x:e.clientX,y:e.clientY,go:0}});
+window.addEventListener('pointermove',e=>{if(!dr)return;if(!dr.go){if(Math.hypot(e.clientX-dr.x,e.clientY-dr.y)<4)return;dr.go=1;if(!dr.n.fr){freeze(dr.P);rc()}Object.assign(dr,{fx:dr.n.fx,fy:dr.n.fy,fw:dr.n.fw,fh:dr.n.fh})}const k=1/(S*3.7795),dx=(e.clientX-dr.x)*k,dy=(e.clientY-dr.y)*k,m=dr.m;let{fx,fy,fw,fh}=dr;
+if(m=='mv'){fx+=dx;fy+=dy}else{if(m.includes('l')){fx+=dx;fw-=dx}if(m.includes('r'))fw+=dx;if(m.includes('t')){fy+=dy;fh-=dy}if(m.includes('b'))fh+=dy}
+if(fw<8){if(m.includes('l'))fx-=8-fw;fw=8}if(fh<6){if(m.includes('t'))fy-=6-fh;fh=6}
+const q=v=>Math.round(v*2)/2;fx=q(Math.max(0,fx));fy=q(Math.max(0,fy));fw=q(Math.min(fw,210-fx));fh=q(Math.min(fh,297-fy));
+if(m=='mv'){fx=Math.min(fx,210-fw);fy=Math.min(fy,297-fh)}
+Object.assign(dr.n,{fx,fy,fw,fh});document.querySelectorAll('.fw.sel,.hl').forEach(x=>x.style.cssText=box(dr.n))});
+const pend=()=>{if(dr){const g=dr.go;dr=null;if(g)commit(false)}};window.addEventListener('pointerup',pend);window.addEventListener('pointercancel',pend);
+new ResizeObserver(fit).observe($('#cv'));
+H=[JSON.stringify(D)];hi=0;render();load();
+</script></body></html>
