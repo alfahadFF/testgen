@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 8.1)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 8.3)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
     
@@ -28,14 +26,24 @@
     .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
     .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 
-    .spec-block { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; }
-    .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); }
+    /* Tables & Rows */
+    .spec-block { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
+    .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
     .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
-    .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid #e5e7eb; font-size: 1em; align-items: center; }
+    
+    /* Zebra Striping */
+    .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 1em; align-items: center; border-bottom: 1px solid #e5e7eb; }
+    .spec-row:nth-child(even) { background-color: #f9fafb; }
+    .spec-row:nth-child(odd) { background-color: #ffffff; }
     .spec-row:last-child { border-bottom: none; }
-    .spec-key { font-weight: 700; color: #374151; outline: none; }
-    .spec-val { font-weight: 900; color: #000; outline: none; text-align: left; }
+    
+    .spec-key { font-weight: 700; color: #374151; outline: none; width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
+    .spec-val { font-weight: 900; color: #000; outline: none; text-align: right; flex-grow: 1; padding-right: 10px; }
 
+    .table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; transition: background 0.2s; }
+    .table-col-resizer:hover, .table-col-resizer:active { background: rgba(245, 183, 0, 0.6); }
+
+    /* Containers */
     .free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248, 249, 250, 0.9); display: flex; flex-direction: column; z-index: 5; }
     .free-container:hover { border-color: #f5b700; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
     .drag-bar { height: 24px; background: #282c35; color: #f5b700; display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 11px; opacity: 0; transition: opacity 0.2s; flex-shrink: 0;}
@@ -49,8 +57,9 @@
     .free-container:hover .col-resizer { background: rgba(245, 183, 0, 0.4); }
     .col-resizer:hover, .col-resizer:active { background: #f5b700; }
 
-    .resizer { position: absolute; background: #fff; border: 1px solid #f5b700; opacity: 0; z-index: 20; box-shadow: 0 0 3px rgba(0,0,0,0.2); }
-    .free-container:hover .resizer { opacity: 1; }
+    /* 8-Directional Resizers */
+    .resizer { position: absolute; background: #fff; border: 1px solid #f5b700; opacity: 0; z-index: 20; box-shadow: 0 0 3px rgba(0,0,0,0.2); transition: opacity 0.2s; }
+    .free-container:hover .resizer, .draggable-wrapper:hover .resizer { opacity: 1; }
     .resizer.t { top: -4px; left: 50%; width: 10px; height: 8px; transform: translateX(-50%); cursor: ns-resize; }
     .resizer.b { bottom: -4px; left: 50%; width: 10px; height: 8px; transform: translateX(-50%); cursor: ns-resize; }
     .resizer.l { left: -4px; top: 50%; width: 8px; height: 10px; transform: translateY(-50%); cursor: ew-resize; }
@@ -60,14 +69,22 @@
     .resizer.bl { bottom: -4px; left: -4px; width: 8px; height: 8px; cursor: nesw-resize; }
     .resizer.br { bottom: -4px; right: -4px; width: 8px; height: 8px; cursor: nwse-resize; }
 
-    .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; }
+    .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; }
     .draggable-wrapper:hover { border: 2px dashed #f5b700; z-index: 10; }
-    .draggable-wrapper img { width: 100%; height: auto; pointer-events: none; display: block; }
-    .simple-resizer { width: 15px; height: 15px; background-color: #f5b700; position: absolute; bottom: -2px; left: -2px; cursor: sw-resize; opacity: 0; transition: opacity 0.2s; }
-    .draggable-wrapper:hover .simple-resizer { opacity: 1; }
+    .draggable-wrapper img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; display: block; }
     .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; }
     .draggable-wrapper:hover .drag-handle { opacity: 1; }
     .drag-handle:active { cursor: grabbing; }
+
+    /* Text Alignment Toolbar */
+    .text-toolbar { position: absolute; top: -35px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; display: flex; gap: 4px; padding: 4px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 50; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .draggable-wrapper:hover .text-toolbar, .group:hover .text-toolbar { opacity: 1; pointer-events: auto; }
+    .align-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; padding: 2px 8px; font-size: 12px; font-weight: bold; color: #374151; transition: all 0.2s; }
+    .align-btn:hover { background: #f5b700; color: #000; border-color: #f5b700; }
+
+    /* Snap Guides */
+    .snap-guide-v { position: absolute; width: 1px; top: 0; bottom: 0; background-color: #ef4444; z-index: 9999; display: none; pointer-events: none; }
+    .snap-guide-h { position: absolute; height: 1px; left: 0; right: 0; background-color: #ef4444; z-index: 9999; display: none; pointer-events: none; }
 
     a.contact-text, span.contact-text { text-decoration: none; outline: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     a.contact-text:hover { text-decoration: underline; color: #f5b700 !important; }
@@ -82,13 +99,13 @@
       .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
       .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; width: 210mm !important; height: 297mm !important; page-break-after: always; }
       .a4-page::before, .a4-page::after { display: none !important; }
-      .drag-bar, .resizer, .col-resizer, .simple-resizer, .drag-handle, .no-print, .delete-btn { display: none !important; }
+      .drag-bar, .resizer, .col-resizer, .table-col-resizer, .drag-handle, .text-toolbar, .no-print, .delete-btn, .snap-guide-v, .snap-guide-h { display: none !important; }
       .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
     }
   </style>
 </head>
 <body class="h-screen flex overflow-hidden">
-
+  
   <!-- لوحة التحكم -->
   <div class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50">
     <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
@@ -105,7 +122,7 @@
 
     <!-- 1. أداة الخطوط المستهدفة -->
     <div class="bg-[#0e1014] p-3 rounded-lg border border-[#343946] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">1. تخصيص الخطوط لكل قسم بشكل منفصل</h2>
+      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">تخصيص الخطوط لكل قسم بشكل منفصل</h2>
       <select id="fontTargetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
         <option value=".spec-header span">عناوين الجداول (نطاق العمل، الأبعاد...)</option>
         <option value=".spec-row">نصوص وصفوف الجداول</option>
@@ -167,27 +184,27 @@
 
     <!-- 4. محرك الجداول الذكي -->
     <div class="bg-[#0e1014] p-3 rounded-lg border border-[#343946] flex flex-col gap-2 relative">
-      <h2 class="text-white font-bold text-xs border-b border-[#282c35] pb-1">4. إدراج الجداول المركزية (متصل بـ Sheets)</h2>
-      
+      <h2 class="text-white font-bold text-xs border-b border-[#282c35] pb-1">4. إدراج البيانات (متصل بـ Sheets)</h2>
       <div class="flex gap-2 mt-1">
           <div class="w-1/2">
-              <label class="text-[10px] font-bold text-[#f5b700]">1. الفئة:</label>
+              <label class="text-[10px] font-bold text-[#f5b700]">الفئة:</label>
               <select id="sheetCategory" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="updateModelsList()">
                 <option value="skid_steers">معدات انزلاقية</option>
                 <option value="pumps">مضخات بيتون</option>
               </select>
           </div>
           <div class="w-1/2">
-              <label class="text-[10px] font-bold text-[#f5b700]">2. الموديل:</label>
+              <label class="text-[10px] font-bold text-[#f5b700]">الموديل:</label>
               <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
                   <option value="">جاري التحميل...</option>
               </select>
           </div>
       </div>
 
-      <label class="text-[10px] font-bold text-gray-400 mt-1">3. ماذا تريد أن تدرج للموديل المحدد؟</label>
+      <label class="text-[10px] font-bold text-gray-400 mt-1">ماذا تريد أن تدرج للموديل المحدد؟</label>
       <select id="dataSourceSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
         <optgroup label="نصوص حرة (للعناوين والترويسات)">
+            <option value="text:model_name">اسم الموديل (عنوان)</option>
             <option value="text:marketing_slogan">العبارة التسويقية (نص)</option>
             <option value="text:short_description">الوصف المختصر (نص)</option>
             <option value="text:marketing_description">الوصف التسويقي (نص - للمضخات)</option>
@@ -203,7 +220,7 @@
         </optgroup>
       </select>
       
-      <input type="text" id="sectionTitle" placeholder="عنوان الجدول (اختياري - مثلاً: المحرك)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold focus:border-[#f5b700] outline-none mt-1">
+      <input type="text" id="sectionTitle" placeholder="عنوان الجدول (اختياري)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold focus:border-[#f5b700] outline-none mt-1">
 
       <button onclick="insertDynamicData(event)" id="insertDataBtn" disabled class="w-full bg-[#343946] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-[#f5b700] hover:text-black transition flex items-center justify-center gap-2">
         <span>إدراج البيانات للموديل المختار ↓</span>
@@ -287,27 +304,25 @@
   };
 
   async function fetchSheetData() {
-    const statusBadge = document.getElementById('dataStatus');
-    try {
-        // الروابط بعد التعديل
-        const skidUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=546876457`;
-        const pumpUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=1201691755`;
-        
-        await Promise.all([
-          new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
-          new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
-        ]);
-        
-        statusBadge.innerHTML = 'متصل بالبيانات 🟢';
-        statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-        document.getElementById('insertDataBtn').disabled = false;
-        updateModelsList();
-    } catch (error) {
-        statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
-        statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
-        console.error("Fetch Error:", error);
-    }
-}
+      const statusBadge = document.getElementById('dataStatus');
+      try {
+          const skidUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=546876457`;
+          const pumpUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=1201691755`;
+          
+          await Promise.all([
+            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
+            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
+          ]);
+          
+          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
+          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
+          document.getElementById('insertDataBtn').disabled = false;
+          updateModelsList();
+      } catch (error) {
+          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
+          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
+      }
+  }
 
   function updateModelsList() {
       const category = document.getElementById('sheetCategory').value;
@@ -328,6 +343,16 @@
               modelSelector.appendChild(opt);
           }
       });
+  }
+
+  function attachResizers(element, targetPage) {
+    const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
+    handlePositions.forEach(pos => {
+      const handle = document.createElement('div'); 
+      handle.className = `resizer ${pos}`; 
+      element.appendChild(handle);
+    });
+    makeBoundedBoxResizable(element, targetPage);
   }
 
   function insertDynamicData(e) {
@@ -352,16 +377,29 @@
           if(textValue.trim() === '') { alert('هذا الحقل فارغ في قاعدة البيانات لهذا الموديل!'); return; }
           
           const wrapper = document.createElement('div'); 
-          wrapper.className = 'draggable-wrapper flex items-start gap-1 p-2';
-          wrapper.style.top = '50mm'; wrapper.style.left = '5mm'; wrapper.style.width = 'max-content';
+          wrapper.className = 'draggable-wrapper flex flex-col p-2';
+          wrapper.style.top = '50mm'; wrapper.style.left = '5mm'; 
+          
+          // إعطاء عرض مناسب للنصوص الطويلة لكي تلتف
+          wrapper.style.width = textValue.length > 40 ? '160mm' : 'auto';
 
           const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
           
-          const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = textValue; 
-          editableText.className = 'outline-none text-[#f5b700] font-black text-2xl bg-transparent w-full whitespace-nowrap'; wrapper.appendChild(editableText);
-          
-          const resizer = document.createElement('div'); resizer.className = 'simple-resizer no-print'; wrapper.appendChild(resizer);
+          // إضافة شريط أدوات المحاذاة
+          const toolbar = document.createElement('div');
+          toolbar.className = 'text-toolbar no-print';
+          toolbar.innerHTML = `
+            <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='right'">يمين</button>
+            <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='center'">وسط</button>
+            <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='left'">يسار</button>
+            <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='justify'">ضبط</button>
+          `;
+          wrapper.appendChild(toolbar);
 
+          const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = textValue; 
+          editableText.className = 'outline-none text-[#f5b700] font-black text-2xl bg-transparent w-full break-words'; 
+          wrapper.appendChild(editableText);
+          
           const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
           deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
           deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
@@ -369,7 +407,7 @@
           
           targetPage.appendChild(wrapper);
           makeBoundedDraggable(wrapper, dragHandle, targetPage);
-          makeSimpleResizable(wrapper, resizer, targetPage); 
+          attachResizers(wrapper, targetPage);
       } 
       else if (action === 'table') {
           const colsToInclude = tableGroups[key];
@@ -396,6 +434,13 @@
           container.appendChild(dragBar);
 
           const block = document.createElement('div'); block.className = 'spec-block flex-1';
+          block.style.setProperty('--key-width', '50%');
+
+          const colResizer = document.createElement('div');
+          colResizer.className = 'table-col-resizer no-print';
+          colResizer.style.right = '50%';
+          block.appendChild(colResizer);
+          
           const header = document.createElement('div'); header.className = 'spec-header'; 
           header.innerHTML = `<span style="position:relative; z-index:2;">${title}</span>`; 
           block.appendChild(header);
@@ -410,14 +455,10 @@
           block.appendChild(rowsWrapper);
           container.appendChild(block);
 
-          const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
-          handlePositions.forEach(pos => {
-            const handle = document.createElement('div'); handle.className = `resizer ${pos}`; container.appendChild(handle);
-          });
-
           targetPage.appendChild(container);
           makeBoundedDraggable(container, dragBar, targetPage);
-          makeBoundedBoxResizable(container, targetPage);
+          attachResizers(container, targetPage);
+          makeTableColResizable(colResizer, block);
       }
       
       document.getElementById('sectionTitle').value = '';
@@ -484,11 +525,12 @@
   }
 
   function reAttachAllEvents() {
-    document.querySelectorAll('.free-container').forEach(container => {
-       const dragBar = container.querySelector('.drag-bar');
+    document.querySelectorAll('.free-container').forEach(container => { 
+       const dragBar = container.querySelector('.drag-bar'); 
        const page = container.closest('.a4-page');
        if(dragBar && page) makeBoundedDraggable(container, dragBar, page);
        makeBoundedBoxResizable(container, page);
+       
        const row = container.querySelector('.grid-row');
        if(row) {
            container.querySelectorAll('.col-resizer').forEach(gutter => {
@@ -497,12 +539,19 @@
            });
        }
     });
-    document.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
+
+    document.querySelectorAll('.draggable-wrapper').forEach(wrapper => { 
        const page = wrapper.closest('.a4-page');
        const dragHandle = wrapper.querySelector('.drag-handle') || wrapper;
-       if(page) makeBoundedDraggable(wrapper, dragHandle, page);
-       const simpleResizer = wrapper.querySelector('.simple-resizer');
-       if(simpleResizer && page) makeSimpleResizable(wrapper, simpleResizer, page);
+       if(page) {
+           makeBoundedDraggable(wrapper, dragHandle, page);
+           makeBoundedBoxResizable(wrapper, page);
+       }
+    });
+
+    document.querySelectorAll('.spec-block').forEach(block => {
+        const resizer = block.querySelector('.table-col-resizer');
+        if(resizer) makeTableColResizable(resizer, block);
     });
   }
 
@@ -529,9 +578,9 @@
     }
   }
 
-  function updateDropdowns(s1, s2, hasCover, pageCount) {
-     s1.innerHTML = ''; s2.innerHTML = '';
-     if (hasCover) { s1.add(new Option('الغلاف', 'cover')); s2.add(new Option('الغلاف', 'cover')); }
+  function updateDropdowns(s1, s2, hasCover, pageCount) { 
+     s1.innerHTML = ''; s2.innerHTML = ''; 
+     if (hasCover) { s1.add(new Option('الغلاف', 'cover')); s2.add(new Option('الغلاف', 'cover')); } 
      for (let i = 1; i <= pageCount; i++) { s1.add(new Option(`صفحة ${i}`, i)); s2.add(new Option(`صفحة ${i}`, i)); }
   }
 
@@ -605,19 +654,24 @@
     }
     container.appendChild(row);
 
-    const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
-    handlePositions.forEach(pos => {
-      const handle = document.createElement('div'); handle.className = `resizer ${pos}`; container.appendChild(handle);
-    });
     targetPage.appendChild(container);
     makeBoundedDraggable(container, dragBar, targetPage);
-    makeBoundedBoxResizable(container, targetPage);
+    attachResizers(container, targetPage);
   }
 
   function insertGridContent(btn, type) {
     const col = btn.closest('.grid-col');
     if (type === 'text') {
-      col.innerHTML = '<div contenteditable="true" class="w-full h-full outline-none text-sm text-gray-800 p-1">اكتب النص هنا...</div>';
+      col.innerHTML = `
+        <div class="relative w-full h-full flex flex-col group">
+            <div class="text-toolbar no-print">
+                <button class="align-btn" onclick="this.closest('.group').querySelector('div[contenteditable]').style.textAlign='right'">يمين</button>
+                <button class="align-btn" onclick="this.closest('.group').querySelector('div[contenteditable]').style.textAlign='center'">وسط</button>
+                <button class="align-btn" onclick="this.closest('.group').querySelector('div[contenteditable]').style.textAlign='left'">يسار</button>
+                <button class="align-btn" onclick="this.closest('.group').querySelector('div[contenteditable]').style.textAlign='justify'">ضبط</button>
+            </div>
+            <div contenteditable="true" class="w-full h-full outline-none text-sm text-gray-800 p-1 break-words">اكتب النص هنا...</div>
+        </div>`;
     } else if (type === 'image') {
       col.innerHTML = `
         <label class="w-full h-full flex flex-col items-center justify-center bg-gray-50 cursor-pointer text-gray-400 text-xs border-2 border-dashed border-gray-300 hover:bg-gray-100 no-print">
@@ -625,10 +679,15 @@
         </label>`;
     } else if (type === 'table') {
       col.innerHTML = `
-        <div class="spec-block w-full h-full">
+        <div class="spec-block w-full h-full" style="--key-width: 50%;">
+          <div class="table-col-resizer no-print" style="right: 50%;"></div>
           <div class="spec-header"><span style="position:relative; z-index:2;" contenteditable="true">عنوان الجدول</span></div>
           <div class="flex-1 bg-white flex flex-col"><div class="spec-row flex-1"><span class="spec-key" contenteditable="true">مواصفة 1</span><span class="spec-val" contenteditable="true">قيمة</span></div></div>
         </div>`;
+      
+      const block = col.querySelector('.spec-block');
+      const resizer = col.querySelector('.table-col-resizer');
+      makeTableColResizable(resizer, block);
     }
   }
 
@@ -636,7 +695,7 @@
     const file = input.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = e => { input.closest('.grid-col').innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; pointer-events:none;">`; }
+      reader.onload = e => { input.closest('.grid-col').innerHTML = `<img src="${e.target.result}">`; }
       reader.readAsDataURL(file);
     }
   }
@@ -651,14 +710,17 @@
       reader.onload = function(event) {
         const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper cursor-grab';
         wrapper.style.width = '100mm'; wrapper.style.top = '100mm'; wrapper.style.left = '5mm';
+        
         const img = document.createElement('img'); img.src = event.target.result; wrapper.appendChild(img);
-        const resizer = document.createElement('div'); resizer.className = 'simple-resizer no-print'; wrapper.appendChild(resizer);
+        
         const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
         deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs cursor-pointer z-50 hover:bg-red-500 hover:text-white';
         deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
         wrapper.appendChild(deleteBtn);
+        
         targetPage.appendChild(wrapper);
-        makeBoundedDraggable(wrapper, wrapper, targetPage); makeSimpleResizable(wrapper, resizer, targetPage);
+        makeBoundedDraggable(wrapper, wrapper, targetPage); 
+        attachResizers(wrapper, targetPage);
         document.getElementById('freeImageUpload').value = '';
       }
       reader.readAsDataURL(file);
@@ -671,17 +733,26 @@
     if (!targetPage) return;
     
     const wrapper = document.createElement('div'); 
-    wrapper.className = 'draggable-wrapper flex items-start gap-1 p-2';
+    wrapper.className = 'draggable-wrapper flex flex-col p-2';
     wrapper.style.top = '50mm'; wrapper.style.left = '5mm';
-    wrapper.style.width = 'max-content';
+    wrapper.style.width = '120mm'; // عرض افتراضي يسمح بالالتفاف بسلاسة
 
     const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
     
-    const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "عنوان حر"; 
-    editableText.className = 'outline-none text-[#f5b700] font-black text-2xl bg-transparent w-full whitespace-nowrap'; wrapper.appendChild(editableText);
-    
-    const resizer = document.createElement('div'); resizer.className = 'simple-resizer no-print'; wrapper.appendChild(resizer);
+    const toolbar = document.createElement('div');
+    toolbar.className = 'text-toolbar no-print';
+    toolbar.innerHTML = `
+      <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='right'">يمين</button>
+      <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='center'">وسط</button>
+      <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='left'">يسار</button>
+      <button class="align-btn" onclick="this.closest('.draggable-wrapper').querySelector('div[contenteditable]').style.textAlign='justify'">ضبط</button>
+    `;
+    wrapper.appendChild(toolbar);
 
+    const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "عنوان أو نص حر..."; 
+    editableText.className = 'outline-none text-[#f5b700] font-black text-2xl bg-transparent w-full break-words'; 
+    wrapper.appendChild(editableText);
+    
     const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
     deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
     deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
@@ -689,7 +760,7 @@
     
     targetPage.appendChild(wrapper);
     makeBoundedDraggable(wrapper, dragHandle, targetPage);
-    makeSimpleResizable(wrapper, resizer, targetPage); 
+    attachResizers(wrapper, targetPage);
   }
 
   function addContactBlock() {
@@ -706,33 +777,28 @@
     const wrapper = document.createElement('div'); 
     wrapper.className = 'draggable-wrapper flex items-center justify-center p-1';
     wrapper.style.top = '275mm'; wrapper.style.left = '50mm';
-    wrapper.style.width = 'max-content'; 
+    wrapper.style.width = 'max-content';     
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'flex items-center gap-2 justify-center whitespace-nowrap';
 
     if (isPhone) {
       const waLink = document.createElement('a');
-      waLink.href = 'https://wa.me/' + linkVal;
-      waLink.target = '_blank';
+      waLink.href = 'https://wa.me/' + linkVal; waLink.target = '_blank';
       waLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
       waLink.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>`;
-
+      
       const callLink = document.createElement('a');
-      callLink.href = 'tel:+' + linkVal;
-      callLink.target = '_blank';
+      callLink.href = 'tel:+' + linkVal; callLink.target = '_blank';
       callLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
       callLink.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="#ef4444"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`;
-
+      
       const numText = document.createElement('span');
       numText.className = 'contact-text font-bold outline-none text-[#ffffff] whitespace-nowrap';
       numText.style.textShadow = '0px 1px 2px rgba(0,0,0,0.5)';
-      numText.contentEditable = true;
-      numText.innerText = textVal;
+      numText.contentEditable = true; numText.innerText = textVal;
 
-      contentDiv.appendChild(waLink);
-      contentDiv.appendChild(callLink);
-      contentDiv.appendChild(numText);
+      contentDiv.appendChild(waLink); contentDiv.appendChild(callLink); contentDiv.appendChild(numText);
     } else {
       const aTag = document.createElement('a'); 
       aTag.href = linkVal; aTag.target = '_blank';
@@ -744,11 +810,8 @@
 
     wrapper.appendChild(contentDiv);
 
-    const resizer = document.createElement('div'); 
-    resizer.className = 'simple-resizer no-print'; 
-    wrapper.appendChild(resizer);
-
     const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
+    
     const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
     deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
     deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
@@ -756,42 +819,74 @@
 
     targetPage.appendChild(wrapper);
     makeBoundedDraggable(wrapper, dragHandle, targetPage);
-    makeSimpleResizable(wrapper, resizer, targetPage); 
-  }
-
-  function makeSimpleResizable(wrapper, resizer, page) {
-    let isResizing = false, startX, startWidth, startLeft;
-    resizer.addEventListener('mousedown', function(e) { 
-      e.preventDefault(); e.stopPropagation(); isResizing = true; 
-      startX = e.clientX; startWidth = wrapper.offsetWidth; startLeft = wrapper.offsetLeft;
-      document.addEventListener('mousemove', resize); document.addEventListener('mouseup', stopResize); 
-    });
-    function resize(e) { 
-      if (!isResizing) return; 
-      let dx = (startX - e.clientX) / scale; let newLeft = startLeft + dx;
-      if (newLeft < marginPx) { dx += (marginPx - newLeft); newLeft = marginPx; }
-      const newWidth = startWidth + dx;
-      if (newWidth > 15) { wrapper.style.width = `${newWidth}px`; wrapper.style.left = `${newLeft}px`; }
-    }
-    function stopResize() { isResizing = false; document.removeEventListener('mousemove', resize); document.removeEventListener('mouseup', stopResize); }
+    attachResizers(wrapper, targetPage);
   }
 
   function makeBoundedDraggable(element, handle, page) {
     let isDragging = false, startX, startY, initialLeft, initialTop;
+    let vGuide, hGuide;
+
     handle.addEventListener('mousedown', function(e) {
       if(e.target.tagName === 'BUTTON') return; 
-      e.preventDefault(); e.stopPropagation(); isDragging = true; startX = e.clientX; startY = e.clientY;
+      e.preventDefault(); e.stopPropagation(); isDragging = true; 
+      startX = e.clientX; startY = e.clientY;
       initialLeft = element.offsetLeft; initialTop = element.offsetTop;
+      
+      vGuide = page.querySelector('.snap-guide-v');
+      if(!vGuide) { vGuide = document.createElement('div'); vGuide.className = 'snap-guide-v'; page.appendChild(vGuide); }
+      hGuide = page.querySelector('.snap-guide-h');
+      if(!hGuide) { hGuide = document.createElement('div'); hGuide.className = 'snap-guide-h'; page.appendChild(hGuide); }
+
       document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd);
     });
+
     function drag(e) {
       if (!isDragging) return;
       const dx = (e.clientX - startX) / scale; const dy = (e.clientY - startY) / scale;
-      let newLeft = initialLeft + dx; const maxLeft = page.clientWidth - marginPx - element.offsetWidth;
+      let newLeft = initialLeft + dx; let newTop = initialTop + dy;
+      
+      const maxLeft = page.clientWidth - marginPx - element.offsetWidth;
       newLeft = Math.max(marginPx, Math.min(newLeft, maxLeft));
-      element.style.left = `${newLeft}px`; element.style.top = `${initialTop + dy}px`;
+
+      // نظام المحاذاة (Smart Snapping)
+      let snappedX = false, snappedY = false;
+      const snapThreshold = 5; 
+      const rect = { left: newLeft, right: newLeft + element.offsetWidth, top: newTop, bottom: newTop + element.offsetHeight, centerX: newLeft + element.offsetWidth/2, centerY: newTop + element.offsetHeight/2 };
+
+      vGuide.style.display = 'none'; hGuide.style.display = 'none';
+
+      const pageCenterX = page.clientWidth / 2;
+      if(Math.abs(rect.centerX - pageCenterX) < snapThreshold) {
+          newLeft = pageCenterX - element.offsetWidth/2;
+          vGuide.style.left = `${pageCenterX}px`; vGuide.style.display = 'block'; snappedX = true;
+      }
+
+      const siblings = Array.from(page.querySelectorAll('.draggable-wrapper, .free-container')).filter(el => el !== element);
+      for(let sibling of siblings) {
+          const sLeft = sibling.offsetLeft, sTop = sibling.offsetTop, sRight = sLeft + sibling.offsetWidth, sBottom = sTop + sibling.offsetHeight;
+          const sCenterX = sLeft + sibling.offsetWidth/2, sCenterY = sTop + sibling.offsetHeight/2;
+
+          if(!snappedX) {
+              if(Math.abs(rect.left - sLeft) < snapThreshold) { newLeft = sLeft; vGuide.style.left = `${sLeft}px`; vGuide.style.display = 'block'; snappedX = true; }
+              else if(Math.abs(rect.right - sRight) < snapThreshold) { newLeft = sRight - element.offsetWidth; vGuide.style.left = `${sRight}px`; vGuide.style.display = 'block'; snappedX = true; }
+              else if(Math.abs(rect.centerX - sCenterX) < snapThreshold) { newLeft = sCenterX - element.offsetWidth/2; vGuide.style.left = `${sCenterX}px`; vGuide.style.display = 'block'; snappedX = true; }
+          }
+          if(!snappedY) {
+              if(Math.abs(rect.top - sTop) < snapThreshold) { newTop = sTop; hGuide.style.top = `${sTop}px`; hGuide.style.display = 'block'; snappedY = true; }
+              else if(Math.abs(rect.bottom - sBottom) < snapThreshold) { newTop = sBottom - element.offsetHeight; hGuide.style.top = `${sBottom}px`; hGuide.style.display = 'block'; snappedY = true; }
+              else if(Math.abs(rect.centerY - sCenterY) < snapThreshold) { newTop = sCenterY - element.offsetHeight/2; hGuide.style.top = `${sCenterY}px`; hGuide.style.display = 'block'; snappedY = true; }
+          }
+      }
+
+      element.style.left = `${newLeft}px`; element.style.top = `${newTop}px`;
     }
-    function dragEnd() { isDragging = false; document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); }
+
+    function dragEnd() { 
+        isDragging = false; 
+        if(vGuide) vGuide.style.display = 'none'; 
+        if(hGuide) hGuide.style.display = 'none'; 
+        document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); 
+    }
   }
 
   function makeBoundedBoxResizable(element, page) {
@@ -800,9 +895,11 @@
       resizer.addEventListener('mousedown', function(e) {
         e.preventDefault(); e.stopPropagation();
         let isResizing = true, startX = e.clientX, startY = e.clientY, startW = element.offsetWidth, startH = element.offsetHeight, startLeft = element.offsetLeft, startTop = element.offsetTop;
+        
         function resize(e) {
           if (!isResizing) return;
           let dx = (e.clientX - startX) / scale; let dy = (e.clientY - startY) / scale;
+          
           if (resizer.classList.contains('r') || resizer.classList.contains('tr') || resizer.classList.contains('br')) {
             const maxW = page.clientWidth - marginPx - startLeft; element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
           }
@@ -822,6 +919,29 @@
         document.addEventListener('mousemove', resize); document.addEventListener('mouseup', stopResize);
       });
     });
+  }
+
+  function makeTableColResizable(resizer, block) {
+      let isResizing = false;
+      resizer.addEventListener('mousedown', function(e) {
+          e.preventDefault(); e.stopPropagation(); isResizing = true;
+          document.body.style.cursor = 'col-resize';
+      });
+      document.addEventListener('mousemove', function(e) {
+          if (!isResizing) return;
+          const blockRect = block.getBoundingClientRect();
+          const mouseXFromRight = blockRect.right - e.clientX;
+          const pctRight = (mouseXFromRight / blockRect.width) * 100;
+          
+          if (pctRight > 15 && pctRight < 85) {
+              block.style.setProperty('--key-width', `${pctRight}%`);
+              resizer.style.right = `${pctRight}%`;
+              resizer.style.left = 'auto';
+          }
+      });
+      document.addEventListener('mouseup', function() {
+          if (isResizing) { isResizing = false; document.body.style.cursor = 'default'; }
+      });
   }
 
   function makeColResizable(leftCol, gutter, row) {
