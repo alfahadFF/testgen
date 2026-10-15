@@ -853,13 +853,13 @@
   async function fetchSheetData() {
       const statusBadge = document.getElementById('dataStatus');
       try {
-          // الروابط الخاصة بك
-          const skidUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?output=csv&gid=546876457"; 
-          const pumpUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?output=csv&gid=868351056"; 
+          // الروابط الصحيحة 100% مع أرقام الـ GID الدقيقة
+          const skidUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=546876457&single=true&output=csv";
+          const pumpUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=1201691755&single=true&output=csv";
           
           await Promise.all([
-            new Promise((resolve) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }})),
-            new Promise((resolve) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }}))
+            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
+            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
           ]);
           
           statusBadge.innerHTML = 'متصل بالبيانات 🟢';
