@@ -287,25 +287,27 @@
   };
 
   async function fetchSheetData() {
-      const statusBadge = document.getElementById('dataStatus');
-      try {
-          const skidUrl = `https://docs.google.com/spreadsheets/d/tq?tqx=out:csv&key=${SHEETS_ID}&gid=546876457`;
-          const pumpUrl = `https://docs.google.com/spreadsheets/d/tq?tqx=out:csv&key=${SHEETS_ID}&gid=1201691755`;
-          
-          await Promise.all([
-            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
-            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
-          ]);
-          
-          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
-          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-          document.getElementById('insertDataBtn').disabled = false;
-          updateModelsList();
-      } catch (error) {
-          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
-          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
-      }
-  }
+    const statusBadge = document.getElementById('dataStatus');
+    try {
+        // الروابط بعد التعديل
+        const skidUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=546876457`;
+        const pumpUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=1201691755`;
+        
+        await Promise.all([
+          new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
+          new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
+        ]);
+        
+        statusBadge.innerHTML = 'متصل بالبيانات 🟢';
+        statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
+        document.getElementById('insertDataBtn').disabled = false;
+        updateModelsList();
+    } catch (error) {
+        statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
+        statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
+        console.error("Fetch Error:", error);
+    }
+}
 
   function updateModelsList() {
       const category = document.getElementById('sheetCategory').value;
