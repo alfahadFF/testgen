@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.2)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.3 - Fix)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -63,7 +63,7 @@
 
     .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; }
     .draggable-wrapper:hover { border: 2px dashed #f5b700; z-index: 10; }
-    .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; }
+    .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; z-index: 100; }
     .draggable-wrapper:hover .drag-handle { opacity: 1; }
 
     /* Smart Toolbar */
@@ -123,7 +123,6 @@
         <input type="number" id="pageCount" min="1" max="20" value="2" class="w-14 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-center text-xs" onchange="renderPages()">
       </div>
       
-      <!-- استعادة حقول الترويسة والتذييل بالكامل -->
       <div class="flex gap-2 mt-2">
         <div class="w-1/2">
           <label class="block text-[10px] font-bold text-gray-400">الترويسة (Header):</label>
@@ -312,7 +311,7 @@
   }
 
   // ==========================================
-  // شريط الأدوات الذكي لتنسيق النصوص (لون، خط، حجم، محاذاة)
+  // شريط الأدوات الذكي لتنسيق النصوص
   // ==========================================
   function createToolbarHTML(targetClass) {
       return `
@@ -361,9 +360,11 @@
           wrapper.setAttribute('data-dynamic-type', 'text');
           wrapper.setAttribute('data-dynamic-key', key);
 
-          const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
+          const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
+          wrapper.appendChild(dragHandle);
           
-          wrapper.innerHTML += createToolbarHTML('.dynamic-content');
+          // الإصلاح الأساسي هنا لمنع تدمير مقبض السحب
+          wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content'));
 
           const editableText = document.createElement('div'); 
           editableText.className = 'dynamic-content outline-none font-black break-words'; 
@@ -433,7 +434,6 @@
       const rowData = database[category][modelIndex];
       if (!rowData) return;
 
-      // 1. تعبئة النصوص
       document.querySelectorAll('[data-dynamic-type="text"]').forEach(el => {
           const key = el.getAttribute('data-dynamic-key');
           const contentDiv = el.querySelector('.dynamic-content');
@@ -444,7 +444,6 @@
           }
       });
 
-      // 2. تعبئة الجداول
       document.querySelectorAll('[data-dynamic-type="table"]').forEach(el => {
           const key = el.getAttribute('data-dynamic-key');
           const wrapper = el.querySelector('.table-rows-wrapper');
@@ -474,9 +473,11 @@
     wrapper.className = 'draggable-wrapper flex flex-col p-2 group';
     wrapper.style.top = '50mm'; wrapper.style.left = '5mm'; wrapper.style.width = '120mm'; 
 
-    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; wrapper.appendChild(dragHandle);
+    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
+    wrapper.appendChild(dragHandle);
     
-    wrapper.innerHTML += createToolbarHTML('.dynamic-content');
+    // الإصلاح الأساسي هنا أيضاً
+    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content'));
 
     const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "نص حر قابل للتعديل..."; 
     editableText.className = 'dynamic-content outline-none font-black break-words'; editableText.style.color = '#000000'; editableText.style.fontSize = '22px';
@@ -493,7 +494,7 @@
   }
 
   // ==========================================
-  // الأساسيات (التحريك والتحجيم المطور)
+  // الأساسيات (التحريك والتحجيم المستقر جداً)
   // ==========================================
   const scale = 0.65;
   const mmToPx = 3.7795275591;
@@ -509,127 +510,89 @@
     makeBoundedBoxResizable(element, targetPage);
   }
 
-  // خوارزمية التحريك المطورة (تعتمد على الإحداثيات الدقيقة للصفحة وتتجاهل السكرول)
   function makeBoundedDraggable(element, handle, page) {
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
+    let isDragging = false, startX, startY, initialLeft, initialTop;
     let vGuide, hGuide;
 
     handle.addEventListener('mousedown', function(e) {
       if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; 
-      e.preventDefault(); 
-      e.stopPropagation(); 
-      isDragging = true; 
-      
-      const pageRect = page.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      
-      // حساب المسافة بين النقطة التي تم النقر عليها وبين زاوية العنصر
-      offsetX = (e.clientX - elementRect.left) / scale;
-      offsetY = (e.clientY - elementRect.top) / scale;
+      e.preventDefault(); e.stopPropagation(); isDragging = true; 
+      startX = e.clientX; startY = e.clientY;
+      initialLeft = element.offsetLeft; initialTop = element.offsetTop;
       
       vGuide = page.querySelector('.snap-guide-v');
       if(!vGuide) { vGuide = document.createElement('div'); vGuide.className = 'snap-guide-v'; page.appendChild(vGuide); }
       hGuide = page.querySelector('.snap-guide-h');
       if(!hGuide) { hGuide = document.createElement('div'); hGuide.className = 'snap-guide-h'; page.appendChild(hGuide); }
 
-      document.addEventListener('mousemove', drag); 
-      document.addEventListener('mouseup', dragEnd);
+      document.addEventListener('mousemove', drag); document.addEventListener('mouseup', dragEnd);
     });
 
     function drag(e) {
       if (!isDragging) return;
+      const dx = (e.clientX - startX) / scale; const dy = (e.clientY - startY) / scale;
+      let newLeft = initialLeft + dx; let newTop = initialTop + dy;
       
-      const pageRect = page.getBoundingClientRect();
-      
-      // حساب الموضع الجديد استناداً لمكان الماوس الحالي مقسوماً على حجم الصفحة بالضبط
-      let newLeft = ((e.clientX - pageRect.left) / scale) - offsetX;
-      let newTop = ((e.clientY - pageRect.top) / scale) - offsetY;
-      
-      // تطبيق الحدود كي لا يخرج العنصر خارج الصفحة
-      const maxLeft = (page.clientWidth || 210 * mmToPx) - marginPx - element.offsetWidth;
-      const maxTop = (page.clientHeight || 297 * mmToPx) - marginPx - element.offsetHeight;
-      
+      const maxLeft = page.clientWidth - marginPx - element.offsetWidth;
+      const maxTop = page.clientHeight - marginPx - element.offsetHeight;
       newLeft = Math.max(marginPx, Math.min(newLeft, maxLeft));
       newTop = Math.max(marginPx, Math.min(newTop, maxTop));
 
-      // الجايدية والمحاذاة التلقائية
       let snappedX = false, snappedY = false;
       const snapThreshold = 5; 
-      const rect = { 
-          left: newLeft, right: newLeft + element.offsetWidth, 
-          top: newTop, bottom: newTop + element.offsetHeight, 
-          centerX: newLeft + element.offsetWidth / 2, centerY: newTop + element.offsetHeight / 2 
-      };
+      const rect = { left: newLeft, right: newLeft + element.offsetWidth, top: newTop, bottom: newTop + element.offsetHeight, centerX: newLeft + element.offsetWidth/2, centerY: newTop + element.offsetHeight/2 };
 
-      vGuide.style.display = 'none'; hGuide.style.display = 'none';
+      if(vGuide) vGuide.style.display = 'none'; 
+      if(hGuide) hGuide.style.display = 'none';
 
       const pageCenterX = page.clientWidth / 2;
       if(Math.abs(rect.centerX - pageCenterX) < snapThreshold) { 
-          newLeft = pageCenterX - element.offsetWidth / 2; 
-          vGuide.style.left = `${pageCenterX}px`; vGuide.style.display = 'block'; snappedX = true; 
+          newLeft = pageCenterX - element.offsetWidth/2; 
+          if(vGuide) { vGuide.style.left = `${pageCenterX}px`; vGuide.style.display = 'block'; }
+          snappedX = true; 
       }
 
       const siblings = Array.from(page.querySelectorAll('.draggable-wrapper, .free-container')).filter(el => el !== element);
       for(let sibling of siblings) {
           const sLeft = sibling.offsetLeft, sTop = sibling.offsetTop, sRight = sLeft + sibling.offsetWidth, sBottom = sTop + sibling.offsetHeight;
-          const sCenterX = sLeft + sibling.offsetWidth / 2, sCenterY = sTop + sibling.offsetHeight / 2;
+          const sCenterX = sLeft + sibling.offsetWidth/2, sCenterY = sTop + sibling.offsetHeight/2;
           
           if(!snappedX) {
-              if(Math.abs(rect.left - sLeft) < snapThreshold) { newLeft = sLeft; vGuide.style.left = `${sLeft}px`; vGuide.style.display = 'block'; snappedX = true; }
-              else if(Math.abs(rect.right - sRight) < snapThreshold) { newLeft = sRight - element.offsetWidth; vGuide.style.left = `${sRight}px`; vGuide.style.display = 'block'; snappedX = true; }
-              else if(Math.abs(rect.centerX - sCenterX) < snapThreshold) { newLeft = sCenterX - element.offsetWidth/2; vGuide.style.left = `${sCenterX}px`; vGuide.style.display = 'block'; snappedX = true; }
+              if(Math.abs(rect.left - sLeft) < snapThreshold) { newLeft = sLeft; if(vGuide){vGuide.style.left = `${sLeft}px`; vGuide.style.display = 'block';} snappedX = true; }
+              else if(Math.abs(rect.right - sRight) < snapThreshold) { newLeft = sRight - element.offsetWidth; if(vGuide){vGuide.style.left = `${sRight}px`; vGuide.style.display = 'block';} snappedX = true; }
+              else if(Math.abs(rect.centerX - sCenterX) < snapThreshold) { newLeft = sCenterX - element.offsetWidth/2; if(vGuide){vGuide.style.left = `${sCenterX}px`; vGuide.style.display = 'block';} snappedX = true; }
           }
           if(!snappedY) {
-              if(Math.abs(rect.top - sTop) < snapThreshold) { newTop = sTop; hGuide.style.top = `${sTop}px`; hGuide.style.display = 'block'; snappedY = true; }
-              else if(Math.abs(rect.bottom - sBottom) < snapThreshold) { newTop = sBottom - element.offsetHeight; hGuide.style.top = `${sBottom}px`; hGuide.style.display = 'block'; snappedY = true; }
-              else if(Math.abs(rect.centerY - sCenterY) < snapThreshold) { newTop = sCenterY - element.offsetHeight/2; hGuide.style.top = `${sCenterY}px`; hGuide.style.display = 'block'; snappedY = true; }
+              if(Math.abs(rect.top - sTop) < snapThreshold) { newTop = sTop; if(hGuide){hGuide.style.top = `${sTop}px`; hGuide.style.display = 'block';} snappedY = true; }
+              else if(Math.abs(rect.bottom - sBottom) < snapThreshold) { newTop = sBottom - element.offsetHeight; if(hGuide){hGuide.style.top = `${sBottom}px`; hGuide.style.display = 'block';} snappedY = true; }
+              else if(Math.abs(rect.centerY - sCenterY) < snapThreshold) { newTop = sCenterY - element.offsetHeight/2; if(hGuide){hGuide.style.top = `${sCenterY}px`; hGuide.style.display = 'block';} snappedY = true; }
           }
       }
 
-      element.style.left = `${newLeft}px`; 
-      element.style.top = `${newTop}px`;
+      element.style.left = `${newLeft}px`; element.style.top = `${newTop}px`;
     }
 
     function dragEnd() { 
         isDragging = false; 
         if(vGuide) vGuide.style.display = 'none'; 
         if(hGuide) hGuide.style.display = 'none'; 
-        document.removeEventListener('mousemove', drag); 
-        document.removeEventListener('mouseup', dragEnd); 
+        document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); 
     }
   }
 
-  // خوارزمية التحجيم المطورة
   function makeBoundedBoxResizable(element, page) {
     const resizers = element.querySelectorAll('.resizer');
     resizers.forEach(resizer => {
       resizer.addEventListener('mousedown', function(e) {
         e.preventDefault(); e.stopPropagation();
-        let isResizing = true;
-        
-        const pageRect = page.getBoundingClientRect();
-        let startPageX = (e.clientX - pageRect.left) / scale;
-        let startPageY = (e.clientY - pageRect.top) / scale;
-        
-        let startW = element.offsetWidth;
-        let startH = element.offsetHeight;
-        let startLeft = element.offsetLeft;
-        let startTop = element.offsetTop;
+        let isResizing = true, startX = e.clientX, startY = e.clientY, startW = element.offsetWidth, startH = element.offsetHeight, startLeft = element.offsetLeft, startTop = element.offsetTop;
         
         function resize(e) {
           if (!isResizing) return;
-          const currentRect = page.getBoundingClientRect();
-          let currentX = (e.clientX - currentRect.left) / scale;
-          let currentY = (e.clientY - currentRect.top) / scale;
-          
-          let dx = currentX - startPageX; 
-          let dy = currentY - startPageY;
+          let dx = (e.clientX - startX) / scale; let dy = (e.clientY - startY) / scale;
           
           if (resizer.classList.contains('r') || resizer.classList.contains('tr') || resizer.classList.contains('br')) {
-            const maxW = page.clientWidth - marginPx - startLeft; 
-            element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
+            const maxW = page.clientWidth - marginPx - startLeft; element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
           }
           if (resizer.classList.contains('l') || resizer.classList.contains('tl') || resizer.classList.contains('bl')) {
             let newLeft = startLeft + dx;
@@ -666,7 +629,7 @@
   }
 
   // ==========================================
-  // إدارة النظام، القوالب، وإعدادات الصفحة
+  // إدارة النظام والقوالب وإعدادات الصفحة
   // ==========================================
   function saveTemplate() {
     const pagesHTML = document.getElementById('pagesContainer').innerHTML;
