@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.3 - Fix)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.4 - Tables Fix)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -31,14 +31,18 @@
     .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
     .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
     
-    .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; }
-    .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: 1em; align-items: center; border-bottom: 1px solid #e5e7eb; }
-    .table-rows-wrapper .spec-row:nth-child(even) { background-color: #f3f4f6 !important; }
-    .table-rows-wrapper .spec-row:nth-child(odd) { background-color: #ffffff !important; }
-    .table-rows-wrapper .spec-row:last-child { border-bottom: none; }
+    .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; font-size: 14px; color: #111827; }
+    .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: inherit; align-items: center; border-bottom: 1px solid #e5e7eb; }
     
-    .spec-key { font-weight: 700; color: #374151; outline: none; width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
-    .spec-val { font-weight: 900; color: #000; outline: none; text-align: right; flex-grow: 1; padding-right: 10px; }
+    /* التلوين الإجباري للصفوف (Zebra) مع لون أكثر وضوحاً */
+    .table-rows-wrapper > .spec-row:nth-child(even) { background-color: #f0f2f5 !important; }
+    .table-rows-wrapper > .spec-row:nth-child(odd) { background-color: #ffffff !important; }
+    .table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
+    
+    /* جعل ألوان بنود الجدول تعتمد على وراثة الخصائص من شريط الأدوات */
+    .spec-key { font-weight: 700; color: inherit; outline: none; width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
+    .spec-val { font-weight: 900; color: inherit; outline: none; text-align: right; flex-grow: 1; padding-right: 10px; }
+    
     .table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; transition: background 0.2s; }
     .table-col-resizer:hover, .table-col-resizer:active { background: rgba(245, 183, 0, 0.6); }
 
@@ -157,14 +161,14 @@
             <option value="text:short_description">الوصف المختصر (نص)</option>
             <option value="text:marketing_description">الوصف التسويقي (نص للمضخات)</option>
         </optgroup>
-        <optgroup label="جداول المواصفات الفنية">
-            <option value="table:engine">جدول المحرك</option>
-            <option value="table:hydraulic">جدول النظام الهيدروليكي</option>
-            <option value="table:drive">جدول نظام الدفع</option>
-            <option value="table:performance">جدول الأداء ونطاق العمل</option>
-            <option value="table:weights">جدول الأوزان والسعات</option>
-            <option value="table:equipment">جدول التجهيزات</option>
-            <option value="table:dimensions">جدول الأبعاد</option>
+        <optgroup label="المواصفات الفنية">
+            <option value="table:engine">المحرك</option>
+            <option value="table:hydraulic">النظام الهيدروليكي</option>
+            <option value="table:drive">نظام الدفع</option>
+            <option value="table:performance">الأداء ونطاق العمل</option>
+            <option value="table:weights">الأوزان والسعات</option>
+            <option value="table:equipment">التجهيزات</option>
+            <option value="table:dimensions">الأبعاد</option>
         </optgroup>
       </select>
       <input type="text" id="sectionTitle" placeholder="تخصيص عنوان الجدول (اختياري)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold outline-none mt-1">
@@ -311,27 +315,27 @@
   }
 
   // ==========================================
-  // شريط الأدوات الذكي لتنسيق النصوص
+  // شريط الأدوات الذكي المطور (يدعم جداول ونصوص)
   // ==========================================
-  function createToolbarHTML(targetClass) {
+  function createToolbarHTML(targetClasses) {
       return `
-      <div class="text-toolbar no-print">
-          <input type="color" value="#000000" title="لون النص" oninput="this.closest('.group').querySelector('${targetClass}').style.color = this.value">
-          <input type="number" value="22" title="حجم الخط" oninput="this.closest('.group').querySelector('${targetClass}').style.fontSize = this.value + 'px'">
-          <select title="وزن الخط" onchange="this.closest('.group').querySelector('${targetClass}').style.fontWeight = this.value">
+      <div class="text-toolbar no-print" style="top: -42px;">
+          <input type="color" value="#000000" title="لون النص" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.color = this.value)">
+          <input type="number" value="14" title="حجم الخط" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontSize = this.value + 'px')">
+          <select title="وزن الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontWeight = this.value)">
               <option value="400">عادي (400)</option>
               <option value="700">عريض (700)</option>
               <option value="900">أسود (900)</option>
           </select>
-          <select title="عائلة الخط" onchange="this.closest('.group').querySelector('${targetClass}').style.fontFamily = this.value">
+          <select title="عائلة الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontFamily = this.value)">
               <option value="'SCORFont', 'Cairo', sans-serif">سكور SCOR</option>
               <option value="'Cairo', sans-serif">كايرو Cairo</option>
           </select>
           <div class="flex gap-1 border-r border-gray-300 pr-1 mr-1">
-              <button class="align-btn" onclick="this.closest('.group').querySelector('${targetClass}').style.textAlign='right'">يمين</button>
-              <button class="align-btn" onclick="this.closest('.group').querySelector('${targetClass}').style.textAlign='center'">وسط</button>
-              <button class="align-btn" onclick="this.closest('.group').querySelector('${targetClass}').style.textAlign='left'">يسار</button>
-              <button class="align-btn" onclick="this.closest('.group').querySelector('${targetClass}').style.textAlign='justify'">ضبط</button>
+              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='right')">يمين</button>
+              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='center')">وسط</button>
+              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='left')">يسار</button>
+              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='justify')">ضبط</button>
           </div>
       </div>`;
   }
@@ -363,7 +367,6 @@
           const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
           wrapper.appendChild(dragHandle);
           
-          // الإصلاح الأساسي هنا لمنع تدمير مقبض السحب
           wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content'));
 
           const editableText = document.createElement('div'); 
@@ -383,7 +386,7 @@
       } 
       else if (action === 'table') {
           const container = document.createElement('div');
-          container.className = 'free-container';
+          container.className = 'free-container group'; 
           container.style.width = '100mm'; container.style.height = 'auto'; container.style.minHeight = '30mm'; 
           container.style.top = '100mm'; container.style.left = '5mm'; container.style.padding = '0'; 
           container.style.background = 'transparent'; container.style.border = '1px dashed transparent'; 
@@ -394,6 +397,9 @@
           dragBar.className = 'drag-bar no-print';
           dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ سحب جدول: ${title}</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
           container.appendChild(dragBar);
+
+          // إدراج شريط الأدوات للجدول ليستهدف صفوف الجدول وعنوانه
+          container.insertAdjacentHTML('beforeend', createToolbarHTML('.table-rows-wrapper, .spec-header span'));
 
           const block = document.createElement('div'); block.className = 'spec-block';
           block.style.setProperty('--key-width', '50%');
@@ -476,7 +482,6 @@
     const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
     wrapper.appendChild(dragHandle);
     
-    // الإصلاح الأساسي هنا أيضاً
     wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content'));
 
     const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "نص حر قابل للتعديل..."; 
