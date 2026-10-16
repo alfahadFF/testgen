@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 10.0 - Advanced Grids & Tables)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 10.1 - Full Screen Preview)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -105,8 +105,9 @@
 
     @media print {
       body { background: none; }
-      .w-\[45\%\] { display: none !important; }
-      .w-\[55\%\] { width: 100% !important; padding: 0 !important; background: none !important; overflow: visible !important; }
+      #sidebar { display: none !important; }
+      #toggleBtn { display: none !important; }
+      #pagesContainer { width: 100% !important; padding: 0 !important; background: none !important; overflow: visible !important; }
       .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
       .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; width: 210mm !important; height: 297mm !important; page-break-after: always; }
       .a4-page::before, .a4-page::after { display: none !important; }
@@ -117,8 +118,8 @@
 </head>
 <body class="h-screen flex overflow-hidden">
   
-  <!-- لوحة التحكم -->
-  <div class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50">
+  <!-- لوحة التحكم الجانبية -->
+  <div id="sidebar" class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50 transition-all duration-300">
     <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
       <h1 class="text-2xl font-black text-[#f5b700]">SCOR Studio</h1>
       <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
@@ -258,8 +259,13 @@
     </button>
   </div>
 
+  <!-- زر طي وتوسيع اللوحة -->
+  <button onclick="toggleSidebar()" id="toggleBtn" class="fixed bottom-5 left-5 z-[9999] bg-[#f5b700] text-black text-xs font-black px-4 py-3 rounded-full shadow-lg hover:scale-105 transition flex items-center justify-center gap-2 no-print border-2 border-black">
+    👁️ معاينة الورقة كاملة
+  </button>
+
   <!-- مساحة العمل الحية -->
-  <div class="w-[55%] h-full bg-[#181b22] canvas-container" id="pagesContainer"></div>
+  <div id="pagesContainer" class="w-[55%] h-full bg-[#181b22] canvas-container transition-all duration-300"></div>
 
 <script>
   // ==========================================
@@ -471,12 +477,10 @@
               block.appendChild(colResizer);
           }
           
-          // Header مع الـ Toolbar المنفصل للعنوان
           const header = document.createElement('div'); header.className = 'spec-header group relative'; 
           header.innerHTML = `<span style="position:relative; z-index:2;" contenteditable="true">${title}</span> ${createToolbarHTML('span', '-55px')}`; 
           block.appendChild(header);
 
-          // Body مع الـ Toolbar المنفصل للصفوف
           const bodyWrapper = document.createElement('div'); bodyWrapper.className = 'flex-1 flex flex-col relative group';
           bodyWrapper.innerHTML = createToolbarHTML('.spec-row span', '-55px');
 
@@ -549,14 +553,12 @@
                       }
                   });
               } else if (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes') {
-                  // تعبئة جداول التجهيزات والملاحظات بعمود واحد فقط
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           tableHTML += `<div class="spec-row flex-1"><span class="spec-val" contenteditable="true" style="width:100%; text-align:center; padding: 4px;">${rowData[colKey]}</span></div>`;
                       }
                   });
               } else {
-                  // تعبئة الجداول العادية
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           const displayKey = translationDict[colKey] || colKey;
@@ -583,7 +585,6 @@
 
     const container = document.createElement('div');
     container.className = 'free-container group';
-    // ملء عرض الصفحة (210mm الكلي ناقص 10mm هوامش اليمين واليسار = 200mm)
     container.style.width = '200mm'; container.style.height = '45mm'; 
     container.style.top = '100mm'; container.style.left = '5mm';   
 
@@ -604,7 +605,6 @@
         </div>`;
       row.appendChild(col);
       
-      // إضافة الفاصل (الـ Gap) الذي يبلغ عرضه 5mm ويعمل كأداة تحجيم بنفس الوقت
       if (i < colCount - 1) {
         const gutter = document.createElement('div'); gutter.className = 'col-resizer';
         row.appendChild(gutter); makeColResizable(col, gutter, row);
@@ -630,7 +630,6 @@
           <span class="font-bold">+ اختر صورة</span><input type="file" class="hidden" accept="image/*" onchange="loadGridImage(this)">
         </label>`;
     } else if (type === 'table') {
-      // إظهار خيارات الجداول المرتبطة بالبيانات بدلاً من إنشاء جدول فارغ
       col.innerHTML = `
         <div class="flex flex-col gap-2 p-2 w-full h-full justify-center bg-gray-50 border border-dashed border-gray-300">
             <label class="text-xs text-gray-700 font-bold text-center">اختر الجدول المرتبط بالبيانات:</label>
@@ -1099,6 +1098,31 @@
       const footer = document.createElement('div'); footer.className = isLast ? 'is-last-footer' : 'is-normal-footer'; page.appendChild(footer);
     }
     return page;
+  }
+
+  // ==========================================
+  // دالة طي وتوسيع لوحة التحكم (المعاينة)
+  // ==========================================
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const pagesContainer = document.getElementById('pagesContainer');
+    const toggleBtn = document.getElementById('toggleBtn');
+    
+    if (sidebar.style.display === 'none' || sidebar.classList.contains('hidden')) {
+        // إظهار اللوحة
+        sidebar.style.display = 'flex';
+        sidebar.classList.remove('hidden');
+        pagesContainer.classList.remove('w-full');
+        pagesContainer.classList.add('w-[55%]');
+        toggleBtn.innerHTML = '👁️ معاينة الورقة كاملة';
+    } else {
+        // إخفاء اللوحة
+        sidebar.style.display = 'none';
+        sidebar.classList.add('hidden');
+        pagesContainer.classList.remove('w-[55%]');
+        pagesContainer.classList.add('w-full');
+        toggleBtn.innerHTML = '⚙️ إظهار لوحة التحكم';
+    }
   }
 
   window.onload = function() { renderPages(); fetchSheetData(); };
