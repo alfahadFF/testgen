@@ -27,7 +27,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 
 /* الجداول: الافتراضي 10px كايرو بولد أسود — يمكن تغييره من لوحة التحكم عبر المتغيرات --t-* */
 .spec-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
-.spec-header { position: relative; background: #1f2937; color: #fff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
+.spec-header { position: relative; background: #1f2937; color: #fff; height: 21px; line-height: 21px; padding: 0 15px 0 50px; flex-shrink: 0; overflow: hidden; font-weight: 900; font-size: 1.1em; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
 .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
 .table-rows-wrapper { display: flex; flex-direction: column; background: #fff; flex: 1; }
 .table-rows-wrapper .spec-row span { font-family: var(--t-family, 'Cairo', sans-serif); font-size: var(--t-size, 10px); font-weight: var(--t-weight, 700); color: var(--t-color, #000); outline: none; }
@@ -135,7 +135,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
         <button class="pbtn" title="مؤخرة" onclick="zOrder('back')">⏬</button>
         <button class="pbtn mr-auto" style="color:#f87171" onclick="delSel()">🗑 حذف (Delete)</button>
       </div>
-      <div class="text-[10px] text-gray-500">اسحب العنصر من أي مكان • اسحب أي حافة أو زاوية للتحجيم (Shift مع الزاوية = حفظ النسبة)</div>
+      <div class="text-[10px] text-gray-500">اسحب العنصر من أي مكان • الزوايا = تحجيم بنفس النسبة • الحواف = تحجيم حر</div>
     </div>
   </div>
 
@@ -625,7 +625,7 @@ function startResize(e, el, rz) {
     if (pos.includes('l')) w = sw - dx;
     if (pos.includes('b')) h = sh + dy;
     if (pos.includes('t')) h = sh - dy;
-    if (pos.length === 2 && ev.shiftKey) h = w * sh / sw;
+    if (pos.length === 2) { const k = Math.max(w / sw, h / sh, 10 / sw, 10 / sh); w = sw * k; h = sh * k; } // الزوايا: نفس النسبة
     w = Math.max(10, w); h = Math.max(10, h);
     el.style.width = w + 'px'; el.style.height = h + 'px';
     if (pos.includes('l')) el.style.left = (sl + sw - w) + 'px';
