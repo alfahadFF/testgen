@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.7 - Final Polish)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 9.8 - Final Polish)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -26,7 +26,7 @@
     .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
     .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 
-    /* Tables & Zebra Striping */
+    /* Tables & Zebra Striping (Updated with Brand Colors) */
     .spec-block { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
     .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
     .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
@@ -34,8 +34,8 @@
     .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; font-size: 14px; color: #111827; }
     .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: inherit; align-items: center; border-bottom: 1px solid #e5e7eb; }
     
-    /* ضمان تلوين الصفوف بالشكل الصحيح في المتصفح والطباعة (PDF) */
-    .spec-block .spec-row:nth-child(even) { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    /* تلوين الصفوف بلون ذهبي/أصفر فاتح جداً من الهوية البصرية */
+    .spec-block .spec-row:nth-child(even) { background-color: #fef0c7 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .spec-block .spec-row:nth-child(odd) { background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
     
@@ -76,14 +76,23 @@
     .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; z-index: 100; }
     .draggable-wrapper:hover .drag-handle { opacity: 1; }
 
-    /* Smart Toolbar */
-    .text-toolbar { position: absolute; top: -38px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; gap: 6px; padding: 4px 8px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.15); align-items: center; }
-    .group:hover .text-toolbar { opacity: 1; pointer-events: auto; }
+    /* Smart Toolbar (Updated 2-Rows & Hover Stability) */
+    .text-toolbar { position: absolute; top: -65px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.15); align-items: center; width: max-content; }
+    
+    /* الجسر الشفاف لمنع الاختفاء السريع عند حركة الماوس */
+    .text-toolbar::after { content: ''; position: absolute; bottom: -20px; left: 0; width: 100%; height: 20px; background: transparent; }
+    .group:hover .text-toolbar, .text-toolbar:hover { opacity: 1; visibility: visible; }
+    
     .text-toolbar input[type="color"] { width: 22px; height: 22px; padding: 0; border: none; border-radius: 4px; cursor: pointer; }
     .text-toolbar input[type="number"] { width: 45px; text-align: center; font-size: 12px; font-weight: bold; color: black; border: 1px solid #ccc; border-radius: 3px; }
     .text-toolbar select { font-size: 12px; color: black; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; background: #f9fafb; outline: none; }
     .align-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 11px; font-weight: bold; color: #374151; transition: all 0.2s; }
     .align-btn:hover { background: #f5b700; color: #000; border-color: #f5b700; }
+
+    /* شريط أدوات مبسط للصور فقط */
+    .image-toolbar { position: absolute; top: -35px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; gap: 4px; padding: 4px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .image-toolbar::after { content: ''; position: absolute; bottom: -15px; left: 0; width: 100%; height: 15px; }
+    .group:hover .image-toolbar, .image-toolbar:hover { opacity: 1; visibility: visible; }
 
     /* Snap Guides */
     .snap-guide-v { position: absolute; width: 1px; top: 0; bottom: 0; background-color: #ef4444; z-index: 9999; display: none; pointer-events: none; }
@@ -101,7 +110,7 @@
       .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
       .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; width: 210mm !important; height: 297mm !important; page-break-after: always; }
       .a4-page::before, .a4-page::after { display: none !important; }
-      .drag-bar, .resizer, .col-resizer, .table-col-resizer, .drag-handle, .text-toolbar, .no-print, .delete-btn, .snap-guide-v, .snap-guide-h { display: none !important; }
+      .drag-bar, .resizer, .col-resizer, .table-col-resizer, .drag-handle, .text-toolbar, .image-toolbar, .no-print, .delete-btn, .snap-guide-v, .snap-guide-h { display: none !important; }
       .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
     }
   </style>
@@ -208,7 +217,7 @@
       </button>
     </div>
 
-    <!-- الصور الحرة والحاويات المكونة من عدة أعمدة -->
+    <!-- الصور الحرة، الحاويات، وبيانات التواصل -->
     <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
       <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. إضافة الحاويات، الصور، والنصوص الحرة</h2>
       
@@ -221,12 +230,24 @@
       </div>
 
       <div class="flex gap-1 mt-1">
-        <button onclick="addFreeText()" class="w-1/3 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر</button>
-        <label class="w-1/3 bg-[#181b22] text-white border border-[#343946] text-center text-[10px] font-bold py-1.5 rounded cursor-pointer hover:bg-gray-700">
+        <button onclick="addFreeText()" class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر</button>
+        <label class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-center text-[10px] font-bold py-1.5 rounded cursor-pointer hover:bg-gray-700">
           + صورة حرة
           <input type="file" id="freeImageUpload" accept="image/*" class="hidden">
         </label>
-        <button onclick="addContactBlock()" class="w-1/3 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ بيانات تواصل</button>
+      </div>
+
+      <!-- قسم بيانات التواصل المدمج -->
+      <div class="mt-1 pt-2 border-t border-[#282c35]">
+        <select id="contactPresetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-[10px] mb-1 outline-none">
+          <option value="4915118316638" data-type="phone">004915118316638</option>
+          <option value="4917634389434" data-type="phone">004917634389434</option>
+          <option value="963939062887" data-type="phone">00963939062887</option>
+          <option value="963941435541" data-type="phone">00963941435541</option>
+          <option value="https://www.scor-sy.de" data-type="web">www.scor-sy.de</option>
+          <option value="mailto:info@scor-sy.de" data-type="web">info@scor-sy.de</option>
+        </select>
+        <button onclick="addContactBlock()" class="w-full bg-[#f5b700] text-black text-[10px] font-bold py-1.5 rounded hover:brightness-110">+ بيانات تواصل (للفوتر)</button>
       </div>
     </div>
 
@@ -355,33 +376,39 @@
   }
 
   // ==========================================
-  // شريط الأدوات الذكي (يتضمن أزرار الطبقات Z-Index)
+  // شريط الأدوات الذكي (تم تعديله ليكون صفين مع ثبات عالٍ)
   // ==========================================
   function createToolbarHTML(targetClasses) {
       return `
-      <div class="text-toolbar no-print" style="top: -42px;">
-          <input type="color" value="#000000" title="لون النص" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.color = this.value)">
-          <input type="number" value="14" title="حجم الخط" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontSize = this.value + 'px')">
-          <select title="وزن الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontWeight = this.value)">
-              <option value="400">عادي (400)</option>
-              <option value="700">عريض (700)</option>
-              <option value="900">أسود (900)</option>
-          </select>
-          <select title="عائلة الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontFamily = this.value)">
-              <option value="'SCORFont', 'Cairo', sans-serif">سكور SCOR</option>
-              <option value="'Cairo', sans-serif">كايرو Cairo</option>
-          </select>
-          <div class="flex gap-1 border-r border-gray-300 pr-1 mr-1">
-              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='right')">يمين</button>
-              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='center')">وسط</button>
-              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='left')">يسار</button>
-              <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='justify')">ضبط</button>
+      <div class="text-toolbar no-print">
+          <!-- الصف الأول: خصائص الخط -->
+          <div class="flex gap-2 items-center border-b border-gray-200 pb-1 w-full justify-center">
+              <input type="color" value="#000000" title="لون النص" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.color = this.value)">
+              <input type="number" value="14" title="حجم الخط" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontSize = this.value + 'px')">
+              <select title="وزن الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontWeight = this.value)">
+                  <option value="400">عادي (400)</option>
+                  <option value="700">عريض (700)</option>
+                  <option value="900">أسود (900)</option>
+              </select>
+              <select title="عائلة الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontFamily = this.value)">
+                  <option value="'SCORFont', 'Cairo', sans-serif">سكور SCOR</option>
+                  <option value="'Cairo', sans-serif">كايرو Cairo</option>
+              </select>
           </div>
-          <div class="flex gap-1 border-r border-gray-300 pr-1 mr-1" title="ترتيب الطبقات">
-              <button class="align-btn" title="مقدمة الكل" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
-              <button class="align-btn" title="خطوة للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
-              <button class="align-btn" title="خطوة للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
-              <button class="align-btn" title="خلف الكل" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
+          <!-- الصف الثاني: المحاذاة والطبقات -->
+          <div class="flex gap-2 items-center w-full justify-center pt-1">
+              <div class="flex gap-1 border-l border-gray-300 pl-2 ml-1">
+                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='right')">يمين</button>
+                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='center')">وسط</button>
+                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='left')">يسار</button>
+                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='justify')">ضبط</button>
+              </div>
+              <div class="flex gap-1" title="ترتيب الطبقات">
+                  <button class="align-btn" title="مقدمة" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
+                  <button class="align-btn" title="للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
+                  <button class="align-btn" title="للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
+                  <button class="align-btn" title="مؤخرة" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
+              </div>
           </div>
       </div>`;
   }
@@ -433,7 +460,7 @@
       else if (action === 'table') {
           const container = document.createElement('div');
           container.className = 'free-container group'; 
-          container.style.width = '97.5mm'; // 9.75 cm كما طلبت
+          container.style.width = '97.5mm'; 
           container.style.height = 'auto'; container.style.minHeight = '30mm'; 
           container.style.top = '100mm'; container.style.left = '5mm'; container.style.padding = '0'; 
           container.style.background = 'transparent'; container.style.border = '1px dashed transparent'; 
@@ -464,7 +491,6 @@
           
           if (key === 'dimensions') {
               colResizer.style.display = 'none';
-              // تمت إزالة صف العناوين بالكامل
               rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل هنا تلقائياً بدون عناوين للأعمدة ]</div>`;
           } else {
               rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات هنا تلقائياً ]</div>`;
@@ -513,7 +539,6 @@
               let tableHTML = '';
               
               if (key === 'dimensions') {
-                  // تعبئة جدول الأبعاد (بدون عناوين أعمدة)
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           const displayKey = translationDict[colKey] || colKey;
@@ -528,7 +553,6 @@
                       }
                   });
               } else {
-                  // تعبئة الجداول العادية
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           const displayKey = translationDict[colKey] || colKey;
@@ -546,7 +570,7 @@
   }
 
   // ==========================================
-  // إضافة الحاويات (الأعمدة) والصور والنصوص الحرة
+  // إضافة الحاويات (الأعمدة) والصور والنصوص الحرة وبيانات التواصل
   // ==========================================
   function addFloatingContainer(colCount) {
     const targetPageVal = document.getElementById('targetPageSelect').value;
@@ -640,13 +664,14 @@
         const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
         wrapper.appendChild(dragHandle);
 
+        // شريط أدوات مبسط مخصص للصور (فقط للتحكم بالطبقات بدون خطوط)
         wrapper.insertAdjacentHTML('beforeend', `
-            <div class="text-toolbar no-print" style="top: -42px;">
-                <div class="flex gap-1 pr-1 mr-1" title="ترتيب الطبقات">
-                    <button class="align-btn" title="مقدمة الكل" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
-                    <button class="align-btn" title="خطوة للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
-                    <button class="align-btn" title="خطوة للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
-                    <button class="align-btn" title="خلف الكل" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
+            <div class="image-toolbar no-print">
+                <div class="flex gap-1" title="ترتيب الطبقات">
+                    <button class="align-btn" title="مقدمة" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
+                    <button class="align-btn" title="للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
+                    <button class="align-btn" title="للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
+                    <button class="align-btn" title="مؤخرة" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
                 </div>
             </div>
         `);
@@ -691,6 +716,75 @@
     targetPage.appendChild(wrapper);
     makeBoundedDraggable(wrapper, dragHandle, targetPage);
     attachResizers(wrapper, targetPage);
+  }
+
+  // ==========================================
+  // دالة بيانات التواصل التفاعلية (المضافة حديثاً)
+  // ==========================================
+  function addContactBlock() {
+    const targetPageVal = document.getElementById('targetPageSelect').value;
+    const targetPage = document.getElementById(`page-${targetPageVal}`);
+    if (!targetPage) return;
+
+    const presetSelect = document.getElementById('contactPresetSelect');
+    const selectedOpt = presetSelect.options[presetSelect.selectedIndex];
+    const textVal = selectedOpt.text; 
+    const linkVal = selectedOpt.value;
+    const isPhone = selectedOpt.getAttribute('data-type') === 'phone';
+
+    const wrapper = document.createElement('div'); 
+    wrapper.className = 'draggable-wrapper flex flex-col items-center justify-center p-2 group';
+    wrapper.style.top = '275mm'; wrapper.style.left = '50mm';
+    wrapper.style.width = 'max-content'; 
+    
+    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
+    wrapper.appendChild(dragHandle);
+
+    // ربط شريط الأدوات الذكي للتحكم بحجم ونوع الخط الخاص بالنص
+    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.contact-text'));
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'flex items-center gap-2 justify-center whitespace-nowrap';
+
+    if (isPhone) {
+      const waLink = document.createElement('a');
+      waLink.href = 'https://wa.me/' + linkVal; waLink.target = '_blank';
+      waLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
+      waLink.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>`;
+
+      const callLink = document.createElement('a');
+      callLink.href = 'tel:+' + linkVal; callLink.target = '_blank';
+      callLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
+      callLink.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`;
+
+      const numText = document.createElement('span');
+      numText.className = 'contact-text font-bold outline-none text-[#000000] whitespace-nowrap';
+      numText.style.fontSize = '18px';
+      numText.contentEditable = true;
+      numText.innerText = textVal;
+
+      contentDiv.appendChild(waLink);
+      contentDiv.appendChild(callLink);
+      contentDiv.appendChild(numText);
+    } else {
+      const aTag = document.createElement('a'); 
+      aTag.href = linkVal; aTag.target = '_blank';
+      aTag.style.color = '#000000'; aTag.style.fontSize = '18px';
+      aTag.className = 'contact-text font-bold outline-none hover:text-[#f5b700] transition block w-full text-center whitespace-nowrap';
+      aTag.contentEditable = true; aTag.innerText = textVal;
+      contentDiv.appendChild(aTag);
+    }
+
+    wrapper.appendChild(contentDiv);
+
+    const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
+    deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
+    deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
+    wrapper.appendChild(deleteBtn);
+
+    targetPage.appendChild(wrapper);
+    makeBoundedDraggable(wrapper, dragHandle, targetPage);
+    attachResizers(wrapper, targetPage); 
   }
 
   // ==========================================
