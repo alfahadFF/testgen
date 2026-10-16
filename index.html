@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 9.8 - Final Polish)</title>
+  <title>SCOR Master Studio - Ultimate Edition (V 10.0 - Advanced Grids & Tables)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -26,7 +26,7 @@
     .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
     .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 
-    /* Tables & Zebra Striping (Updated with Brand Colors) */
+    /* Tables & Zebra Striping */
     .spec-block { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
     .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
     .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
@@ -34,7 +34,6 @@
     .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; font-size: 14px; color: #111827; }
     .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: inherit; align-items: center; border-bottom: 1px solid #e5e7eb; }
     
-    /* تلوين الصفوف بلون ذهبي/أصفر فاتح جداً من الهوية البصرية */
     .spec-block .spec-row:nth-child(even) { background-color: #fef0c7 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .spec-block .spec-row:nth-child(odd) { background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
@@ -54,10 +53,13 @@
 
     /* Grid Columns System */
     .grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
-    .grid-col { flex: 1; min-width: 20px; padding: 5px; position: relative; display: flex; flex-direction: column; }
-    .col-resizer { width: 5mm; background: #e5e7eb; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
-    .free-container:hover .col-resizer { background: rgba(245, 183, 0, 0.4); }
-    .col-resizer:hover, .col-resizer:active { background: #f5b700; }
+    .grid-col { flex: 1; min-width: 20px; position: relative; display: flex; flex-direction: column; }
+    
+    /* فاصل الأعمدة 5mm مطابق للهوامش الجانبية */
+    .col-resizer { width: 5mm; background: transparent; position: relative; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
+    .col-resizer::after { content: ''; position: absolute; width: 1px; top: 0; bottom: 0; border-left: 1px dashed rgba(0,0,0,0.15); border-right: 1px dashed rgba(0,0,0,0.15); background: transparent; }
+    .free-container:hover .col-resizer::after { background: rgba(245, 183, 0, 0.1); border-color: #f5b700; }
+    .col-resizer:hover, .col-resizer:active { background: rgba(245, 183, 0, 0.2); }
 
     /* 8-Directional Resizers */
     .resizer { position: absolute; background: #fff; border: 1px solid #f5b700; opacity: 0; z-index: 20; box-shadow: 0 0 3px rgba(0,0,0,0.2); transition: opacity 0.2s; }
@@ -76,12 +78,10 @@
     .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; z-index: 100; }
     .draggable-wrapper:hover .drag-handle { opacity: 1; }
 
-    /* Smart Toolbar (Updated 2-Rows & Hover Stability) */
-    .text-toolbar { position: absolute; top: -65px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.15); align-items: center; width: max-content; }
-    
-    /* الجسر الشفاف لمنع الاختفاء السريع عند حركة الماوس */
+    /* Smart Toolbar */
+    .text-toolbar { position: absolute; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.15); align-items: center; width: max-content; }
     .text-toolbar::after { content: ''; position: absolute; bottom: -20px; left: 0; width: 100%; height: 20px; background: transparent; }
-    .group:hover .text-toolbar, .text-toolbar:hover { opacity: 1; visibility: visible; }
+    .group:hover > .text-toolbar, .text-toolbar:hover { opacity: 1; visibility: visible; }
     
     .text-toolbar input[type="color"] { width: 22px; height: 22px; padding: 0; border: none; border-radius: 4px; cursor: pointer; }
     .text-toolbar input[type="number"] { width: 45px; text-align: center; font-size: 12px; font-weight: bold; color: black; border: 1px solid #ccc; border-radius: 3px; }
@@ -89,10 +89,10 @@
     .align-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 11px; font-weight: bold; color: #374151; transition: all 0.2s; }
     .align-btn:hover { background: #f5b700; color: #000; border-color: #f5b700; }
 
-    /* شريط أدوات مبسط للصور فقط */
+    /* شريط أدوات للصور */
     .image-toolbar { position: absolute; top: -35px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; gap: 4px; padding: 4px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
     .image-toolbar::after { content: ''; position: absolute; bottom: -15px; left: 0; width: 100%; height: 15px; }
-    .group:hover .image-toolbar, .image-toolbar:hover { opacity: 1; visibility: visible; }
+    .group:hover > .image-toolbar, .image-toolbar:hover { opacity: 1; visibility: visible; }
 
     /* Snap Guides */
     .snap-guide-v { position: absolute; width: 1px; top: 0; bottom: 0; background-color: #ef4444; z-index: 9999; display: none; pointer-events: none; }
@@ -182,7 +182,9 @@
             <option value="table:drive">نظام الدفع</option>
             <option value="table:performance">الأداء ونطاق العمل</option>
             <option value="table:weights">الأوزان والسعات</option>
-            <option value="table:equipment">التجهيزات</option>
+            <option value="table:std_equipment">التجهيزات القياسية</option>
+            <option value="table:opt_equipment">التجهيزات الاختيارية</option>
+            <option value="table:notes">الملاحظات</option>
             <option value="table:dimensions">الأبعاد</option>
         </optgroup>
       </select>
@@ -273,26 +275,10 @@
     'drive_type': 'نوع الدفع', 'travel_speed': 'سرعة السير', 'max_travel_speed': 'السرعة القصوى', 'gradeability': 'قدرة التسلق', 'tires': 'الإطارات', 'steering_type': 'نمط التوجيه',
     'rated_payload': 'الحمولة المقدرة', 'rated_load': 'الحمولة المقننة', 'bucket_capacity': 'سعة الدلو', 'dump_height': 'ارتفاع التفريغ', 'arm_length': 'طول الذراع', 'breakout_force': 'قوة الكسر', 'lifting_capacity': 'قدرة الرفع', 'performance_productivity': 'الإنتاجية', 'performance_pressure': 'الضغط', 'pump_vertical_fine': 'ضخ رأسي', 'pump_horizontal_fine': 'ضخ أفقي', 'max_aggregate_size': 'أقصى حجم للركام',
     'operating_weight': 'الوزن التشغيلي', 'total_weight': 'الوزن الكلي', 'fuel_tank_capacity': 'سعة خزان الوقود', 'hydraulic_capacity': 'سعة الهيدروليك',
-    'std_equip_1': 'تجهيز قياسي 1', 'std_equip_2': 'تجهيز قياسي 2', 'std_equip_3': 'تجهيز قياسي 3', 'opt_equip_1': 'تجهيز اختياري 1', 'feature_1': 'ميزة 1',
-    'dim_a': 'الطول الكلي مع الدلو',
-    'dim_b': 'الطول بدون الدلو',
-    'dim_c': 'قاعدة العجلات',
-    'dim_d': 'الارتفاع الكلي',
-    'dim_e': 'ارتفاع الكابينة',
-    'dim_f': 'ارتفاع محور الدوران',
-    'dim_g': 'ارتفاع الدلو في أقصى وضع',
-    'dim_h': 'ارتفاع التفريغ',
-    'dim_i': 'مدى التفريغ',
-    'dim_j': 'زاوية إرجاع الدلو عند الرفع',
-    'dim_k': 'زاوية التفريغ عند أقصى ارتفاع',
-    'dim_l': 'عمق الحفر أسفل مستوى الأرض',
-    'dim_m': 'الخلوص الأرضي',
-    'dim_n': 'العرض الكلي',
-    'dim_o': 'عرض المسار',
-    'dim_p': 'عرض الدلو',
-    'dim_q': 'عرض الدلو الداخلي',
-    'dim_r': 'نصف قطر الدوران الأمامي (بدون دلو)',
-    'dim_s': 'نصف قطر الدوران الأمامي (مع دلو)'
+    'std_equip_1': 'تجهيز قياسي 1', 'std_equip_2': 'تجهيز قياسي 2', 'std_equip_3': 'تجهيز قياسي 3', 'std_equip_4': 'تجهيز قياسي 4', 'std_equip_5': 'تجهيز قياسي 5', 'std_equip_6': 'تجهيز قياسي 6', 'std_equip_7': 'تجهيز قياسي 7', 'std_equip_8': 'تجهيز قياسي 8', 'std_equip_9': 'تجهيز قياسي 9', 'std_equip_10': 'تجهيز قياسي 10', 
+    'opt_equip_1': 'تجهيز اختياري 1', 'opt_equip_2': 'تجهيز اختياري 2', 'opt_equip_3': 'تجهيز اختياري 3', 'opt_equip_4': 'تجهيز اختياري 4', 'opt_equip_5': 'تجهيز اختياري 5', 'opt_equip_6': 'تجهيز اختياري 6',
+    'note_1': 'ملاحظة 1', 'note_2': 'ملاحظة 2', 'note_3': 'ملاحظة 3',
+    'dim_a': 'الطول الكلي مع الدلو', 'dim_b': 'الطول بدون الدلو', 'dim_c': 'قاعدة العجلات', 'dim_d': 'الارتفاع الكلي', 'dim_e': 'ارتفاع الكابينة', 'dim_f': 'ارتفاع محور الدوران', 'dim_g': 'ارتفاع الدلو في أقصى وضع', 'dim_h': 'ارتفاع التفريغ', 'dim_i': 'مدى التفريغ', 'dim_j': 'زاوية إرجاع الدلو عند الرفع', 'dim_k': 'زاوية التفريغ عند أقصى ارتفاع', 'dim_l': 'عمق الحفر أسفل مستوى الأرض', 'dim_m': 'الخلوص الأرضي', 'dim_n': 'العرض الكلي', 'dim_o': 'عرض المسار', 'dim_p': 'عرض الدلو', 'dim_q': 'عرض الدلو الداخلي', 'dim_r': 'نصف قطر الدوران الأمامي (بدون دلو)', 'dim_s': 'نصف قطر الدوران الأمامي (مع دلو)'
   };
 
   const tableGroups = {
@@ -301,8 +287,10 @@
       'drive': ['drive_type', 'travel_speed', 'max_travel_speed', 'gradeability', 'max_gradeability', 'tires', 'steering_type', 'steering_type_2'],
       'performance': ['rated_payload', 'rated_load', 'bucket_capacity', 'std_bucket_capacity', 'dump_height', 'arm_length', 'breakout_force', 'bucket_breakout_force', 'lifting_capacity', 'max_lifting_force', 'rollback_angle_ground', 'max_dump_angle', 'rear_departure_angle', 'front_approach_angle', 'performance_productivity', 'performance_pressure', 'pump_vertical_fine', 'pump_horizontal_fine', 'pump_vertical_coarse', 'pump_horizontal_coarse', 'max_aggregate_size', 'cooling_system_performance'],
       'weights': ['operating_weight', 'operating_weight_2', 'total_weight', 'fuel_tank_capacity', 'fuel_tank_2', 'hydraulic_capacity'],
-      'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s'],
-      'equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10','opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6', 'feature_1', 'feature_2', 'feature_3', 'feature_4', 'feature_5', 'feature_6']
+      'std_equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10'],
+      'opt_equipment': ['opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6'],
+      'notes': ['note_1', 'note_2', 'note_3'],
+      'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s']
   };
 
   async function fetchSheetData() {
@@ -376,12 +364,11 @@
   }
 
   // ==========================================
-  // شريط الأدوات الذكي (تم تعديله ليكون صفين مع ثبات عالٍ)
+  // شريط الأدوات الذكي
   // ==========================================
-  function createToolbarHTML(targetClasses) {
+  function createToolbarHTML(targetClasses, topPos = '-65px') {
       return `
-      <div class="text-toolbar no-print">
-          <!-- الصف الأول: خصائص الخط -->
+      <div class="text-toolbar no-print" style="top: ${topPos};">
           <div class="flex gap-2 items-center border-b border-gray-200 pb-1 w-full justify-center">
               <input type="color" value="#000000" title="لون النص" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.color = this.value)">
               <input type="number" value="14" title="حجم الخط" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontSize = this.value + 'px')">
@@ -395,7 +382,6 @@
                   <option value="'Cairo', sans-serif">كايرو Cairo</option>
               </select>
           </div>
-          <!-- الصف الثاني: المحاذاة والطبقات -->
           <div class="flex gap-2 items-center w-full justify-center pt-1">
               <div class="flex gap-1 border-l border-gray-300 pl-2 ml-1">
                   <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='right')">يمين</button>
@@ -440,7 +426,7 @@
           const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
           wrapper.appendChild(dragHandle);
           
-          wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content'));
+          wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content', '-65px'));
 
           const editableText = document.createElement('div'); 
           editableText.className = 'dynamic-content outline-none font-black break-words'; 
@@ -472,37 +458,47 @@
           dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ سحب جدول: ${title}</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
           container.appendChild(dragBar);
 
-          container.insertAdjacentHTML('beforeend', createToolbarHTML('.table-rows-wrapper, .spec-header span'));
-
-          const block = document.createElement('div'); block.className = 'spec-block';
+          const block = document.createElement('div'); block.className = 'spec-block w-full h-full';
           block.style.setProperty('--key-width', '50%');
 
-          const colResizer = document.createElement('div');
-          colResizer.className = 'table-col-resizer no-print';
-          colResizer.style.right = '50%';
-          block.appendChild(colResizer);
+          const isOneColumn = (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes' || key === 'dimensions');
+          let colResizer;
+
+          if (!isOneColumn) {
+              colResizer = document.createElement('div');
+              colResizer.className = 'table-col-resizer no-print';
+              colResizer.style.right = '50%';
+              block.appendChild(colResizer);
+          }
           
-          const header = document.createElement('div'); header.className = 'spec-header'; 
-          header.innerHTML = `<span style="position:relative; z-index:2;" contenteditable="true">${title}</span>`; 
+          // Header مع الـ Toolbar المنفصل للعنوان
+          const header = document.createElement('div'); header.className = 'spec-header group relative'; 
+          header.innerHTML = `<span style="position:relative; z-index:2;" contenteditable="true">${title}</span> ${createToolbarHTML('span', '-55px')}`; 
           block.appendChild(header);
+
+          // Body مع الـ Toolbar المنفصل للصفوف
+          const bodyWrapper = document.createElement('div'); bodyWrapper.className = 'flex-1 flex flex-col relative group';
+          bodyWrapper.innerHTML = createToolbarHTML('.spec-row span', '-55px');
 
           const rowsWrapper = document.createElement('div');
           rowsWrapper.className = 'table-rows-wrapper';
           
           if (key === 'dimensions') {
-              colResizer.style.display = 'none';
-              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل هنا تلقائياً بدون عناوين للأعمدة ]</div>`;
+              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل بدون عناوين للأعمدة ]</div>`;
+          } else if (isOneColumn) {
+              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات في عمود واحد هنا تلقائياً ]</div>`;
           } else {
               rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات هنا تلقائياً ]</div>`;
           }
           
-          block.appendChild(rowsWrapper);
+          bodyWrapper.appendChild(rowsWrapper);
+          block.appendChild(bodyWrapper);
           container.appendChild(block);
 
           targetPage.appendChild(container);
           makeBoundedDraggable(container, dragBar, targetPage);
           attachResizers(container, targetPage);
-          if (key !== 'dimensions') {
+          if (colResizer) {
               makeTableColResizable(colResizer, block);
           }
       }
@@ -552,7 +548,15 @@
                           </div>`;
                       }
                   });
+              } else if (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes') {
+                  // تعبئة جداول التجهيزات والملاحظات بعمود واحد فقط
+                  colsToInclude.forEach(colKey => {
+                      if(rowData[colKey] && rowData[colKey].trim() !== '') {
+                          tableHTML += `<div class="spec-row flex-1"><span class="spec-val" contenteditable="true" style="width:100%; text-align:center; padding: 4px;">${rowData[colKey]}</span></div>`;
+                      }
+                  });
               } else {
+                  // تعبئة الجداول العادية
                   colsToInclude.forEach(colKey => {
                       if(rowData[colKey] && rowData[colKey].trim() !== '') {
                           const displayKey = translationDict[colKey] || colKey;
@@ -570,7 +574,7 @@
   }
 
   // ==========================================
-  // إضافة الحاويات (الأعمدة) والصور والنصوص الحرة وبيانات التواصل
+  // إضافة الحاويات (تطابق عرض الصفحة مع مسافات 5mm)
   // ==========================================
   function addFloatingContainer(colCount) {
     const targetPageVal = document.getElementById('targetPageSelect').value;
@@ -579,6 +583,7 @@
 
     const container = document.createElement('div');
     container.className = 'free-container group';
+    // ملء عرض الصفحة (210mm الكلي ناقص 10mm هوامش اليمين واليسار = 200mm)
     container.style.width = '200mm'; container.style.height = '45mm'; 
     container.style.top = '100mm'; container.style.left = '5mm';   
 
@@ -595,9 +600,11 @@
           <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
           <button onclick="insertGridContent(this, 'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📝 نص</button>
           <button onclick="insertGridContent(this, 'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">🖼️ صورة</button>
-          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 جدول</button>
+          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 إدراج جدول</button>
         </div>`;
       row.appendChild(col);
+      
+      // إضافة الفاصل (الـ Gap) الذي يبلغ عرضه 5mm ويعمل كأداة تحجيم بنفس الوقت
       if (i < colCount - 1) {
         const gutter = document.createElement('div'); gutter.className = 'col-resizer';
         row.appendChild(gutter); makeColResizable(col, gutter, row);
@@ -623,16 +630,66 @@
           <span class="font-bold">+ اختر صورة</span><input type="file" class="hidden" accept="image/*" onchange="loadGridImage(this)">
         </label>`;
     } else if (type === 'table') {
+      // إظهار خيارات الجداول المرتبطة بالبيانات بدلاً من إنشاء جدول فارغ
       col.innerHTML = `
-        <div class="spec-block w-full h-full" style="--key-width: 50%;">
-          <div class="table-col-resizer no-print" style="right: 50%;"></div>
-          <div class="spec-header"><span style="position:relative; z-index:2;" contenteditable="true">عنوان الجدول</span></div>
-          <div class="table-rows-wrapper flex-1 bg-white flex flex-col"><div class="spec-row flex-1"><span class="spec-key" contenteditable="true">مواصفة 1</span><span class="spec-val" contenteditable="true">قيمة</span></div></div>
+        <div class="flex flex-col gap-2 p-2 w-full h-full justify-center bg-gray-50 border border-dashed border-gray-300">
+            <label class="text-xs text-gray-700 font-bold text-center">اختر الجدول المرتبط بالبيانات:</label>
+            <select class="grid-table-select text-xs p-1.5 border border-gray-300 rounded w-full outline-none">
+                <option value="engine">المحرك</option>
+                <option value="hydraulic">النظام الهيدروليكي</option>
+                <option value="drive">نظام الدفع</option>
+                <option value="performance">الأداء ونطاق العمل</option>
+                <option value="weights">الأوزان والسعات</option>
+                <option value="std_equipment">التجهيزات القياسية</option>
+                <option value="opt_equipment">التجهيزات الاختيارية</option>
+                <option value="notes">الملاحظات</option>
+                <option value="dimensions">الأبعاد</option>
+            </select>
+            <button onclick="insertGridTableConfirmed(this)" class="bg-[#f5b700] text-black text-xs font-bold py-1.5 rounded hover:brightness-110">تأكيد الإدراج</button>
+            <button onclick="cancelGridTable(this)" class="bg-gray-300 text-black text-xs font-bold py-1 rounded">إلغاء</button>
         </div>`;
+    }
+  }
+
+  function cancelGridTable(btn) {
+      const col = btn.closest('.grid-col');
+      col.innerHTML = `
+        <div class="flex flex-col gap-1 items-center justify-center h-full no-print bg-gray-100 rounded border border-gray-300 p-2">
+          <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
+          <button onclick="insertGridContent(this, 'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📝 نص</button>
+          <button onclick="insertGridContent(this, 'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">🖼️ صورة</button>
+          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 إدراج جدول</button>
+        </div>`;
+  }
+
+  function insertGridTableConfirmed(btn) {
+      const col = btn.closest('.grid-col');
+      const select = col.querySelector('.grid-table-select');
+      const key = select.value;
+      const title = select.options[select.selectedIndex].text;
+      
+      const isOneColumn = (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes' || key === 'dimensions');
+
+      col.innerHTML = `
+        <div class="spec-block w-full h-full relative" data-dynamic-type="table" data-dynamic-key="${key}" style="--key-width: 50%;">
+          ${!isOneColumn ? '<div class="table-col-resizer no-print" style="right: 50%;"></div>' : ''}
+          <div class="spec-header group relative">
+              <span style="position:relative; z-index:2;" contenteditable="true">${title}</span>
+              ${createToolbarHTML('span', '-55px')}
+          </div>
+          <div class="flex-1 flex flex-col relative group">
+              ${createToolbarHTML('.spec-row span', '-55px')}
+              <div class="table-rows-wrapper flex-1 bg-white flex flex-col">
+                  <div class="p-4 text-center text-gray-400 text-xs flex-1 flex items-center justify-center border-t border-gray-200">
+                      [ سيتم تعبئة ${title} هنا ]
+                  </div>
+              </div>
+          </div>
+        </div>`;
+        
       const block = col.querySelector('.spec-block');
       const resizer = col.querySelector('.table-col-resizer');
-      makeTableColResizable(resizer, block);
-    }
+      if(resizer) makeTableColResizable(resizer, block);
   }
 
   function loadGridImage(input) {
@@ -664,7 +721,6 @@
         const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
         wrapper.appendChild(dragHandle);
 
-        // شريط أدوات مبسط مخصص للصور (فقط للتحكم بالطبقات بدون خطوط)
         wrapper.insertAdjacentHTML('beforeend', `
             <div class="image-toolbar no-print">
                 <div class="flex gap-1" title="ترتيب الطبقات">
@@ -702,7 +758,7 @@
     const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
     wrapper.appendChild(dragHandle);
     
-    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content'));
+    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content', '-65px'));
 
     const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "نص حر قابل للتعديل..."; 
     editableText.className = 'dynamic-content outline-none font-black break-words'; editableText.style.color = '#000000'; editableText.style.fontSize = '22px';
@@ -718,9 +774,6 @@
     attachResizers(wrapper, targetPage);
   }
 
-  // ==========================================
-  // دالة بيانات التواصل التفاعلية (المضافة حديثاً)
-  // ==========================================
   function addContactBlock() {
     const targetPageVal = document.getElementById('targetPageSelect').value;
     const targetPage = document.getElementById(`page-${targetPageVal}`);
@@ -740,8 +793,7 @@
     const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
     wrapper.appendChild(dragHandle);
 
-    // ربط شريط الأدوات الذكي للتحكم بحجم ونوع الخط الخاص بالنص
-    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.contact-text'));
+    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.contact-text', '-65px'));
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'flex items-center gap-2 justify-center whitespace-nowrap';
@@ -971,12 +1023,12 @@
         pages: pagesHTML, state: state,
         pageCount: document.getElementById('pageCount').value, hasCover: document.getElementById('hasCover').checked
     };
-    localStorage.setItem('scor_master_template_v9', JSON.stringify(templateData));
+    localStorage.setItem('scor_master_template_v10', JSON.stringify(templateData));
     alert('تم حفظ ترتيب وتنسيق الصفحات كقالب بنجاح!');
   }
 
   function loadTemplate() {
-    const dataStr = localStorage.getItem('scor_master_template_v9');
+    const dataStr = localStorage.getItem('scor_master_template_v10');
     if(!dataStr) { alert('لا يوجد قالب محفوظ مسبقاً!'); return; }
     const templateData = JSON.parse(dataStr);
     
