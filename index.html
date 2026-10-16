@@ -1,1131 +1,714 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCOR Master Studio - Ultimate Edition (V 10.1 - Full Screen Preview)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
-    
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; font-style: normal; }
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; font-style: normal; }
-    @font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCOR Master Studio - V 10.2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; }
 
-    :root { --main-font: 'SCORFont', 'Cairo', sans-serif; --base-size: 14px; }
-    body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
-    
-    .canvas-container { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 40px; padding-bottom: 100px; overflow-y: auto; gap: 30px; }
-    .a4-page { font-family: var(--main-font); font-size: var(--base-size); width: 210mm; height: 297mm; background-color: #fff; color: #000; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.5); transform: scale(0.65); transform-origin: top center; margin-bottom: -100mm; overflow: hidden; flex-shrink: 0; background-size: cover; background-position: center; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .a4-page::before { content: ''; position: absolute; top: 0; bottom: 0; left: 5mm; width: 1px; border-left: 1px dashed rgba(245, 183, 0, 0.4); pointer-events: none; z-index: 1; }
-    .a4-page::after { content: ''; position: absolute; top: 0; bottom: 0; right: 5mm; width: 1px; border-right: 1px dashed rgba(245, 183, 0, 0.4); pointer-events: none; z-index: 1; }
+:root { --main-font: 'Cairo', sans-serif; }
+body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 
-    .page-header { position: absolute; top: 0; left: 0; width: 100%; height: 35mm; background-size: 100% auto; background-position: top center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
-    .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
-    .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
+.canvas-container { height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 40px; padding-bottom: 100px; overflow-y: auto; gap: 30px; }
+.a4-page { font-family: var(--main-font); font-weight: 700; width: 210mm; height: 297mm; background-color: #fff; color: #000; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.5); transform: scale(0.65); transform-origin: top center; margin-bottom: -100mm; overflow: hidden; flex-shrink: 0; background-size: cover; background-position: center; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+.a4-page::before { content: ''; position: absolute; top: 0; bottom: 0; left: 5mm; width: 1px; border-left: 1px dashed rgba(245,183,0,0.4); pointer-events: none; z-index: 1; }
+.a4-page::after { content: ''; position: absolute; top: 0; bottom: 0; right: 5mm; width: 1px; border-right: 1px dashed rgba(245,183,0,0.4); pointer-events: none; z-index: 1; }
 
-    /* Tables & Zebra Striping */
-    .spec-block { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
-    .spec-header { position: relative; background: #1f2937; color: #ffffff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; border: none; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
-    .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
-    
-    .table-rows-wrapper { display: flex; flex-direction: column; background-color: #fff; flex: 1; font-size: 14px; color: #111827; }
-    .spec-row { display: flex; justify-content: space-between; padding: 6px 12px; font-size: inherit; align-items: center; border-bottom: 1px solid #e5e7eb; }
-    
-    .spec-block .spec-row:nth-child(even) { background-color: #fef0c7 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .spec-block .spec-row:nth-child(odd) { background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
-    
-    .spec-key { font-weight: 700; color: inherit; outline: none; width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
-    .spec-val { font-weight: 900; color: inherit; outline: none; text-align: right; flex-grow: 1; padding-right: 10px; }
-    
-    .table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; transition: background 0.2s; }
-    .table-col-resizer:hover, .table-col-resizer:active { background: rgba(245, 183, 0, 0.6); }
+.page-header { position: absolute; top: 0; left: 0; width: 100%; height: 35mm; background-size: 100% auto; background-position: top center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
+.is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
+.is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 
-    /* Containers */
-    .free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248, 249, 250, 0.9); display: flex; flex-direction: column; z-index: 5; }
-    .free-container:hover { border-color: #f5b700; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
-    .drag-bar { height: 24px; background: #282c35; color: #f5b700; display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 11px; opacity: 0; transition: opacity 0.2s; flex-shrink: 0;}
-    .free-container:hover .drag-bar { opacity: 1; }
-    .drag-title { flex: 1; text-align: center; cursor: grab; }
+/* الجداول: الافتراضي 10px كايرو بولد أسود — يمكن تغييره من لوحة التحكم عبر المتغيرات --t-* */
+.spec-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
+.spec-header { position: relative; background: #1f2937; color: #fff; padding: 8px 15px 8px 50px; font-weight: 900; font-size: 1.1em; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
+.spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
+.table-rows-wrapper { display: flex; flex-direction: column; background: #fff; flex: 1; }
+.table-rows-wrapper .spec-row span { font-family: var(--t-family, 'Cairo', sans-serif); font-size: var(--t-size, 10px); font-weight: var(--t-weight, 700); color: var(--t-color, #000); outline: none; }
+.spec-row { display: flex; justify-content: space-between; padding: 6px 12px; align-items: center; border-bottom: 1px solid #e5e7eb; }
+.spec-block .spec-row:nth-child(even) { background-color: #fef0c7 !important; }
+.spec-block .spec-row:nth-child(odd) { background-color: #fff !important; }
+.table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
+.spec-key { width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
+.spec-val { text-align: right; flex-grow: 1; padding-right: 10px; }
+.table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; }
+.table-col-resizer:hover, .table-col-resizer:active { background: rgba(245,183,0,0.6); }
 
-    /* Grid Columns System */
-    .grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
-    .grid-col { flex: 1; min-width: 20px; position: relative; display: flex; flex-direction: column; }
-    
-    /* فاصل الأعمدة 5mm مطابق للهوامش الجانبية */
-    .col-resizer { width: 5mm; background: transparent; position: relative; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
-    .col-resizer::after { content: ''; position: absolute; width: 1px; top: 0; bottom: 0; border-left: 1px dashed rgba(0,0,0,0.15); border-right: 1px dashed rgba(0,0,0,0.15); background: transparent; }
-    .free-container:hover .col-resizer::after { background: rgba(245, 183, 0, 0.1); border-color: #f5b700; }
-    .col-resizer:hover, .col-resizer:active { background: rgba(245, 183, 0, 0.2); }
+/* العناصر: لا تظهر أي أدوات إلا بالنقر (حالة selected) */
+.free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248,249,250,0.9); display: flex; flex-direction: column; z-index: 5; cursor: move; }
+.draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; cursor: move; }
+[contenteditable="true"] { cursor: text; }
+.selected { outline: 2px solid #f5b700; }
+.draggable-wrapper img { -webkit-user-drag: none; user-select: none; }
+.drag-bar, .drag-handle, .delete-btn, .text-toolbar, .image-toolbar { display: none !important; } /* توافق مع قوالب قديمة */
 
-    /* 8-Directional Resizers */
-    .resizer { position: absolute; background: #fff; border: 1px solid #f5b700; opacity: 0; z-index: 20; box-shadow: 0 0 3px rgba(0,0,0,0.2); transition: opacity 0.2s; }
-    .free-container:hover .resizer, .draggable-wrapper:hover .resizer { opacity: 1; }
-    .resizer.t { top: -4px; left: 50%; width: 10px; height: 8px; transform: translateX(-50%); cursor: ns-resize; }
-    .resizer.b { bottom: -4px; left: 50%; width: 10px; height: 8px; transform: translateX(-50%); cursor: ns-resize; }
-    .resizer.l { left: -4px; top: 50%; width: 8px; height: 10px; transform: translateY(-50%); cursor: ew-resize; }
-    .resizer.r { right: -4px; top: 50%; width: 8px; height: 10px; transform: translateY(-50%); cursor: ew-resize; }
-    .resizer.tl { top: -4px; left: -4px; width: 8px; height: 8px; cursor: nwse-resize; }
-    .resizer.tr { top: -4px; right: -4px; width: 8px; height: 8px; cursor: nesw-resize; }
-    .resizer.bl { bottom: -4px; left: -4px; width: 8px; height: 8px; cursor: nesw-resize; }
-    .resizer.br { bottom: -4px; right: -4px; width: 8px; height: 8px; cursor: nwse-resize; }
+.grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
+.grid-col { flex: 1; min-width: 20px; position: relative; display: flex; flex-direction: column; }
+.col-resizer { width: 5mm; background: transparent; position: relative; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
+.col-resizer::after { content: ''; position: absolute; width: 1px; top: 0; bottom: 0; border-left: 1px dashed rgba(0,0,0,0.15); }
+.selected .col-resizer::after { border-color: #f5b700; }
+.col-resizer:hover, .col-resizer:active { background: rgba(245,183,0,0.2); }
 
-    .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; }
-    .draggable-wrapper:hover { border: 2px dashed #f5b700; z-index: 10; }
-    .drag-handle { cursor: grab; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); color: white; border-radius: 4px; padding: 2px 5px; margin-left: 5px; opacity: 0; font-size: 16px; z-index: 100; }
-    .draggable-wrapper:hover .drag-handle { opacity: 1; }
+/* مقابض التحجيم: تظهر فقط عند التحديد — الحواف كاملة قابلة للسحب */
+.resizer { display: none; position: absolute; z-index: 20; }
+.selected > .resizer { display: block; }
+.resizer.t, .resizer.b { left: 0; width: 100%; height: 12px; cursor: ns-resize; }
+.resizer.t { top: -6px; } .resizer.b { bottom: -6px; }
+.resizer.l, .resizer.r { top: 0; height: 100%; width: 12px; cursor: ew-resize; }
+.resizer.l { left: -6px; } .resizer.r { right: -6px; }
+.resizer.tl, .resizer.tr, .resizer.bl, .resizer.br { width: 14px; height: 14px; background: #f5b700; border: 1px solid #000; z-index: 21; }
+.resizer.tl { top: -7px; left: -7px; cursor: nwse-resize; } .resizer.tr { top: -7px; right: -7px; cursor: nesw-resize; }
+.resizer.bl { bottom: -7px; left: -7px; cursor: nesw-resize; } .resizer.br { bottom: -7px; right: -7px; cursor: nwse-resize; }
 
-    /* Smart Toolbar */
-    .text-toolbar { position: absolute; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.15); align-items: center; width: max-content; }
-    .text-toolbar::after { content: ''; position: absolute; bottom: -20px; left: 0; width: 100%; height: 20px; background: transparent; }
-    .group:hover > .text-toolbar, .text-toolbar:hover { opacity: 1; visibility: visible; }
-    
-    .text-toolbar input[type="color"] { width: 22px; height: 22px; padding: 0; border: none; border-radius: 4px; cursor: pointer; }
-    .text-toolbar input[type="number"] { width: 45px; text-align: center; font-size: 12px; font-weight: bold; color: black; border: 1px solid #ccc; border-radius: 3px; }
-    .text-toolbar select { font-size: 12px; color: black; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; background: #f9fafb; outline: none; }
-    .align-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 3px; cursor: pointer; padding: 2px 6px; font-size: 11px; font-weight: bold; color: #374151; transition: all 0.2s; }
-    .align-btn:hover { background: #f5b700; color: #000; border-color: #f5b700; }
+.snap-guide-v { position: absolute; width: 1px; top: 0; bottom: 0; background: #ef4444; z-index: 9999; display: none; pointer-events: none; }
+.snap-guide-h { position: absolute; height: 1px; left: 0; right: 0; background: #ef4444; z-index: 9999; display: none; pointer-events: none; }
+a.contact-text, span.contact-text { text-decoration: none; outline: none; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #15171c; }
+::-webkit-scrollbar-thumb { background: #f5b700; border-radius: 4px; }
+.pin { background: #181b22; border: 1px solid #343946; color: #fff; border-radius: 4px; font-size: 12px; padding: 4px; outline: none; }
+.pbtn { background: #282c35; color: #fff; border: 1px solid #4b5563; border-radius: 4px; font-size: 11px; font-weight: 700; padding: 4px 8px; cursor: pointer; }
+.pbtn:hover { background: #f5b700; color: #000; }
 
-    /* شريط أدوات للصور */
-    .image-toolbar { position: absolute; top: -35px; right: 50%; transform: translateX(50%); background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; display: flex; gap: 4px; padding: 4px 8px; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-    .image-toolbar::after { content: ''; position: absolute; bottom: -15px; left: 0; width: 100%; height: 15px; }
-    .group:hover > .image-toolbar, .image-toolbar:hover { opacity: 1; visibility: visible; }
-
-    /* Snap Guides */
-    .snap-guide-v { position: absolute; width: 1px; top: 0; bottom: 0; background-color: #ef4444; z-index: 9999; display: none; pointer-events: none; }
-    .snap-guide-h { position: absolute; height: 1px; left: 0; right: 0; background-color: #ef4444; z-index: 9999; display: none; pointer-events: none; }
-
-    a.contact-text, span.contact-text { text-decoration: none; outline: none; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #15171c; }
-    ::-webkit-scrollbar-thumb { background: #f5b700; border-radius: 4px; }
-
-    @media print {
-      body { background: none; }
-      #sidebar { display: none !important; }
-      #toggleBtn { display: none !important; }
-      #pagesContainer { width: 100% !important; padding: 0 !important; background: none !important; overflow: visible !important; }
-      .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
-      .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; width: 210mm !important; height: 297mm !important; page-break-after: always; }
-      .a4-page::before, .a4-page::after { display: none !important; }
-      .drag-bar, .resizer, .col-resizer, .table-col-resizer, .drag-handle, .text-toolbar, .image-toolbar, .no-print, .delete-btn, .snap-guide-v, .snap-guide-h { display: none !important; }
-      .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
-    }
-  </style>
+@media print {
+  body { background: none; }
+  #sidebar { display: none !important; }
+  #pagesContainer { width: 100% !important; padding: 0 !important; background: none !important; overflow: visible !important; }
+  .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
+  .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
+  .a4-page::before, .a4-page::after { display: none !important; }
+  .resizer, .col-resizer, .table-col-resizer, .no-print, .snap-guide-v, .snap-guide-h { display: none !important; }
+  .selected { outline: none !important; }
+  .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
+}
+</style>
 </head>
 <body class="h-screen flex overflow-hidden">
-  
-  <!-- لوحة التحكم الجانبية -->
-  <div id="sidebar" class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50 transition-all duration-300">
-    <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
-      <h1 class="text-2xl font-black text-[#f5b700]">SCOR Studio</h1>
-      <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
-    </div>
 
-    <!-- 0. إدارة القوالب -->
-    <div class="bg-[#1f2937] p-2.5 rounded-lg border border-[#f5b700] flex gap-2">
-      <button onclick="saveTemplate()" class="w-1/2 bg-[#f5b700] text-black font-bold text-xs py-2 rounded hover:brightness-110 shadow-lg">💾 حفظ كقالب افتراضي</button>
-      <button onclick="loadTemplate()" class="w-1/2 bg-[#374151] text-white font-bold text-xs py-2 rounded hover:bg-[#4b5563]">📂 استرجاع القالب</button>
-    </div>
-
-    <!-- إعدادات المستند والخلفيات -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">1. إعدادات المستند والهوية البصرية</h2>
-      <div class="flex items-center justify-between">
-        <label class="text-xs font-bold text-gray-300">تضمين غلاف أمامي:</label>
-        <input type="checkbox" id="hasCover" class="w-4 h-4 accent-[#f5b700]" onchange="renderPages()">
-      </div>
-      <div class="flex items-center justify-between">
-        <label class="text-xs font-bold text-gray-300">عدد الصفحات الداخلية:</label>
-        <input type="number" id="pageCount" min="1" max="20" value="2" class="w-14 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-center text-xs" onchange="renderPages()">
-      </div>
-      
-      <div class="flex gap-2 mt-2">
-        <div class="w-1/2">
-          <label class="block text-[10px] font-bold text-gray-400">الترويسة (Header):</label>
-          <input type="file" id="globalHeader" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1">
-        </div>
-        <div class="w-1/2">
-          <label class="block text-[10px] font-bold text-gray-400">التذييل (Footer العادي):</label>
-          <input type="file" id="globalFooter" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1">
-        </div>
-      </div>
-      <div class="mt-1 pt-1 border-t border-[#282c35]">
-        <label class="block text-[10px] font-bold text-[#f5b700] mb-1">تذييل الصفحة الأخيرة فقط:</label>
-        <input type="file" id="lastFooter" accept="image/*" class="w-full text-[10px] text-[#f5b700] bg-[#181b22] border border-[#f5b700] rounded p-1">
-      </div>
-    </div>
-
-    <!-- محرك بناء القوالب -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2 relative shadow-lg">
-      <h2 class="text-white font-black text-sm border-b border-[#282c35] pb-2 text-center text-[#f5b700]">2. بناء القالب الآلي (بيانات الشيت)</h2>
-      
-      <!-- الخطوة 1 -->
-      <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 1: تخطيط الصفحة (إدراج الحاويات الفارغة)</label>
-      <div class="flex items-center gap-2 mt-1">
-        <label class="text-[10px] text-gray-400 w-1/4">العمل على صفحة:</label>
-        <select id="targetPageSelect" class="w-3/4 bg-[#181b22] border border-[#343946] p-1.5 rounded text-[#f5b700] text-xs font-bold outline-none"></select>
-      </div>
-      
-      <select id="dataSourceSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
-        <optgroup label="نصوص العناوين والوصف">
-            <option value="text:model_name">اسم الموديل (عنوان)</option>
-            <option value="text:marketing_slogan">العبارة التسويقية (نص)</option>
-            <option value="text:short_description">الوصف المختصر (نص)</option>
-            <option value="text:marketing_description">الوصف التسويقي (نص للمضخات)</option>
-        </optgroup>
-        <optgroup label="المواصفات الفنية">
-            <option value="table:engine">المحرك</option>
-            <option value="table:hydraulic">النظام الهيدروليكي</option>
-            <option value="table:drive">نظام الدفع</option>
-            <option value="table:performance">الأداء ونطاق العمل</option>
-            <option value="table:weights">الأوزان والسعات</option>
-            <option value="table:std_equipment">التجهيزات القياسية</option>
-            <option value="table:opt_equipment">التجهيزات الاختيارية</option>
-            <option value="table:notes">الملاحظات</option>
-            <option value="table:dimensions">الأبعاد</option>
-        </optgroup>
-      </select>
-      <input type="text" id="sectionTitle" placeholder="تخصيص عنوان الجدول (اختياري)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold outline-none mt-1">
-
-      <button onclick="insertPlaceholder()" class="w-full bg-[#282c35] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-gray-300 hover:text-black transition border border-gray-600">
-        + إدراج كحاوية تخطيط فارغة بالمكان المطلوب
-      </button>
-
-      <hr class="border-[#282c35] my-2">
-
-      <!-- الخطوة 2 -->
-      <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 2: اختيار الموديل وملء الحاويات بنقرة واحدة</label>
-      <div class="flex gap-2">
-          <div class="w-1/2">
-              <label class="text-[10px] font-bold text-[#f5b700]">الفئة:</label>
-              <select id="sheetCategory" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="updateModelsList()">
-                <option value="skid_steers">معدات انزلاقية</option>
-                <option value="pumps">مضخات بيتون</option>
-              </select>
-          </div>
-          <div class="w-1/2">
-              <label class="text-[10px] font-bold text-[#f5b700]">الموديل:</label>
-              <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
-                  <option value="">جاري التحميل...</option>
-              </select>
-          </div>
-      </div>
-
-      <button onclick="fillAllPlaceholders()" class="w-full bg-[#f5b700] text-black text-xs font-black py-3 mt-2 rounded shadow-lg hover:brightness-110 transition flex items-center justify-center gap-2">
-        🚀 تعبئة كافة الحاويات في المخطط
-      </button>
-    </div>
-
-    <!-- الصور الحرة، الحاويات، وبيانات التواصل -->
-    <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
-      <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. إضافة الحاويات، الصور، والنصوص الحرة</h2>
-      
-      <div class="grid grid-cols-5 gap-1 mt-1">
-        <button onclick="addFloatingContainer(1)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">1 عمود</button>
-        <button onclick="addFloatingContainer(2)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">2 عمود</button>
-        <button onclick="addFloatingContainer(3)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">3 أعمدة</button>
-        <button onclick="addFloatingContainer(4)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">4 أعمدة</button>
-        <button onclick="addFloatingContainer(5)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">5 أعمدة</button>
-      </div>
-
-      <div class="flex gap-1 mt-1">
-        <button onclick="addFreeText()" class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر</button>
-        <label class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-center text-[10px] font-bold py-1.5 rounded cursor-pointer hover:bg-gray-700">
-          + صورة حرة
-          <input type="file" id="freeImageUpload" accept="image/*" class="hidden">
-        </label>
-      </div>
-
-      <!-- قسم بيانات التواصل المدمج -->
-      <div class="mt-1 pt-2 border-t border-[#282c35]">
-        <select id="contactPresetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-[10px] mb-1 outline-none">
-          <option value="4915118316638" data-type="phone">004915118316638</option>
-          <option value="4917634389434" data-type="phone">004917634389434</option>
-          <option value="963939062887" data-type="phone">00963939062887</option>
-          <option value="963941435541" data-type="phone">00963941435541</option>
-          <option value="https://www.scor-sy.de" data-type="web">www.scor-sy.de</option>
-          <option value="mailto:info@scor-sy.de" data-type="web">info@scor-sy.de</option>
-        </select>
-        <button onclick="addContactBlock()" class="w-full bg-[#f5b700] text-black text-[10px] font-bold py-1.5 rounded hover:brightness-110">+ بيانات تواصل (للفوتر)</button>
-      </div>
-    </div>
-
-    <button onclick="window.print()" class="w-full bg-white text-black font-black py-3 rounded-lg mt-auto hover:bg-gray-200 border-2 border-black">
-      طباعة / تصدير KTLG النهائي (PDF)
-    </button>
+<div id="sidebar" class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50">
+  <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
+    <h1 class="text-2xl font-black text-[#f5b700]">SCOR Studio</h1>
+    <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
   </div>
 
-  <!-- زر طي وتوسيع اللوحة -->
-  <button onclick="toggleSidebar()" id="toggleBtn" class="fixed bottom-5 left-5 z-[9999] bg-[#f5b700] text-black text-xs font-black px-4 py-3 rounded-full shadow-lg hover:scale-105 transition flex items-center justify-center gap-2 no-print border-2 border-black">
-    👁️ معاينة الورقة كاملة
-  </button>
+  <!-- لوحة خصائص العنصر المحدد (ثابتة بأعلى اللوحة) -->
+  <div class="sticky top-0 z-30 bg-[#0e1014] p-3 rounded-lg border-2 border-[#f5b700] flex flex-col gap-2 shadow-xl">
+    <div class="flex justify-between items-center">
+      <h2 class="text-[#f5b700] font-black text-xs">🎛️ خصائص العنصر المحدد</h2>
+      <span id="selLabel" class="text-[10px] text-gray-400">لا يوجد تحديد</span>
+    </div>
+    <div id="propsEmpty" class="text-[11px] text-gray-400 text-center py-1">انقر على أي عنصر في الصفحة لتظهر خياراته هنا</div>
+    <div id="propsBody" style="display:none" class="flex-col gap-2">
+      <div id="propsText" class="flex-col gap-2" style="display:flex">
+        <div class="flex gap-2 items-center">
+          <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
+          <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
+          <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
+            <option value="400">عادي</option><option value="700">بولد</option><option value="900">أسود</option>
+          </select>
+          <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
+            <option value="cairo">Cairo</option><option value="scor">SCOR</option>
+          </select>
+        </div>
+        <div class="flex gap-1">
+          <button class="pbtn" onclick="applyAlign('right')">يمين</button>
+          <button class="pbtn" onclick="applyAlign('center')">وسط</button>
+          <button class="pbtn" onclick="applyAlign('left')">يسار</button>
+          <button class="pbtn" onclick="applyAlign('justify')">ضبط</button>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span class="text-[10px] text-gray-400">عرض</span><input type="number" id="pW" step="0.5" class="pin w-16 text-center" oninput="setGeom('width',this.value)">
+        <span class="text-[10px] text-gray-400">ارتفاع</span><input type="number" id="pH" step="0.5" class="pin w-16 text-center" oninput="setGeom('height',this.value)">
+        <span class="text-[10px] text-gray-400">مم</span>
+      </div>
+      <div class="flex gap-1 items-center">
+        <button class="pbtn" title="مقدمة" onclick="zOrder('front')">⏫</button>
+        <button class="pbtn" title="للأمام" onclick="zOrder('up')">🔼</button>
+        <button class="pbtn" title="للخلف" onclick="zOrder('down')">🔽</button>
+        <button class="pbtn" title="مؤخرة" onclick="zOrder('back')">⏬</button>
+        <button class="pbtn mr-auto" style="color:#f87171" onclick="delSel()">🗑 حذف (Delete)</button>
+      </div>
+      <div class="text-[10px] text-gray-500">اسحب العنصر من أي مكان • اسحب أي حافة أو زاوية للتحجيم (Shift مع الزاوية = حفظ النسبة)</div>
+    </div>
+  </div>
 
-  <!-- مساحة العمل الحية -->
-  <div id="pagesContainer" class="w-[55%] h-full bg-[#181b22] canvas-container transition-all duration-300"></div>
+  <div class="bg-[#1f2937] p-2.5 rounded-lg border border-[#f5b700] flex gap-2">
+    <button onclick="saveTemplate()" class="w-1/2 bg-[#f5b700] text-black font-bold text-xs py-2 rounded hover:brightness-110">💾 حفظ كقالب افتراضي</button>
+    <button onclick="loadTemplate()" class="w-1/2 bg-[#374151] text-white font-bold text-xs py-2 rounded hover:bg-[#4b5563]">📂 استرجاع القالب</button>
+  </div>
+
+  <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex flex-col gap-2">
+    <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">1. إعدادات المستند والهوية البصرية</h2>
+    <div class="flex items-center justify-between">
+      <label class="text-xs font-bold text-gray-300">تضمين غلاف أمامي:</label>
+      <input type="checkbox" id="hasCover" class="w-4 h-4 accent-[#f5b700]" onchange="renderPages()">
+    </div>
+    <div class="flex items-center justify-between">
+      <label class="text-xs font-bold text-gray-300">عدد الصفحات الداخلية:</label>
+      <input type="number" id="pageCount" min="1" max="20" value="2" class="w-14 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-center text-xs" onchange="renderPages()">
+    </div>
+    <div class="flex gap-2 mt-2">
+      <div class="w-1/2"><label class="block text-[10px] font-bold text-gray-400">الترويسة (Header):</label>
+        <input type="file" id="globalHeader" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1"></div>
+      <div class="w-1/2"><label class="block text-[10px] font-bold text-gray-400">التذييل (Footer العادي):</label>
+        <input type="file" id="globalFooter" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1"></div>
+    </div>
+    <div class="mt-1 pt-1 border-t border-[#282c35]">
+      <label class="block text-[10px] font-bold text-[#f5b700] mb-1">تذييل الصفحة الأخيرة فقط:</label>
+      <input type="file" id="lastFooter" accept="image/*" class="w-full text-[10px] text-[#f5b700] bg-[#181b22] border border-[#f5b700] rounded p-1">
+    </div>
+  </div>
+
+  <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2 shadow-lg">
+    <h2 class="font-black text-sm border-b border-[#282c35] pb-2 text-center text-[#f5b700]">2. بناء القالب الآلي (بيانات الشيت)</h2>
+    <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 1: تخطيط الصفحة (إدراج الحاويات الفارغة)</label>
+    <div class="flex items-center gap-2 mt-1">
+      <label class="text-[10px] text-gray-400 w-1/4">العمل على صفحة:</label>
+      <select id="targetPageSelect" class="w-3/4 bg-[#181b22] border border-[#343946] p-1.5 rounded text-[#f5b700] text-xs font-bold outline-none"></select>
+    </div>
+    <select id="dataSourceSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
+      <optgroup label="نصوص العناوين والوصف">
+        <option value="text:model_name">اسم الموديل (عنوان)</option>
+        <option value="text:marketing_slogan">العبارة التسويقية (نص)</option>
+        <option value="text:short_description">الوصف المختصر (نص)</option>
+        <option value="text:marketing_description">الوصف التسويقي (نص للمضخات)</option>
+      </optgroup>
+      <optgroup label="المواصفات الفنية">
+        <option value="table:engine">المحرك</option>
+        <option value="table:hydraulic">النظام الهيدروليكي</option>
+        <option value="table:drive">نظام الدفع</option>
+        <option value="table:performance">الأداء ونطاق العمل</option>
+        <option value="table:weights">الأوزان والسعات</option>
+        <option value="table:std_equipment">التجهيزات القياسية</option>
+        <option value="table:opt_equipment">التجهيزات الاختيارية</option>
+        <option value="table:notes">الملاحظات</option>
+        <option value="table:dimensions">الأبعاد</option>
+      </optgroup>
+    </select>
+    <input type="text" id="sectionTitle" placeholder="تخصيص عنوان الجدول (اختياري)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold outline-none mt-1">
+    <button onclick="insertPlaceholder()" class="w-full bg-[#282c35] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-gray-300 hover:text-black transition border border-gray-600">+ إدراج كحاوية تخطيط فارغة بالمكان المطلوب</button>
+    <hr class="border-[#282c35] my-2">
+    <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 2: اختيار الموديل وملء الحاويات بنقرة واحدة</label>
+    <div class="flex gap-2">
+      <div class="w-1/2"><label class="text-[10px] font-bold text-[#f5b700]">الفئة:</label>
+        <select id="sheetCategory" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="updateModelsList()">
+          <option value="skid_steers">معدات انزلاقية</option><option value="pumps">مضخات بيتون</option>
+        </select></div>
+      <div class="w-1/2"><label class="text-[10px] font-bold text-[#f5b700]">الموديل:</label>
+        <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none"><option value="">جاري التحميل...</option></select></div>
+    </div>
+    <button onclick="fillAllPlaceholders()" class="w-full bg-[#f5b700] text-black text-xs font-black py-3 mt-2 rounded shadow-lg hover:brightness-110 transition">🚀 تعبئة كافة الحاويات في المخطط</button>
+  </div>
+
+  <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
+    <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. إضافة الحاويات، الصور، والنصوص الحرة</h2>
+    <div class="grid grid-cols-5 gap-1 mt-1">
+      <button onclick="addFloatingContainer(1)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">1 عمود</button>
+      <button onclick="addFloatingContainer(2)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">2 عمود</button>
+      <button onclick="addFloatingContainer(3)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">3 أعمدة</button>
+      <button onclick="addFloatingContainer(4)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">4 أعمدة</button>
+      <button onclick="addFloatingContainer(5)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">5 أعمدة</button>
+    </div>
+    <div class="flex gap-1 mt-1">
+      <button onclick="addFreeText()" class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر</button>
+      <label class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-center text-[10px] font-bold py-1.5 rounded cursor-pointer hover:bg-gray-700">+ صورة حرة
+        <input type="file" id="freeImageUpload" accept="image/*" class="hidden"></label>
+    </div>
+    <div class="mt-1 pt-2 border-t border-[#282c35]">
+      <select id="contactPresetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-[10px] mb-1 outline-none">
+        <option value="4915118316638" data-type="phone">004915118316638</option>
+        <option value="4917634389434" data-type="phone">004917634389434</option>
+        <option value="963939062887" data-type="phone">00963939062887</option>
+        <option value="963941435541" data-type="phone">00963941435541</option>
+        <option value="https://www.scor-sy.de" data-type="web">www.scor-sy.de</option>
+        <option value="mailto:info@scor-sy.de" data-type="web">info@scor-sy.de</option>
+      </select>
+      <button onclick="addContactBlock()" class="w-full bg-[#f5b700] text-black text-[10px] font-bold py-1.5 rounded hover:brightness-110">+ بيانات تواصل (للفوتر)</button>
+    </div>
+  </div>
+
+  <button onclick="clearSel(); window.print()" class="w-full bg-white text-black font-black py-3 rounded-lg mt-auto hover:bg-gray-200 border-2 border-black">طباعة / تصدير KTLG النهائي (PDF)</button>
+</div>
+
+<div id="pagesContainer" class="flex-1 bg-[#181b22] canvas-container"></div>
 
 <script>
-  // ==========================================
-  // محرك الربط بقاعدة بيانات Google Sheets
-  // ==========================================
-  const SHEETS_ID = "1TDSSCDfAQJxz_zeulBrM6M79p9fw7mE1xTSvD-P_fuQ";
-  let database = { skid_steers: [], pumps: [] };
-  
-  const translationDict = {
-    'model_name': 'الاسم', 'marketing_slogan': 'العبارة التسويقية', 'short_description': 'الوصف المختصر', 'sub_type': 'النوع الفرعي', 'marketing_description': 'الوصف التسويقي',
-    'engine_type': 'نوع المحرك', 'engine_model': 'موديل المحرك', 'engine_capacity': 'سعة المحرك', 'engine_power': 'قدرة المحرك', 'engine_torque': 'عزم المحرك', 'engine_emissions': 'الانبعاثات', 'engine_cooling': 'تبريد المحرك', 'engine_start_system': 'تشغيل المحرك',
-    'hydraulic_system_type': 'نوع النظام', 'main_pump': 'المضخة الرئيسية', 'standard_flow': 'التدفق القياسي', 'max_pressure': 'الضغط الأقصى', 'aux_hydraulic_system': 'نظام هيدروليكي إضافي', 'aux_system_flow': 'تدفق النظام الإضافي', 'quick_couplers': 'توصيلات سريعة',
-    'drive_type': 'نوع الدفع', 'travel_speed': 'سرعة السير', 'max_travel_speed': 'السرعة القصوى', 'gradeability': 'قدرة التسلق', 'tires': 'الإطارات', 'steering_type': 'نمط التوجيه',
-    'rated_payload': 'الحمولة المقدرة', 'rated_load': 'الحمولة المقننة', 'bucket_capacity': 'سعة الدلو', 'dump_height': 'ارتفاع التفريغ', 'arm_length': 'طول الذراع', 'breakout_force': 'قوة الكسر', 'lifting_capacity': 'قدرة الرفع', 'performance_productivity': 'الإنتاجية', 'performance_pressure': 'الضغط', 'pump_vertical_fine': 'ضخ رأسي', 'pump_horizontal_fine': 'ضخ أفقي', 'max_aggregate_size': 'أقصى حجم للركام',
-    'operating_weight': 'الوزن التشغيلي', 'total_weight': 'الوزن الكلي', 'fuel_tank_capacity': 'سعة خزان الوقود', 'hydraulic_capacity': 'سعة الهيدروليك',
-    'std_equip_1': 'تجهيز قياسي 1', 'std_equip_2': 'تجهيز قياسي 2', 'std_equip_3': 'تجهيز قياسي 3', 'std_equip_4': 'تجهيز قياسي 4', 'std_equip_5': 'تجهيز قياسي 5', 'std_equip_6': 'تجهيز قياسي 6', 'std_equip_7': 'تجهيز قياسي 7', 'std_equip_8': 'تجهيز قياسي 8', 'std_equip_9': 'تجهيز قياسي 9', 'std_equip_10': 'تجهيز قياسي 10', 
-    'opt_equip_1': 'تجهيز اختياري 1', 'opt_equip_2': 'تجهيز اختياري 2', 'opt_equip_3': 'تجهيز اختياري 3', 'opt_equip_4': 'تجهيز اختياري 4', 'opt_equip_5': 'تجهيز اختياري 5', 'opt_equip_6': 'تجهيز اختياري 6',
-    'note_1': 'ملاحظة 1', 'note_2': 'ملاحظة 2', 'note_3': 'ملاحظة 3',
-    'dim_a': 'الطول الكلي مع الدلو', 'dim_b': 'الطول بدون الدلو', 'dim_c': 'قاعدة العجلات', 'dim_d': 'الارتفاع الكلي', 'dim_e': 'ارتفاع الكابينة', 'dim_f': 'ارتفاع محور الدوران', 'dim_g': 'ارتفاع الدلو في أقصى وضع', 'dim_h': 'ارتفاع التفريغ', 'dim_i': 'مدى التفريغ', 'dim_j': 'زاوية إرجاع الدلو عند الرفع', 'dim_k': 'زاوية التفريغ عند أقصى ارتفاع', 'dim_l': 'عمق الحفر أسفل مستوى الأرض', 'dim_m': 'الخلوص الأرضي', 'dim_n': 'العرض الكلي', 'dim_o': 'عرض المسار', 'dim_p': 'عرض الدلو', 'dim_q': 'عرض الدلو الداخلي', 'dim_r': 'نصف قطر الدوران الأمامي (بدون دلو)', 'dim_s': 'نصف قطر الدوران الأمامي (مع دلو)'
-  };
+// ================= بيانات Google Sheets =================
+const SHEETS_ID = "1TDSSCDfAQJxz_zeulBrM6M79p9fw7mE1xTSvD-P_fuQ";
+let database = { skid_steers: [], pumps: [] };
 
-  const tableGroups = {
-      'engine': ['engine_type', 'engine_model', 'engine_capacity', 'engine_power', 'engine_torque', 'engine_emissions', 'engine_cooling', 'engine_start_system'],
-      'hydraulic': ['hydraulic_system_type', 'main_pump', 'standard_flow', 'max_pressure', 'aux_hydraulic_system', 'aux_system_flow', 'quick_couplers', 'total_hydraulic_system'],
-      'drive': ['drive_type', 'travel_speed', 'max_travel_speed', 'gradeability', 'max_gradeability', 'tires', 'steering_type', 'steering_type_2'],
-      'performance': ['rated_payload', 'rated_load', 'bucket_capacity', 'std_bucket_capacity', 'dump_height', 'arm_length', 'breakout_force', 'bucket_breakout_force', 'lifting_capacity', 'max_lifting_force', 'rollback_angle_ground', 'max_dump_angle', 'rear_departure_angle', 'front_approach_angle', 'performance_productivity', 'performance_pressure', 'pump_vertical_fine', 'pump_horizontal_fine', 'pump_vertical_coarse', 'pump_horizontal_coarse', 'max_aggregate_size', 'cooling_system_performance'],
-      'weights': ['operating_weight', 'operating_weight_2', 'total_weight', 'fuel_tank_capacity', 'fuel_tank_2', 'hydraulic_capacity'],
-      'std_equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10'],
-      'opt_equipment': ['opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6'],
-      'notes': ['note_1', 'note_2', 'note_3'],
-      'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s']
-  };
+const translationDict = {
+  'model_name':'الاسم','marketing_slogan':'العبارة التسويقية','short_description':'الوصف المختصر','sub_type':'النوع الفرعي','marketing_description':'الوصف التسويقي',
+  'engine_type':'نوع المحرك','engine_model':'موديل المحرك','engine_capacity':'سعة المحرك','engine_power':'قدرة المحرك','engine_torque':'عزم المحرك','engine_emissions':'الانبعاثات','engine_cooling':'تبريد المحرك','engine_start_system':'تشغيل المحرك',
+  'hydraulic_system_type':'نوع النظام','main_pump':'المضخة الرئيسية','standard_flow':'التدفق القياسي','max_pressure':'الضغط الأقصى','aux_hydraulic_system':'نظام هيدروليكي إضافي','aux_system_flow':'تدفق النظام الإضافي','quick_couplers':'توصيلات سريعة',
+  'drive_type':'نوع الدفع','travel_speed':'سرعة السير','max_travel_speed':'السرعة القصوى','gradeability':'قدرة التسلق','tires':'الإطارات','steering_type':'نمط التوجيه',
+  'rated_payload':'الحمولة المقدرة','rated_load':'الحمولة المقننة','bucket_capacity':'سعة الدلو','dump_height':'ارتفاع التفريغ','arm_length':'طول الذراع','breakout_force':'قوة الكسر','lifting_capacity':'قدرة الرفع','performance_productivity':'الإنتاجية','performance_pressure':'الضغط','pump_vertical_fine':'ضخ رأسي','pump_horizontal_fine':'ضخ أفقي','max_aggregate_size':'أقصى حجم للركام',
+  'operating_weight':'الوزن التشغيلي','total_weight':'الوزن الكلي','fuel_tank_capacity':'سعة خزان الوقود','hydraulic_capacity':'سعة الهيدروليك',
+  'std_equip_1':'تجهيز قياسي 1','std_equip_2':'تجهيز قياسي 2','std_equip_3':'تجهيز قياسي 3','std_equip_4':'تجهيز قياسي 4','std_equip_5':'تجهيز قياسي 5','std_equip_6':'تجهيز قياسي 6','std_equip_7':'تجهيز قياسي 7','std_equip_8':'تجهيز قياسي 8','std_equip_9':'تجهيز قياسي 9','std_equip_10':'تجهيز قياسي 10',
+  'opt_equip_1':'تجهيز اختياري 1','opt_equip_2':'تجهيز اختياري 2','opt_equip_3':'تجهيز اختياري 3','opt_equip_4':'تجهيز اختياري 4','opt_equip_5':'تجهيز اختياري 5','opt_equip_6':'تجهيز اختياري 6',
+  'note_1':'ملاحظة 1','note_2':'ملاحظة 2','note_3':'ملاحظة 3',
+  'dim_a':'الطول الكلي مع الدلو','dim_b':'الطول بدون الدلو','dim_c':'قاعدة العجلات','dim_d':'الارتفاع الكلي','dim_e':'ارتفاع الكابينة','dim_f':'ارتفاع محور الدوران','dim_g':'ارتفاع الدلو في أقصى وضع','dim_h':'ارتفاع التفريغ','dim_i':'مدى التفريغ','dim_j':'زاوية إرجاع الدلو عند الرفع','dim_k':'زاوية التفريغ عند أقصى ارتفاع','dim_l':'عمق الحفر أسفل مستوى الأرض','dim_m':'الخلوص الأرضي','dim_n':'العرض الكلي','dim_o':'عرض المسار','dim_p':'عرض الدلو','dim_q':'عرض الدلو الداخلي','dim_r':'نصف قطر الدوران الأمامي (بدون دلو)','dim_s':'نصف قطر الدوران الأمامي (مع دلو)'
+};
 
-  async function fetchSheetData() {
-      const statusBadge = document.getElementById('dataStatus');
-      try {
-          const skidUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=546876457`;
-          const pumpUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=1201691755`;
-          await Promise.all([
-            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
-            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
-          ]);
-          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
-          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-          updateModelsList();
-      } catch (error) {
-          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
-          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
-      }
+const tableGroups = {
+  'engine': ['engine_type','engine_model','engine_capacity','engine_power','engine_torque','engine_emissions','engine_cooling','engine_start_system'],
+  'hydraulic': ['hydraulic_system_type','main_pump','standard_flow','max_pressure','aux_hydraulic_system','aux_system_flow','quick_couplers','total_hydraulic_system'],
+  'drive': ['drive_type','travel_speed','max_travel_speed','gradeability','max_gradeability','tires','steering_type','steering_type_2'],
+  'performance': ['rated_payload','rated_load','bucket_capacity','std_bucket_capacity','dump_height','arm_length','breakout_force','bucket_breakout_force','lifting_capacity','max_lifting_force','rollback_angle_ground','max_dump_angle','rear_departure_angle','front_approach_angle','performance_productivity','performance_pressure','pump_vertical_fine','pump_horizontal_fine','pump_vertical_coarse','pump_horizontal_coarse','max_aggregate_size','cooling_system_performance'],
+  'weights': ['operating_weight','operating_weight_2','total_weight','fuel_tank_capacity','fuel_tank_2','hydraulic_capacity'],
+  'std_equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10'],
+  'opt_equipment': ['opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6'],
+  'notes': ['note_1','note_2','note_3'],
+  'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s']
+};
+const oneColKeys = ['std_equipment','opt_equipment','notes','dimensions'];
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+async function fetchSheetData() {
+  const badge = document.getElementById('dataStatus');
+  const load = gid => new Promise((resolve, reject) => Papa.parse(`https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=${gid}`, { download: true, header: true, complete: r => resolve(r.data), error: reject }));
+  try {
+    [database.skid_steers, database.pumps] = await Promise.all([load(546876457), load(1201691755)]);
+    badge.innerHTML = 'متصل بالبيانات 🟢'; badge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
+    updateModelsList();
+  } catch (e) {
+    badge.innerHTML = 'خطأ بالاتصال 🔴'; badge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
   }
+}
 
-  function updateModelsList() {
-      const category = document.getElementById('sheetCategory').value;
-      const modelSelector = document.getElementById('modelSelector');
-      modelSelector.innerHTML = '';
-      const models = database[category];
-      if(!models || models.length === 0) { modelSelector.innerHTML = '<option value="">لا يوجد موديلات</option>'; return; }
-      models.forEach((row, index) => {
-          if(row.model_name && row.model_name.trim() !== '') {
-              const opt = document.createElement('option');
-              opt.value = index; opt.text = row.model_name;
-              modelSelector.appendChild(opt);
-          }
-      });
+function updateModelsList() {
+  const sel = document.getElementById('modelSelector');
+  sel.innerHTML = '';
+  const models = database[document.getElementById('sheetCategory').value];
+  if (!models || !models.length) { sel.innerHTML = '<option value="">لا يوجد موديلات</option>'; return; }
+  models.forEach((row, i) => { if (row.model_name && row.model_name.trim()) sel.add(new Option(row.model_name, i)); });
+}
+
+// ================= الترويسة والتذييل =================
+let state = { headerImg: '', footerImg: '', lastFooterImg: '' };
+['globalHeader:headerImg','globalFooter:footerImg','lastFooter:lastFooterImg'].forEach(s => {
+  const [id, key] = s.split(':');
+  document.getElementById(id).addEventListener('change', e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = ev => { state[key] = ev.target.result; updateHeadersAndFooters(); }; r.readAsDataURL(f);
+  });
+});
+function updateHeadersAndFooters() {
+  document.querySelectorAll('.page-header').forEach(el => { if (state.headerImg) el.style.backgroundImage = `url(${state.headerImg})`; });
+  document.querySelectorAll('.is-normal-footer').forEach(el => { if (state.footerImg) el.style.backgroundImage = `url(${state.footerImg})`; });
+  document.querySelectorAll('.is-last-footer').forEach(el => {
+    const img = state.lastFooterImg || state.footerImg; if (img) el.style.backgroundImage = `url(${img})`;
+  });
+}
+
+// ================= أدوات مساعدة للإنشاء =================
+const scale = 0.65;
+const mmToPx = 3.7795275591;
+function pageOf(){ return document.getElementById(`page-${document.getElementById('targetPageSelect').value}`); }
+function textBox(cls, html, style) {
+  const w = document.createElement('div');
+  w.className = 'draggable-wrapper flex flex-col p-2 ' + (cls || '');
+  w.style.cssText = style; if (html) w.innerHTML = html;
+  return w;
+}
+function addEl(page, el) { page.appendChild(el); attachResizers(el); selectEl(el, null); }
+
+// ================= إدراج الحاويات الفارغة =================
+function insertPlaceholder() {
+  const req = document.getElementById('dataSourceSelect').value;
+  const title = document.getElementById('sectionTitle').value || document.querySelector(`#dataSourceSelect option[value="${req}"]`).text;
+  const page = pageOf(); if (!page) return;
+  const [action, key] = req.split(':');
+
+  if (action === 'text') {
+    const w = textBox('', '', 'top:50mm;left:5mm;width:140mm;');
+    w.dataset.dynamicType = 'text'; w.dataset.dynamicKey = key;
+    const t = document.createElement('div');
+    t.className = 'dynamic-content outline-none break-words';
+    t.style.cssText = "color:#000;font-size:24px;font-weight:700;font-family:'Cairo',sans-serif;";
+    t.textContent = `[ حاوية نص: ${title} ]`;
+    w.appendChild(t); addEl(page, w);
+  } else {
+    const c = document.createElement('div');
+    c.className = 'free-container';
+    c.style.cssText = 'width:97.5mm;height:auto;min-height:30mm;top:100mm;left:5mm;padding:0;background:transparent;border:1px dashed transparent;';
+    c.dataset.dynamicType = 'table'; c.dataset.dynamicKey = key;
+    const oneCol = oneColKeys.includes(key);
+    const msg = key === 'dimensions' ? '[ سيتم تعبئة أبعاد الموديل بدون عناوين للأعمدة ]' : oneCol ? '[ سيتم تعبئة البيانات في عمود واحد هنا تلقائياً ]' : '[ سيتم تعبئة البيانات هنا تلقائياً ]';
+    c.innerHTML = `<div class="spec-block w-full h-full" style="--key-width:50%">
+      ${oneCol ? '' : '<div class="table-col-resizer no-print" style="right:50%"></div>'}
+      <div class="spec-header"><span style="position:relative;z-index:2" contenteditable="true">${esc(title)}</span></div>
+      <div class="flex-1 flex flex-col relative"><div class="table-rows-wrapper"><div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">${msg}</div></div></div></div>`;
+    page.appendChild(c); attachResizers(c);
+    const rs = c.querySelector('.table-col-resizer'); if (rs) makeTableColResizable(rs, c.querySelector('.spec-block'));
+    selectEl(c, null);
   }
+  document.getElementById('sectionTitle').value = '';
+}
 
-  // ==========================================
-  // الصور والخلفيات
-  // ==========================================
-  let state = { headerImg: '', footerImg: '', lastFooterImg: '' };
+// ================= التعبئة الآلية =================
+function fillAllPlaceholders() {
+  const idx = document.getElementById('modelSelector').value;
+  if (idx === "") { alert("الرجاء اختيار موديل من القائمة أولاً لتعبئة القالب."); return; }
+  const row = database[document.getElementById('sheetCategory').value][idx]; if (!row) return;
 
-  document.getElementById('globalHeader').addEventListener('change', (e) => uploadImage(e, 'headerImg'));
-  document.getElementById('globalFooter').addEventListener('change', (e) => uploadImage(e, 'footerImg'));
-  document.getElementById('lastFooter').addEventListener('change', (e) => uploadImage(e, 'lastFooterImg'));
-  
-  function uploadImage(event, stateKey) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) { 
-        state[stateKey] = e.target.result; 
-        updateHeadersAndFooters(); 
-      }
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function updateHeadersAndFooters() {
-    document.querySelectorAll('.page-header').forEach(el => { 
-        if(state.headerImg) el.style.backgroundImage = `url(${state.headerImg})`; 
-    });
-    document.querySelectorAll('.is-normal-footer').forEach(el => { 
-        if(state.footerImg) el.style.backgroundImage = `url(${state.footerImg})`; 
-    });
-    document.querySelectorAll('.is-last-footer').forEach(el => {
-        if(state.lastFooterImg) { 
-            el.style.backgroundImage = `url(${state.lastFooterImg})`; 
-        } else if (state.footerImg) { 
-            el.style.backgroundImage = `url(${state.footerImg})`; 
-        }
-    });
-  }
-
-  // ==========================================
-  // شريط الأدوات الذكي
-  // ==========================================
-  function createToolbarHTML(targetClasses, topPos = '-65px') {
-      return `
-      <div class="text-toolbar no-print" style="top: ${topPos};">
-          <div class="flex gap-2 items-center border-b border-gray-200 pb-1 w-full justify-center">
-              <input type="color" value="#000000" title="لون النص" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.color = this.value)">
-              <input type="number" value="14" title="حجم الخط" oninput="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontSize = this.value + 'px')">
-              <select title="وزن الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontWeight = this.value)">
-                  <option value="400">عادي (400)</option>
-                  <option value="700">عريض (700)</option>
-                  <option value="900">أسود (900)</option>
-              </select>
-              <select title="عائلة الخط" onchange="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.fontFamily = this.value)">
-                  <option value="'SCORFont', 'Cairo', sans-serif">سكور SCOR</option>
-                  <option value="'Cairo', sans-serif">كايرو Cairo</option>
-              </select>
-          </div>
-          <div class="flex gap-2 items-center w-full justify-center pt-1">
-              <div class="flex gap-1 border-l border-gray-300 pl-2 ml-1">
-                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='right')">يمين</button>
-                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='center')">وسط</button>
-                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='left')">يسار</button>
-                  <button class="align-btn" onclick="this.closest('.group').querySelectorAll('${targetClasses}').forEach(el => el.style.textAlign='justify')">ضبط</button>
-              </div>
-              <div class="flex gap-1" title="ترتيب الطبقات">
-                  <button class="align-btn" title="مقدمة" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
-                  <button class="align-btn" title="للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
-                  <button class="align-btn" title="للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
-                  <button class="align-btn" title="مؤخرة" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
-              </div>
-          </div>
-      </div>`;
-  }
-
-  // ==========================================
-  // محرك التخطيط (إدراج الحاويات الفارغة)
-  // ==========================================
-  function insertPlaceholder() {
-      const requestType = document.getElementById('dataSourceSelect').value;
-      const selectOpt = document.querySelector(`#dataSourceSelect option[value="${requestType}"]`);
-      let title = document.getElementById('sectionTitle').value || selectOpt.text;
-      
-      const targetPageVal = document.getElementById('targetPageSelect').value;
-      const targetPage = document.getElementById(`page-${targetPageVal}`);
-      if(!targetPage) return;
-
-      const typeParts = requestType.split(':');
-      const action = typeParts[0]; 
-      const key = typeParts[1];
-
-      if (action === 'text') {
-          const wrapper = document.createElement('div'); 
-          wrapper.className = 'draggable-wrapper flex flex-col p-2 group';
-          wrapper.style.top = '50mm'; wrapper.style.left = '5mm'; 
-          wrapper.style.width = '140mm';
-          wrapper.setAttribute('data-dynamic-type', 'text');
-          wrapper.setAttribute('data-dynamic-key', key);
-
-          const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
-          wrapper.appendChild(dragHandle);
-          
-          wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content', '-65px'));
-
-          const editableText = document.createElement('div'); 
-          editableText.className = 'dynamic-content outline-none font-black break-words'; 
-          editableText.style.color = '#f5b700'; editableText.style.fontSize = '24px'; editableText.style.fontFamily = "'SCORFont', sans-serif";
-          editableText.innerHTML = `[ حاوية نص: ${title} ]`; 
-          wrapper.appendChild(editableText);
-          
-          const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-          deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-          deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-          wrapper.appendChild(deleteBtn);
-          
-          targetPage.appendChild(wrapper);
-          makeBoundedDraggable(wrapper, dragHandle, targetPage);
-          attachResizers(wrapper, targetPage);
-      } 
-      else if (action === 'table') {
-          const container = document.createElement('div');
-          container.className = 'free-container group'; 
-          container.style.width = '97.5mm'; 
-          container.style.height = 'auto'; container.style.minHeight = '30mm'; 
-          container.style.top = '100mm'; container.style.left = '5mm'; container.style.padding = '0'; 
-          container.style.background = 'transparent'; container.style.border = '1px dashed transparent'; 
-          container.setAttribute('data-dynamic-type', 'table');
-          container.setAttribute('data-dynamic-key', key);
-
-          const dragBar = document.createElement('div');
-          dragBar.className = 'drag-bar no-print';
-          dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ سحب جدول: ${title}</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
-          container.appendChild(dragBar);
-
-          const block = document.createElement('div'); block.className = 'spec-block w-full h-full';
-          block.style.setProperty('--key-width', '50%');
-
-          const isOneColumn = (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes' || key === 'dimensions');
-          let colResizer;
-
-          if (!isOneColumn) {
-              colResizer = document.createElement('div');
-              colResizer.className = 'table-col-resizer no-print';
-              colResizer.style.right = '50%';
-              block.appendChild(colResizer);
-          }
-          
-          const header = document.createElement('div'); header.className = 'spec-header group relative'; 
-          header.innerHTML = `<span style="position:relative; z-index:2;" contenteditable="true">${title}</span> ${createToolbarHTML('span', '-55px')}`; 
-          block.appendChild(header);
-
-          const bodyWrapper = document.createElement('div'); bodyWrapper.className = 'flex-1 flex flex-col relative group';
-          bodyWrapper.innerHTML = createToolbarHTML('.spec-row span', '-55px');
-
-          const rowsWrapper = document.createElement('div');
-          rowsWrapper.className = 'table-rows-wrapper';
-          
-          if (key === 'dimensions') {
-              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة أبعاد الموديل بدون عناوين للأعمدة ]</div>`;
-          } else if (isOneColumn) {
-              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات في عمود واحد هنا تلقائياً ]</div>`;
-          } else {
-              rowsWrapper.innerHTML = `<div class="p-4 text-center text-gray-400 font-bold bg-gray-50 flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة البيانات هنا تلقائياً ]</div>`;
-          }
-          
-          bodyWrapper.appendChild(rowsWrapper);
-          block.appendChild(bodyWrapper);
-          container.appendChild(block);
-
-          targetPage.appendChild(container);
-          makeBoundedDraggable(container, dragBar, targetPage);
-          attachResizers(container, targetPage);
-          if (colResizer) {
-              makeTableColResizable(colResizer, block);
-          }
-      }
-      document.getElementById('sectionTitle').value = '';
-  }
-
-  // ==========================================
-  // التعبئة الآلية (Auto-Fill Engine)
-  // ==========================================
-  function fillAllPlaceholders() {
-      const category = document.getElementById('sheetCategory').value;
-      const modelIndex = document.getElementById('modelSelector').value;
-      
-      if (modelIndex === "") { alert("الرجاء اختيار موديل من القائمة أولاً لتعبئة القالب."); return; }
-      
-      const rowData = database[category][modelIndex];
-      if (!rowData) return;
-
-      document.querySelectorAll('[data-dynamic-type="text"]').forEach(el => {
-          const key = el.getAttribute('data-dynamic-key');
-          const contentDiv = el.querySelector('.dynamic-content');
-          if(contentDiv) {
-              const val = rowData[key] || '';
-              if (val.trim() !== '') contentDiv.innerText = val;
-              else contentDiv.innerText = '[ لا توجد بيانات ]';
-          }
-      });
-
-      document.querySelectorAll('[data-dynamic-type="table"]').forEach(el => {
-          const key = el.getAttribute('data-dynamic-key');
-          const wrapper = el.querySelector('.table-rows-wrapper');
-          if(wrapper) {
-              const colsToInclude = tableGroups[key];
-              let tableHTML = '';
-              
-              if (key === 'dimensions') {
-                  colsToInclude.forEach(colKey => {
-                      if(rowData[colKey] && rowData[colKey].trim() !== '') {
-                          const displayKey = translationDict[colKey] || colKey;
-                          let symbol = colKey.replace('dim_', '').toUpperCase();
-                          if(symbol.length > 1) symbol = '-'; 
-                          
-                          tableHTML += `<div class="spec-row flex-1" style="padding: 4px 12px;">
-                              <span contenteditable="true" style="width: 15%; text-align: center; font-weight: 900; color: #f5b700; border-left: 1px solid #e5e7eb; flex-shrink:0;">${symbol}</span>
-                              <span contenteditable="true" style="width: 25%; text-align: center; font-weight: 900; border-left: 1px solid #e5e7eb; flex-shrink:0;">${rowData[colKey]}</span>
-                              <span contenteditable="true" style="width: 60%; font-weight: 700; text-align: right; padding-right: 10px; flex-grow:1;">${displayKey}</span>
-                          </div>`;
-                      }
-                  });
-              } else if (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes') {
-                  colsToInclude.forEach(colKey => {
-                      if(rowData[colKey] && rowData[colKey].trim() !== '') {
-                          tableHTML += `<div class="spec-row flex-1"><span class="spec-val" contenteditable="true" style="width:100%; text-align:center; padding: 4px;">${rowData[colKey]}</span></div>`;
-                      }
-                  });
-              } else {
-                  colsToInclude.forEach(colKey => {
-                      if(rowData[colKey] && rowData[colKey].trim() !== '') {
-                          const displayKey = translationDict[colKey] || colKey;
-                          tableHTML += `<div class="spec-row flex-1"><span class="spec-key" contenteditable="true">${displayKey}</span><span class="spec-val" contenteditable="true">${rowData[colKey]}</span></div>`;
-                      }
-                  });
-              }
-              
-              if(tableHTML === '') {
-                  tableHTML = `<div class="p-4 text-center text-red-400 font-bold bg-red-50 flex-1 border-t border-red-200">لا توفر المواصفات لهذا الموديل</div>`;
-              }
-              wrapper.innerHTML = tableHTML;
-          }
-      });
-  }
-
-  // ==========================================
-  // إضافة الحاويات (تطابق عرض الصفحة مع مسافات 5mm)
-  // ==========================================
-  function addFloatingContainer(colCount) {
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-    if(!targetPage) return;
-
-    const container = document.createElement('div');
-    container.className = 'free-container group';
-    container.style.width = '200mm'; container.style.height = '45mm'; 
-    container.style.top = '100mm'; container.style.left = '5mm';   
-
-    const dragBar = document.createElement('div');
-    dragBar.className = 'drag-bar no-print';
-    dragBar.innerHTML = `<div style="width:20px;"></div><span class="drag-title">☩ اسحب الحاوية (${colCount} أعمدة)</span><button onclick="this.closest('.free-container').remove()" class="text-red-500 hover:text-red-300 font-bold text-sm bg-transparent border-none">✖</button>`;
-    container.appendChild(dragBar);
-
-    const row = document.createElement('div'); row.className = 'grid-row';
-    for (let i = 0; i < colCount; i++) {
-      const col = document.createElement('div'); col.className = 'grid-col';
-      col.innerHTML = `
-        <div class="flex flex-col gap-1 items-center justify-center h-full no-print bg-gray-100 rounded border border-gray-300 p-2">
-          <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
-          <button onclick="insertGridContent(this, 'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📝 نص</button>
-          <button onclick="insertGridContent(this, 'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">🖼️ صورة</button>
-          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 إدراج جدول</button>
-        </div>`;
-      row.appendChild(col);
-      
-      if (i < colCount - 1) {
-        const gutter = document.createElement('div'); gutter.className = 'col-resizer';
-        row.appendChild(gutter); makeColResizable(col, gutter, row);
-      }
-    }
-    container.appendChild(row);
-
-    targetPage.appendChild(container);
-    makeBoundedDraggable(container, dragBar, targetPage);
-    attachResizers(container, targetPage);
-  }
-
-  function insertGridContent(btn, type) {
-    const col = btn.closest('.grid-col');
-    if (type === 'text') {
-      col.innerHTML = `
-        <div class="relative w-full h-full flex flex-col group">
-            <div contenteditable="true" class="w-full h-full outline-none text-sm text-gray-800 p-1 break-words">اكتب النص هنا...</div>
-        </div>`;
-    } else if (type === 'image') {
-      col.innerHTML = `
-        <label class="w-full h-full flex flex-col items-center justify-center bg-gray-50 cursor-pointer text-gray-400 text-xs border-2 border-dashed border-gray-300 hover:bg-gray-100 no-print">
-          <span class="font-bold">+ اختر صورة</span><input type="file" class="hidden" accept="image/*" onchange="loadGridImage(this)">
-        </label>`;
-    } else if (type === 'table') {
-      col.innerHTML = `
-        <div class="flex flex-col gap-2 p-2 w-full h-full justify-center bg-gray-50 border border-dashed border-gray-300">
-            <label class="text-xs text-gray-700 font-bold text-center">اختر الجدول المرتبط بالبيانات:</label>
-            <select class="grid-table-select text-xs p-1.5 border border-gray-300 rounded w-full outline-none">
-                <option value="engine">المحرك</option>
-                <option value="hydraulic">النظام الهيدروليكي</option>
-                <option value="drive">نظام الدفع</option>
-                <option value="performance">الأداء ونطاق العمل</option>
-                <option value="weights">الأوزان والسعات</option>
-                <option value="std_equipment">التجهيزات القياسية</option>
-                <option value="opt_equipment">التجهيزات الاختيارية</option>
-                <option value="notes">الملاحظات</option>
-                <option value="dimensions">الأبعاد</option>
-            </select>
-            <button onclick="insertGridTableConfirmed(this)" class="bg-[#f5b700] text-black text-xs font-bold py-1.5 rounded hover:brightness-110">تأكيد الإدراج</button>
-            <button onclick="cancelGridTable(this)" class="bg-gray-300 text-black text-xs font-bold py-1 rounded">إلغاء</button>
-        </div>`;
-    }
-  }
-
-  function cancelGridTable(btn) {
-      const col = btn.closest('.grid-col');
-      col.innerHTML = `
-        <div class="flex flex-col gap-1 items-center justify-center h-full no-print bg-gray-100 rounded border border-gray-300 p-2">
-          <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
-          <button onclick="insertGridContent(this, 'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📝 نص</button>
-          <button onclick="insertGridContent(this, 'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">🖼️ صورة</button>
-          <button onclick="insertGridContent(this, 'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded hover:brightness-110">📊 إدراج جدول</button>
-        </div>`;
-  }
-
-  function insertGridTableConfirmed(btn) {
-      const col = btn.closest('.grid-col');
-      const select = col.querySelector('.grid-table-select');
-      const key = select.value;
-      const title = select.options[select.selectedIndex].text;
-      
-      const isOneColumn = (key === 'std_equipment' || key === 'opt_equipment' || key === 'notes' || key === 'dimensions');
-
-      col.innerHTML = `
-        <div class="spec-block w-full h-full relative" data-dynamic-type="table" data-dynamic-key="${key}" style="--key-width: 50%;">
-          ${!isOneColumn ? '<div class="table-col-resizer no-print" style="right: 50%;"></div>' : ''}
-          <div class="spec-header group relative">
-              <span style="position:relative; z-index:2;" contenteditable="true">${title}</span>
-              ${createToolbarHTML('span', '-55px')}
-          </div>
-          <div class="flex-1 flex flex-col relative group">
-              ${createToolbarHTML('.spec-row span', '-55px')}
-              <div class="table-rows-wrapper flex-1 bg-white flex flex-col">
-                  <div class="p-4 text-center text-gray-400 text-xs flex-1 flex items-center justify-center border-t border-gray-200">
-                      [ سيتم تعبئة ${title} هنا ]
-                  </div>
-              </div>
-          </div>
-        </div>`;
-        
-      const block = col.querySelector('.spec-block');
-      const resizer = col.querySelector('.table-col-resizer');
-      if(resizer) makeTableColResizable(resizer, block);
-  }
-
-  function loadGridImage(input) {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = e => { 
-        input.closest('.grid-col').innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:contain; pointer-events:none;">`; 
-      }
-      reader.readAsDataURL(file);
-    }
-  }
-
-  document.getElementById('freeImageUpload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-
-    if (file && targetPage) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const wrapper = document.createElement('div'); wrapper.className = 'draggable-wrapper flex flex-col p-1 group';
-        wrapper.style.width = '100mm'; wrapper.style.top = '100mm'; wrapper.style.left = '5mm';
-        
-        const img = document.createElement('img'); img.src = event.target.result; 
-        img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'contain';
-        wrapper.appendChild(img);
-        
-        const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
-        wrapper.appendChild(dragHandle);
-
-        wrapper.insertAdjacentHTML('beforeend', `
-            <div class="image-toolbar no-print">
-                <div class="flex gap-1" title="ترتيب الطبقات">
-                    <button class="align-btn" title="مقدمة" onclick="this.closest('.group').style.zIndex = 99">⏫</button>
-                    <button class="align-btn" title="للأمام" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) + 1">🔼</button>
-                    <button class="align-btn" title="للخلف" onclick="let el = this.closest('.group'); el.style.zIndex = (parseInt(window.getComputedStyle(el).zIndex) || 10) - 1">🔽</button>
-                    <button class="align-btn" title="مؤخرة" onclick="this.closest('.group').style.zIndex = 1">⏬</button>
-                </div>
-            </div>
-        `);
-
-        const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-        deleteBtn.className = 'delete-btn no-print absolute -top-3 -right-3 bg-white border border-red-500 text-red-500 rounded-full w-6 h-6 flex items-center justify-center text-xs cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-        deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-        wrapper.appendChild(deleteBtn);
-        
-        targetPage.appendChild(wrapper);
-        makeBoundedDraggable(wrapper, dragHandle, targetPage); 
-        attachResizers(wrapper, targetPage);
-        document.getElementById('freeImageUpload').value = '';
-      }
-      reader.readAsDataURL(file);
-    }
+  document.querySelectorAll('[data-dynamic-type="text"]').forEach(el => {
+    const d = el.querySelector('.dynamic-content'); if (!d) return;
+    const v = row[el.dataset.dynamicKey] || '';
+    d.innerText = v.trim() ? v : '[ لا توجد بيانات ]';
   });
 
-  function addFreeText() {
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-    if (!targetPage) return;
-    
-    const wrapper = document.createElement('div'); 
-    wrapper.className = 'draggable-wrapper flex flex-col p-2 group';
-    wrapper.style.top = '50mm'; wrapper.style.left = '5mm'; wrapper.style.width = '120mm'; 
-
-    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
-    wrapper.appendChild(dragHandle);
-    
-    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.dynamic-content', '-65px'));
-
-    const editableText = document.createElement('div'); editableText.contentEditable = true; editableText.innerText = "نص حر قابل للتعديل..."; 
-    editableText.className = 'dynamic-content outline-none font-black break-words'; editableText.style.color = '#000000'; editableText.style.fontSize = '22px';
-    wrapper.appendChild(editableText);
-    
-    const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-    deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-    deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-    wrapper.appendChild(deleteBtn);
-    
-    targetPage.appendChild(wrapper);
-    makeBoundedDraggable(wrapper, dragHandle, targetPage);
-    attachResizers(wrapper, targetPage);
-  }
-
-  function addContactBlock() {
-    const targetPageVal = document.getElementById('targetPageSelect').value;
-    const targetPage = document.getElementById(`page-${targetPageVal}`);
-    if (!targetPage) return;
-
-    const presetSelect = document.getElementById('contactPresetSelect');
-    const selectedOpt = presetSelect.options[presetSelect.selectedIndex];
-    const textVal = selectedOpt.text; 
-    const linkVal = selectedOpt.value;
-    const isPhone = selectedOpt.getAttribute('data-type') === 'phone';
-
-    const wrapper = document.createElement('div'); 
-    wrapper.className = 'draggable-wrapper flex flex-col items-center justify-center p-2 group';
-    wrapper.style.top = '275mm'; wrapper.style.left = '50mm';
-    wrapper.style.width = 'max-content'; 
-    
-    const dragHandle = document.createElement('div'); dragHandle.innerHTML = '☩'; dragHandle.className = 'drag-handle no-print absolute -left-6 top-1/2 transform -translate-y-1/2'; 
-    wrapper.appendChild(dragHandle);
-
-    wrapper.insertAdjacentHTML('beforeend', createToolbarHTML('.contact-text', '-65px'));
-    
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'flex items-center gap-2 justify-center whitespace-nowrap';
-
-    if (isPhone) {
-      const waLink = document.createElement('a');
-      waLink.href = 'https://wa.me/' + linkVal; waLink.target = '_blank';
-      waLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
-      waLink.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>`;
-
-      const callLink = document.createElement('a');
-      callLink.href = 'tel:+' + linkVal; callLink.target = '_blank';
-      callLink.className = 'outline-none hover:opacity-80 transition flex items-center justify-center';
-      callLink.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="#ef4444"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`;
-
-      const numText = document.createElement('span');
-      numText.className = 'contact-text font-bold outline-none text-[#000000] whitespace-nowrap';
-      numText.style.fontSize = '18px';
-      numText.contentEditable = true;
-      numText.innerText = textVal;
-
-      contentDiv.appendChild(waLink);
-      contentDiv.appendChild(callLink);
-      contentDiv.appendChild(numText);
-    } else {
-      const aTag = document.createElement('a'); 
-      aTag.href = linkVal; aTag.target = '_blank';
-      aTag.style.color = '#000000'; aTag.style.fontSize = '18px';
-      aTag.className = 'contact-text font-bold outline-none hover:text-[#f5b700] transition block w-full text-center whitespace-nowrap';
-      aTag.contentEditable = true; aTag.innerText = textVal;
-      contentDiv.appendChild(aTag);
-    }
-
-    wrapper.appendChild(contentDiv);
-
-    const deleteBtn = document.createElement('button'); deleteBtn.innerHTML = '✖';
-    deleteBtn.className = 'delete-btn no-print absolute -top-2 -right-2 bg-white border border-red-500 text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-[10px] cursor-pointer z-50 hover:bg-red-500 hover:text-white';
-    deleteBtn.setAttribute('onclick', "this.closest('.draggable-wrapper').remove()");
-    wrapper.appendChild(deleteBtn);
-
-    targetPage.appendChild(wrapper);
-    makeBoundedDraggable(wrapper, dragHandle, targetPage);
-    attachResizers(wrapper, targetPage); 
-  }
-
-  // ==========================================
-  // الأساسيات (التحريك والتحجيم المستقر)
-  // ==========================================
-  const scale = 0.65;
-  const mmToPx = 3.7795275591;
-  const marginPx = 5 * mmToPx;
-
-  function attachResizers(element, targetPage) {
-    const handlePositions = ['t', 'b', 'l', 'r', 'tl', 'tr', 'bl', 'br'];
-    handlePositions.forEach(pos => {
-      const handle = document.createElement('div'); 
-      handle.className = `resizer ${pos}`; 
-      element.appendChild(handle);
-    });
-    makeBoundedBoxResizable(element, targetPage);
-  }
-
-  function makeBoundedDraggable(element, handle, page) {
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-    let vGuide, hGuide;
-
-    handle.addEventListener('mousedown', function(e) {
-      if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return; 
-      e.preventDefault(); 
-      e.stopPropagation(); 
-      isDragging = true; 
-      
-      const pageRect = page.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      
-      offsetX = (e.clientX - elementRect.left) / scale;
-      offsetY = (e.clientY - elementRect.top) / scale;
-      
-      vGuide = page.querySelector('.snap-guide-v');
-      if(!vGuide) { vGuide = document.createElement('div'); vGuide.className = 'snap-guide-v'; page.appendChild(vGuide); }
-      hGuide = page.querySelector('.snap-guide-h');
-      if(!hGuide) { hGuide = document.createElement('div'); hGuide.className = 'snap-guide-h'; page.appendChild(hGuide); }
-
-      document.addEventListener('mousemove', drag); 
-      document.addEventListener('mouseup', dragEnd);
-    });
-
-    function drag(e) {
-      if (!isDragging) return;
-      
-      const pageRect = page.getBoundingClientRect();
-      
-      let newLeft = ((e.clientX - pageRect.left) / scale) - offsetX;
-      let newTop = ((e.clientY - pageRect.top) / scale) - offsetY;
-      
-      const maxLeft = (page.clientWidth || 210 * mmToPx) - marginPx - element.offsetWidth;
-      const maxTop = (page.clientHeight || 297 * mmToPx) - marginPx - element.offsetHeight;
-      
-      newLeft = Math.max(marginPx, Math.min(newLeft, maxLeft));
-      newTop = Math.max(marginPx, Math.min(newTop, maxTop));
-
-      let snappedX = false, snappedY = false;
-      const snapThreshold = 5; 
-      const rect = { left: newLeft, right: newLeft + element.offsetWidth, top: newTop, bottom: newTop + element.offsetHeight, centerX: newLeft + element.offsetWidth/2, centerY: newTop + element.offsetHeight/2 };
-
-      if(vGuide) vGuide.style.display = 'none'; 
-      if(hGuide) hGuide.style.display = 'none';
-
-      const pageCenterX = page.clientWidth / 2;
-      if(Math.abs(rect.centerX - pageCenterX) < snapThreshold) { 
-          newLeft = pageCenterX - element.offsetWidth/2; 
-          if(vGuide) { vGuide.style.left = `${pageCenterX}px`; vGuide.style.display = 'block'; }
-          snappedX = true; 
+  document.querySelectorAll('[data-dynamic-type="table"]').forEach(el => {
+    const key = el.dataset.dynamicKey, wrapper = el.querySelector('.table-rows-wrapper'); if (!wrapper) return;
+    let html = '';
+    tableGroups[key].forEach(k => {
+      const v = row[k]; if (!v || !v.trim()) return;
+      if (key === 'dimensions') {
+        const label = translationDict[k] || k;
+        html += `<div class="spec-row flex-1" style="padding:4px 12px">
+          <span contenteditable="true" style="width:15%;text-align:center;border-left:1px solid #e5e7eb;flex-shrink:0">${k.replace('dim_','').toUpperCase()}</span>
+          <span contenteditable="true" style="width:25%;text-align:center;border-left:1px solid #e5e7eb;flex-shrink:0">${esc(v)}</span>
+          <span contenteditable="true" style="width:60%;text-align:right;padding-right:10px;flex-grow:1">${esc(label)}</span></div>`;
+      } else if (oneColKeys.includes(key)) {
+        html += `<div class="spec-row flex-1"><span class="spec-val" contenteditable="true" style="width:100%;text-align:center;padding:4px">${esc(v)}</span></div>`;
+      } else {
+        html += `<div class="spec-row flex-1"><span class="spec-key" contenteditable="true">${esc(translationDict[k] || k)}</span><span class="spec-val" contenteditable="true">${esc(v)}</span></div>`;
       }
-
-      const siblings = Array.from(page.querySelectorAll('.draggable-wrapper, .free-container')).filter(el => el !== element);
-      for(let sibling of siblings) {
-          const sLeft = sibling.offsetLeft, sTop = sibling.offsetTop, sRight = sLeft + sibling.offsetWidth, sBottom = sTop + sibling.offsetHeight;
-          const sCenterX = sLeft + sibling.offsetWidth/2, sCenterY = sTop + sibling.offsetHeight/2;
-          
-          if(!snappedX) {
-              if(Math.abs(rect.left - sLeft) < snapThreshold) { newLeft = sLeft; if(vGuide){vGuide.style.left = `${sLeft}px`; vGuide.style.display = 'block';} snappedX = true; }
-              else if(Math.abs(rect.right - sRight) < snapThreshold) { newLeft = sRight - element.offsetWidth; if(vGuide){vGuide.style.left = `${sRight}px`; vGuide.style.display = 'block';} snappedX = true; }
-              else if(Math.abs(rect.centerX - sCenterX) < snapThreshold) { newLeft = sCenterX - element.offsetWidth/2; if(vGuide){vGuide.style.left = `${sCenterX}px`; vGuide.style.display = 'block';} snappedX = true; }
-          }
-          if(!snappedY) {
-              if(Math.abs(rect.top - sTop) < snapThreshold) { newTop = sTop; if(hGuide){hGuide.style.top = `${sTop}px`; hGuide.style.display = 'block';} snappedY = true; }
-              else if(Math.abs(rect.bottom - sBottom) < snapThreshold) { newTop = sBottom - element.offsetHeight; if(hGuide){hGuide.style.top = `${sBottom}px`; hGuide.style.display = 'block';} snappedY = true; }
-              else if(Math.abs(rect.centerY - sCenterY) < snapThreshold) { newTop = sCenterY - element.offsetHeight/2; if(hGuide){hGuide.style.top = `${sCenterY}px`; hGuide.style.display = 'block';} snappedY = true; }
-          }
-      }
-
-      element.style.left = `${newLeft}px`; element.style.top = `${newTop}px`;
-    }
-
-    function dragEnd() { 
-        isDragging = false; 
-        if(vGuide) vGuide.style.display = 'none'; 
-        if(hGuide) hGuide.style.display = 'none'; 
-        document.removeEventListener('mousemove', drag); document.removeEventListener('mouseup', dragEnd); 
-    }
-  }
-
-  function makeBoundedBoxResizable(element, page) {
-    const resizers = element.querySelectorAll('.resizer');
-    resizers.forEach(resizer => {
-      resizer.addEventListener('mousedown', function(e) {
-        e.preventDefault(); e.stopPropagation();
-        let isResizing = true;
-        
-        const pageRect = page.getBoundingClientRect();
-        let startPageX = (e.clientX - pageRect.left) / scale;
-        let startPageY = (e.clientY - pageRect.top) / scale;
-        
-        let startW = element.offsetWidth;
-        let startH = element.offsetHeight;
-        let startLeft = element.offsetLeft;
-        let startTop = element.offsetTop;
-        
-        function resize(e) {
-          if (!isResizing) return;
-          const currentRect = page.getBoundingClientRect();
-          let currentX = (e.clientX - currentRect.left) / scale;
-          let currentY = (e.clientY - currentRect.top) / scale;
-          
-          let dx = currentX - startPageX; 
-          let dy = currentY - startPageY;
-          
-          if (resizer.classList.contains('r') || resizer.classList.contains('tr') || resizer.classList.contains('br')) {
-            const maxW = page.clientWidth - marginPx - startLeft; 
-            element.style.width = Math.min(maxW, Math.max(30, startW + dx)) + 'px';
-          }
-          if (resizer.classList.contains('l') || resizer.classList.contains('tl') || resizer.classList.contains('bl')) {
-            let newLeft = startLeft + dx;
-            if (newLeft < marginPx) { const diff = marginPx - newLeft; newLeft = marginPx; dx += diff; }
-            const newWidth = startW - dx;
-            if (newWidth > 30) { element.style.width = newWidth + 'px'; element.style.left = newLeft + 'px'; }
-          }
-          if (resizer.classList.contains('b') || resizer.classList.contains('bl') || resizer.classList.contains('br')) { 
-            const maxH = page.clientHeight - marginPx - startTop;
-            element.style.height = Math.min(maxH, Math.max(20, startH + dy)) + 'px'; 
-          }
-          if (resizer.classList.contains('t') || resizer.classList.contains('tl') || resizer.classList.contains('tr')) {
-            let newTop = startTop + dy;
-            if (newTop < marginPx) { const diff = marginPx - newTop; newTop = marginPx; dy += diff; }
-            const newHeight = startH - dy;
-            if (newHeight > 20) { element.style.height = newHeight + 'px'; element.style.top = newTop + 'px'; }
-          }
-        }
-        function stopResize() { isResizing = false; document.removeEventListener('mousemove', resize); document.removeEventListener('mouseup', stopResize); }
-        document.addEventListener('mousemove', resize); document.addEventListener('mouseup', stopResize);
-      });
     });
-  }
+    wrapper.innerHTML = html || `<div class="p-4 text-center text-red-400 font-bold bg-red-50 flex-1 border-t border-red-200">لا توفر المواصفات لهذا الموديل</div>`;
+  });
+  if (selEl) updatePanel();
+}
 
-  function makeTableColResizable(resizer, block) {
-      let isResizing = false;
-      resizer.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); isResizing = true; document.body.style.cursor = 'col-resize'; });
-      document.addEventListener('mousemove', function(e) {
-          if (!isResizing) return;
-          const blockRect = block.getBoundingClientRect(); const mouseXFromRight = blockRect.right - e.clientX; const pctRight = (mouseXFromRight / blockRect.width) * 100;
-          if (pctRight > 15 && pctRight < 85) { block.style.setProperty('--key-width', `${pctRight}%`); resizer.style.right = `${pctRight}%`; resizer.style.left = 'auto'; }
-      });
-      document.addEventListener('mouseup', function() { if (isResizing) { isResizing = false; document.body.style.cursor = 'default'; } });
-  }
+// ================= حاويات الأعمدة والصور والنصوص =================
+const gridChooser = `<div class="flex flex-col gap-1 items-center justify-center h-full no-print bg-gray-100 rounded border border-gray-300 p-2">
+  <span class="text-[10px] text-gray-500 font-bold mb-1">إدراج محتوى:</span>
+  <button onclick="insertGridContent(this,'text')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded">📝 نص</button>
+  <button onclick="insertGridContent(this,'image')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded">🖼️ صورة</button>
+  <button onclick="insertGridContent(this,'table')" class="w-full bg-[#181b22] text-[#f5b700] text-[10px] py-1 rounded">📊 إدراج جدول</button></div>`;
 
-  function makeColResizable(leftCol, gutter, row) {
-    let isResizingCol = false;
-    gutter.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); isResizingCol = true; document.body.style.cursor = 'col-resize'; });
-    document.addEventListener('mousemove', function(e) {
-      if (!isResizingCol) return;
-      const rowRect = row.getBoundingClientRect(); const mouseXFromRight = rowRect.right - e.clientX;
-      const percentage = (mouseXFromRight / rowRect.width) * 100;
-      if (percentage > 5 && percentage < 95) leftCol.style.flex = `0 0 ${percentage}%`;
+function addFloatingContainer(n) {
+  const page = pageOf(); if (!page) return;
+  const c = document.createElement('div');
+  c.className = 'free-container';
+  c.style.cssText = 'width:200mm;height:45mm;top:100mm;left:5mm;';
+  const row = document.createElement('div'); row.className = 'grid-row';
+  for (let i = 0; i < n; i++) {
+    const col = document.createElement('div'); col.className = 'grid-col'; col.innerHTML = gridChooser; row.appendChild(col);
+    if (i < n - 1) { const g = document.createElement('div'); g.className = 'col-resizer'; row.appendChild(g); makeColResizable(col, g, row); }
+  }
+  c.appendChild(row); page.appendChild(c); attachResizers(c); selectEl(c, null);
+}
+
+function insertGridContent(btn, type) {
+  const col = btn.closest('.grid-col');
+  if (type === 'text') {
+    col.innerHTML = `<div contenteditable="true" class="w-full h-full outline-none text-sm text-black p-1 break-words">اكتب النص هنا...</div>`;
+  } else if (type === 'image') {
+    col.innerHTML = `<label class="w-full h-full flex flex-col items-center justify-center bg-gray-50 cursor-pointer text-gray-400 text-xs border-2 border-dashed border-gray-300 hover:bg-gray-100 no-print"><span class="font-bold">+ اختر صورة</span><input type="file" class="hidden" accept="image/*" onchange="loadGridImage(this)"></label>`;
+  } else {
+    col.innerHTML = `<div class="flex flex-col gap-2 p-2 w-full h-full justify-center bg-gray-50 border border-dashed border-gray-300 no-print">
+      <label class="text-xs text-gray-700 font-bold text-center">اختر الجدول المرتبط بالبيانات:</label>
+      <select class="grid-table-select text-xs p-1.5 border border-gray-300 rounded w-full outline-none">
+        <option value="engine">المحرك</option><option value="hydraulic">النظام الهيدروليكي</option><option value="drive">نظام الدفع</option><option value="performance">الأداء ونطاق العمل</option><option value="weights">الأوزان والسعات</option><option value="std_equipment">التجهيزات القياسية</option><option value="opt_equipment">التجهيزات الاختيارية</option><option value="notes">الملاحظات</option><option value="dimensions">الأبعاد</option>
+      </select>
+      <button onclick="insertGridTableConfirmed(this)" class="bg-[#f5b700] text-black text-xs font-bold py-1.5 rounded">تأكيد الإدراج</button>
+      <button onclick="cancelGridTable(this)" class="bg-gray-300 text-black text-xs font-bold py-1 rounded">إلغاء</button></div>`;
+  }
+}
+function cancelGridTable(btn) { btn.closest('.grid-col').innerHTML = gridChooser; }
+
+function insertGridTableConfirmed(btn) {
+  const col = btn.closest('.grid-col'), sel = col.querySelector('.grid-table-select');
+  const key = sel.value, title = sel.options[sel.selectedIndex].text, oneCol = oneColKeys.includes(key);
+  col.innerHTML = `<div class="spec-block w-full h-full relative" data-dynamic-type="table" data-dynamic-key="${key}" style="--key-width:50%">
+    ${oneCol ? '' : '<div class="table-col-resizer no-print" style="right:50%"></div>'}
+    <div class="spec-header"><span style="position:relative;z-index:2" contenteditable="true">${title}</span></div>
+    <div class="flex-1 flex flex-col relative"><div class="table-rows-wrapper flex-1 bg-white flex flex-col"><div class="p-4 text-center text-gray-400 text-xs flex-1 flex items-center justify-center border-t border-gray-200">[ سيتم تعبئة ${title} هنا ]</div></div></div></div>`;
+  const rs = col.querySelector('.table-col-resizer'); if (rs) makeTableColResizable(rs, col.querySelector('.spec-block'));
+}
+
+function loadGridImage(input) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => { input.closest('.grid-col').innerHTML = `<img src="${e.target.result}" draggable="false" style="width:100%;height:100%;object-fit:contain;pointer-events:none">`; };
+  r.readAsDataURL(f);
+}
+
+document.getElementById('freeImageUpload').addEventListener('change', function (e) {
+  const f = e.target.files[0], page = pageOf(); if (!f || !page) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const w = textBox('p-1', '', 'width:100mm;top:100mm;left:5mm;');
+    const img = document.createElement('img'); img.src = ev.target.result; img.draggable = false;
+    img.style.cssText = 'width:100%;height:100%;object-fit:fill;'; // تمديد حر: الصورة تتبع الصندوق تماماً
+    w.appendChild(img); addEl(page, w); e.target.value = '';
+  };
+  r.readAsDataURL(f);
+});
+
+function addFreeText() {
+  const page = pageOf(); if (!page) return;
+  const w = textBox('', '', 'top:50mm;left:5mm;width:120mm;');
+  const t = document.createElement('div');
+  t.contentEditable = true; t.className = 'dynamic-content outline-none break-words'; t.innerText = 'نص حر قابل للتعديل...';
+  t.style.cssText = "color:#000;font-size:22px;font-weight:700;font-family:'Cairo',sans-serif;";
+  w.appendChild(t); addEl(page, w);
+}
+
+function addContactBlock() {
+  const page = pageOf(); if (!page) return;
+  const opt = document.getElementById('contactPresetSelect').selectedOptions[0];
+  const text = opt.text, link = opt.value, isPhone = opt.dataset.type === 'phone';
+  const w = textBox('items-center justify-center', '', 'top:275mm;left:50mm;width:max-content;');
+  const box = document.createElement('div'); box.className = 'flex items-center gap-2 justify-center whitespace-nowrap';
+  const base = "color:#000;font-size:18px;font-weight:700;font-family:'Cairo',sans-serif;";
+  if (isPhone) {
+    box.innerHTML = `<a href="https://wa.me/${link}" target="_blank" class="flex items-center"><svg viewBox="0 0 24 24" width="12" height="12" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg></a>
+      <a href="tel:+${link}" target="_blank" class="flex items-center"><svg viewBox="0 0 24 24" width="12" height="12" fill="#ef4444"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></a>`;
+    const s = document.createElement('span'); s.className = 'contact-text whitespace-nowrap'; s.style.cssText = base; s.contentEditable = true; s.innerText = text; box.appendChild(s);
+  } else {
+    const a = document.createElement('a'); a.href = link; a.target = '_blank'; a.className = 'contact-text block w-full text-center whitespace-nowrap'; a.style.cssText = base; a.contentEditable = true; a.innerText = text; box.appendChild(a);
+  }
+  w.appendChild(box); addEl(page, w);
+}
+
+// ================= التحديد + لوحة الخصائص =================
+let selEl = null, selSub = null;
+const FONTS = { cairo: "'Cairo', sans-serif", scor: "'SCORFont', 'Cairo', sans-serif" };
+const $ = id => document.getElementById(id);
+
+function clearSel() { if (selEl) selEl.classList.remove('selected'); selEl = null; selSub = null; updatePanel(); }
+function selectEl(el, sub) {
+  if (selEl && selEl !== el) selEl.classList.remove('selected');
+  selEl = el; selSub = sub; el.classList.add('selected'); updatePanel();
+}
+
+// الهدف النصي للوحة: جدول (عبر متغيرات CSS) أو عناصر نصية
+function textTargets() {
+  const blk = selSub && selSub.closest('.spec-block');
+  const b = blk || (!selSub && selEl.dataset.dynamicType === 'table' && selEl.querySelector('.spec-block'));
+  if (b) return { block: b };
+  const scope = (selSub && selSub.closest('.grid-col')) || selEl;
+  return { els: [...scope.querySelectorAll('.dynamic-content,.contact-text,[contenteditable="true"]')].filter(x => !x.closest('.spec-block')) };
+}
+const rgb2hex = c => '#' + (c.match(/\d+/g) || [0,0,0]).slice(0,3).map(n => (+n).toString(16).padStart(2,'0')).join('');
+
+function syncText() {
+  const t = textTargets();
+  const s = t.block ? t.block.querySelector('.spec-row span') : t.els[0];
+  let color = '#000000', size = 10, weight = '700', fam = 'cairo';
+  if (s) {
+    const cs = getComputedStyle(s), w = parseInt(cs.fontWeight);
+    color = rgb2hex(cs.color); size = Math.round(parseFloat(cs.fontSize)); weight = w >= 800 ? '900' : w >= 600 ? '700' : '400';
+    fam = /scor/i.test(cs.fontFamily) ? 'scor' : 'cairo';
+  }
+  $('pColor').value = color; $('pSize').value = size; $('pWeight').value = weight; $('pFamily').value = fam;
+}
+function syncGeom() {
+  if (!selEl) return;
+  $('pW').value = (selEl.offsetWidth / mmToPx).toFixed(1); $('pH').value = (selEl.offsetHeight / mmToPx).toFixed(1);
+}
+function updatePanel() {
+  const has = !!selEl;
+  $('propsEmpty').style.display = has ? 'none' : 'block';
+  $('propsBody').style.display = has ? 'flex' : 'none';
+  if (!has) { $('selLabel').textContent = 'لا يوجد تحديد'; return; }
+  const isImg = !!selEl.querySelector(':scope > img');
+  $('selLabel').textContent = isImg ? 'صورة' : selEl.querySelector('.grid-row') ? 'حاوية أعمدة' : selEl.dataset.dynamicType === 'table' ? 'جدول' : 'نص';
+  $('propsText').style.display = isImg ? 'none' : 'flex';
+  if (!isImg) syncText();
+  syncGeom();
+}
+
+function applyText(prop, val) {
+  if (!selEl || val === '') return;
+  const t = textTargets(), v = prop === 'size' ? val + 'px' : prop === 'family' ? FONTS[val] : val;
+  if (t.block) t.block.style.setProperty({ color:'--t-color', size:'--t-size', weight:'--t-weight', family:'--t-family' }[prop], v);
+  else t.els.forEach(el => { el.style[{ color:'color', size:'fontSize', weight:'fontWeight', family:'fontFamily' }[prop]] = v; });
+}
+function applyAlign(a) {
+  if (!selEl) return;
+  const t = textTargets();
+  (t.block ? [...t.block.querySelectorAll('.spec-row span')] : t.els).forEach(x => x.style.textAlign = a);
+}
+function zOrder(m) {
+  if (!selEl) return;
+  const cur = parseInt(getComputedStyle(selEl).zIndex) || 6;
+  selEl.style.zIndex = m === 'front' ? 99 : m === 'back' ? 1 : m === 'up' ? cur + 1 : cur - 1;
+}
+function setGeom(prop, v) { v = parseFloat(v); if (selEl && v > 0) selEl.style[prop] = v * mmToPx + 'px'; }
+function delSel() { if (selEl) { selEl.remove(); selEl = null; selSub = null; updatePanel(); } }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Delete' && selEl && !e.target.isContentEditable && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) delSel();
+});
+
+// ================= التحريك والتحجيم: من أي مكان، بلا قيود =================
+function attachResizers(el) {
+  if (el.querySelector(':scope > .resizer')) return;
+  ['t','b','l','r','tl','tr','bl','br'].forEach(p => { const h = document.createElement('div'); h.className = 'resizer ' + p; el.appendChild(h); });
+}
+function makeBoundedDraggable() {} // للتوافق فقط — التحريك الآن عبر المستمع العام أدناه
+
+const box = $('pagesContainer');
+box.addEventListener('dragstart', e => e.preventDefault());
+box.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  const el = e.target.closest('.draggable-wrapper, .free-container');
+  if (!el) { clearSel(); return; }
+  const page = el.closest('.a4-page'), rz = e.target.closest('.resizer');
+  selectEl(el, rz ? null : e.target.closest('.spec-block, .grid-col'));
+  if (rz) startResize(e, el, rz);
+  else if (!e.target.closest('button,input,select,label')) startDrag(e, el, page);
+});
+
+function guide(page, cls) {
+  let g = page.querySelector('.' + cls);
+  if (!g) { g = document.createElement('div'); g.className = cls; page.appendChild(g); }
+  return g;
+}
+
+function startDrag(e, el, page) {
+  const sx = e.clientX, sy = e.clientY, sl = el.offsetLeft, st = el.offsetTop;
+  const vG = guide(page, 'snap-guide-v'), hG = guide(page, 'snap-guide-h');
+  let moving = false;
+  const snap = (pos, size, targets) => {
+    for (const a of [0, size / 2, size]) for (const t of targets) if (Math.abs(pos + a - t) < 5) return [t - a, t];
+    return null;
+  };
+  function move(ev) {
+    const dx = (ev.clientX - sx) / scale, dy = (ev.clientY - sy) / scale;
+    if (!moving) {
+      if (Math.abs(dx * scale) + Math.abs(dy * scale) < 4) return; // نقرة عادية = تحرير نص
+      moving = true; getSelection().removeAllRanges(); document.body.style.userSelect = 'none';
+    }
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let l = sl + dx, t = st + dy;
+    const xs = [page.clientWidth / 2], ys = [];
+    page.querySelectorAll('.draggable-wrapper,.free-container').forEach(s => {
+      if (s === el) return;
+      xs.push(s.offsetLeft, s.offsetLeft + s.offsetWidth / 2, s.offsetLeft + s.offsetWidth);
+      ys.push(s.offsetTop, s.offsetTop + s.offsetHeight / 2, s.offsetTop + s.offsetHeight);
     });
-    document.addEventListener('mouseup', function() { if (isResizingCol) { isResizingCol = false; document.body.style.cursor = 'default'; } });
+    vG.style.display = hG.style.display = 'none';
+    const sX = snap(l, w, xs), sY = snap(t, h, ys);
+    if (sX) { l = sX[0]; vG.style.left = sX[1] + 'px'; vG.style.display = 'block'; }
+    if (sY) { t = sY[0]; hG.style.top = sY[1] + 'px'; hG.style.display = 'block'; }
+    // حرية كاملة؛ فقط يبقى 20px من العنصر داخل الصفحة حتى لا يضيع
+    l = Math.max(20 - w, Math.min(l, page.clientWidth - 20));
+    t = Math.max(20 - h, Math.min(t, page.clientHeight - 20));
+    el.style.left = l + 'px'; el.style.top = t + 'px';
   }
-
-  // ==========================================
-  // إدارة النظام والقوالب وإعدادات الصفحة
-  // ==========================================
-  function saveTemplate() {
-    const pagesHTML = document.getElementById('pagesContainer').innerHTML;
-    const templateData = { 
-        pages: pagesHTML, state: state,
-        pageCount: document.getElementById('pageCount').value, hasCover: document.getElementById('hasCover').checked
-    };
-    localStorage.setItem('scor_master_template_v10', JSON.stringify(templateData));
-    alert('تم حفظ ترتيب وتنسيق الصفحات كقالب بنجاح!');
+  function end() {
+    vG.style.display = hG.style.display = 'none'; document.body.style.userSelect = '';
+    document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', end);
   }
+  document.addEventListener('mousemove', move); document.addEventListener('mouseup', end);
+}
 
-  function loadTemplate() {
-    const dataStr = localStorage.getItem('scor_master_template_v10');
-    if(!dataStr) { alert('لا يوجد قالب محفوظ مسبقاً!'); return; }
-    const templateData = JSON.parse(dataStr);
-    
-    document.getElementById('pageCount').value = templateData.pageCount;
-    document.getElementById('hasCover').checked = templateData.hasCover;
-    state = templateData.state || { headerImg: '', footerImg: '', lastFooterImg: '' };
-    
-    document.getElementById('pagesContainer').innerHTML = templateData.pages;
-    
-    updateHeadersAndFooters();
-    
-    document.querySelectorAll('.draggable-wrapper').forEach(wrapper => {
-        const dragHandle = wrapper.querySelector('.drag-handle');
-        const targetPage = wrapper.closest('.a4-page');
-        if(dragHandle && targetPage) makeBoundedDraggable(wrapper, dragHandle, targetPage);
-        attachResizers(wrapper, targetPage);
-    });
-
-    document.querySelectorAll('.free-container').forEach(container => {
-        const dragBar = container.querySelector('.drag-bar');
-        const targetPage = container.closest('.a4-page');
-        if(dragBar && targetPage) makeBoundedDraggable(container, dragBar, targetPage);
-        attachResizers(container, targetPage);
-
-        const block = container.querySelector('.spec-block');
-        const colResizer = container.querySelector('.table-col-resizer');
-        if(block && colResizer) makeTableColResizable(colResizer, block);
-
-        const row = container.querySelector('.grid-row');
-        if(row) {
-           container.querySelectorAll('.col-resizer').forEach(gutter => {
-               const leftCol = gutter.previousElementSibling;
-               if(leftCol) makeColResizable(leftCol, gutter, row);
-           });
-        }
-    });
-    
-    alert('تم استرجاع القالب بنجاح!');
+function startResize(e, el, rz) {
+  e.preventDefault();
+  const pos = ['tl','tr','bl','br','t','b','l','r'].find(p => rz.classList.contains(p));
+  const sx = e.clientX, sy = e.clientY, sw = el.offsetWidth, sh = el.offsetHeight, sl = el.offsetLeft, st = el.offsetTop;
+  function move(ev) {
+    const dx = (ev.clientX - sx) / scale, dy = (ev.clientY - sy) / scale;
+    let w = sw, h = sh;
+    if (pos.includes('r')) w = sw + dx;
+    if (pos.includes('l')) w = sw - dx;
+    if (pos.includes('b')) h = sh + dy;
+    if (pos.includes('t')) h = sh - dy;
+    if (pos.length === 2 && ev.shiftKey) h = w * sh / sw;
+    w = Math.max(10, w); h = Math.max(10, h);
+    el.style.width = w + 'px'; el.style.height = h + 'px';
+    if (pos.includes('l')) el.style.left = (sl + sw - w) + 'px';
+    if (pos.includes('t')) el.style.top = (st + sh - h) + 'px';
+    syncGeom();
   }
+  function end() { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', end); }
+  document.addEventListener('mousemove', move); document.addEventListener('mouseup', end);
+}
 
-  function renderPages() {
-    const container = document.getElementById('pagesContainer');
-    const targetSelect = document.getElementById('targetPageSelect');
-    const hasCover = document.getElementById('hasCover').checked;
-    const pageCount = parseInt(document.getElementById('pageCount').value) || 1;
-    
-    container.innerHTML = ''; targetSelect.innerHTML = '';
-    if (hasCover) {
-      container.appendChild(createPageElement('cover'));
-      targetSelect.add(new Option('الغلاف', 'cover'));
-    }
-    for (let i = 1; i <= pageCount; i++) {
-      const isLast = (i === pageCount);
-      container.appendChild(createPageElement(i, isLast));
-      targetSelect.add(new Option(`صفحة ${i}`, i));
-    }
-    
-    updateHeadersAndFooters();
+function makeTableColResizable(resizer, block) {
+  let on = false;
+  resizer.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); on = true; document.body.style.cursor = 'col-resize'; });
+  document.addEventListener('mousemove', e => {
+    if (!on) return;
+    const r = block.getBoundingClientRect(), pct = ((r.right - e.clientX) / r.width) * 100;
+    if (pct > 15 && pct < 85) { block.style.setProperty('--key-width', pct + '%'); resizer.style.right = pct + '%'; resizer.style.left = 'auto'; }
+  });
+  document.addEventListener('mouseup', () => { if (on) { on = false; document.body.style.cursor = 'default'; } });
+}
+
+function makeColResizable(leftCol, gutter, row) {
+  let on = false;
+  gutter.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); on = true; document.body.style.cursor = 'col-resize'; });
+  document.addEventListener('mousemove', e => {
+    if (!on) return;
+    const r = row.getBoundingClientRect(), pct = ((r.right - e.clientX) / r.width) * 100;
+    if (pct > 5 && pct < 95) leftCol.style.flex = `0 0 ${pct}%`;
+  });
+  document.addEventListener('mouseup', () => { if (on) { on = false; document.body.style.cursor = 'default'; } });
+}
+
+// ================= القوالب والصفحات =================
+function saveTemplate() {
+  clearSel();
+  const data = { pages: box.innerHTML, state, pageCount: $('pageCount').value, hasCover: $('hasCover').checked };
+  try { localStorage.setItem('scor_master_template_v10', JSON.stringify(data)); alert('تم حفظ ترتيب وتنسيق الصفحات كقالب بنجاح!'); }
+  catch (err) { alert('فشل الحفظ: حجم القالب (غالباً صور الترويسة/التذييل) يتجاوز سعة التخزين المحلي.'); }
+}
+
+function loadTemplate() {
+  const str = localStorage.getItem('scor_master_template_v10');
+  if (!str) { alert('لا يوجد قالب محفوظ مسبقاً!'); return; }
+  const d = JSON.parse(str);
+  clearSel();
+  $('pageCount').value = d.pageCount; $('hasCover').checked = d.hasCover;
+  state = d.state || { headerImg: '', footerImg: '', lastFooterImg: '' };
+  box.innerHTML = d.pages;
+  box.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
+  // إعادة بناء قائمة الصفحات
+  const ts = $('targetPageSelect'); ts.innerHTML = '';
+  box.querySelectorAll('.a4-page').forEach(p => { const id = p.id.replace('page-', ''); ts.add(new Option(id === 'cover' ? 'الغلاف' : `صفحة ${id}`, id)); });
+  updateHeadersAndFooters();
+  box.querySelectorAll('.draggable-wrapper, .free-container').forEach(attachResizers);
+  box.querySelectorAll('.spec-block').forEach(b => { const rs = b.querySelector(':scope > .table-col-resizer'); if (rs) makeTableColResizable(rs, b); });
+  box.querySelectorAll('.grid-row').forEach(row => row.querySelectorAll('.col-resizer').forEach(g => { if (g.previousElementSibling) makeColResizable(g.previousElementSibling, g, row); }));
+  alert('تم استرجاع القالب بنجاح!');
+}
+
+function renderPages() {
+  clearSel();
+  const ts = $('targetPageSelect'), hasCover = $('hasCover').checked, n = parseInt($('pageCount').value) || 1;
+  box.innerHTML = ''; ts.innerHTML = '';
+  if (hasCover) { box.appendChild(createPageElement('cover')); ts.add(new Option('الغلاف', 'cover')); }
+  for (let i = 1; i <= n; i++) { box.appendChild(createPageElement(i, i === n)); ts.add(new Option(`صفحة ${i}`, i)); }
+  updateHeadersAndFooters();
+}
+
+function createPageElement(num, isLast = false) {
+  const page = document.createElement('div');
+  page.className = 'a4-page'; page.id = `page-${num}`;
+  const wm = document.createElement('div'); wm.className = 'no-print';
+  wm.textContent = num === 'cover' ? 'الغلاف' : `صفحة ${num}`;
+  wm.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#e5e7eb;font-size:40px;font-weight:900;z-index:0;opacity:0.2;pointer-events:none';
+  page.appendChild(wm);
+  if (num !== 'cover') {
+    const h = document.createElement('div'); h.className = 'page-header'; page.appendChild(h);
+    const f = document.createElement('div'); f.className = isLast ? 'is-last-footer' : 'is-normal-footer'; page.appendChild(f);
   }
+  return page;
+}
 
-  function createPageElement(pageNum, isLast = false) {
-    const page = document.createElement('div');
-    page.className = 'a4-page'; page.id = `page-${pageNum}`;
-    const watermark = document.createElement('div'); watermark.className = 'no-print'; watermark.innerHTML = pageNum === 'cover' ? 'الغلاف' : `صفحة ${pageNum}`; watermark.style = "position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#e5e7eb; font-size:40px; font-weight:900; z-index:0; opacity: 0.2;";
-    page.appendChild(watermark);
-    if (pageNum !== 'cover') {
-      const header = document.createElement('div'); header.className = 'page-header'; page.appendChild(header);
-      const footer = document.createElement('div'); footer.className = isLast ? 'is-last-footer' : 'is-normal-footer'; page.appendChild(footer);
-    }
-    return page;
-  }
-
-  // ==========================================
-  // دالة طي وتوسيع لوحة التحكم (المعاينة)
-  // ==========================================
-  function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const pagesContainer = document.getElementById('pagesContainer');
-    const toggleBtn = document.getElementById('toggleBtn');
-    
-    if (sidebar.style.display === 'none' || sidebar.classList.contains('hidden')) {
-        // إظهار اللوحة
-        sidebar.style.display = 'flex';
-        sidebar.classList.remove('hidden');
-        pagesContainer.classList.remove('w-full');
-        pagesContainer.classList.add('w-[55%]');
-        toggleBtn.innerHTML = '👁️ معاينة الورقة كاملة';
-    } else {
-        // إخفاء اللوحة
-        sidebar.style.display = 'none';
-        sidebar.classList.add('hidden');
-        pagesContainer.classList.remove('w-[55%]');
-        pagesContainer.classList.add('w-full');
-        toggleBtn.innerHTML = '⚙️ إظهار لوحة التحكم';
-    }
-  }
-
-  window.onload = function() { renderPages(); fetchSheetData(); };
+window.onload = () => { renderPages(); fetchSheetData(); };
 </script>
 </body>
 </html>
