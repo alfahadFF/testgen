@@ -26,7 +26,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 
-/* الجداول: الافتراضي 10px كايرو بولد أسود — يمكن تغييره من لوحة التحكم عبر المتغيرات --t-* */
+/* الجداول */
 .spec-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
 .spec-header { position: relative; background: #1f2937; color: #fff; height: 21px; line-height: 21px; padding: 0 15px 0 50px; flex-shrink: 0; overflow: hidden; font-weight: 900; font-size: 1.1em; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
 .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
@@ -41,7 +41,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 .table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; }
 .table-col-resizer:hover, .table-col-resizer:active { background: rgba(245,183,0,0.6); }
 
-/* العناصر: لا تظهر أي أدوات إلا بالنقر (حالة selected) */
+/* العناصر */
 .free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248,249,250,0.9); display: flex; flex-direction: column; z-index: 5; cursor: move; }
 .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; cursor: move; }
 [contenteditable="true"] { cursor: text; }
@@ -58,7 +58,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 
 /* مقابض التحجيم */
 .resizer { display: none; position: absolute; z-index: 20; }
-.selected > .resizer { display: block; } /* تم إصلاح الـ CSS هنا */
+.selected > .resizer { display: block; }
 .resizer.t, .resizer.b { left: 0; width: 100%; height: 12px; cursor: ns-resize; }
 .resizer.t { top: -6px; } .resizer.b { bottom: -6px; }
 .resizer.l, .resizer.r { top: 0; height: 100%; width: 12px; cursor: ew-resize; }
@@ -85,7 +85,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
   .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
   .a4-page::before, .a4-page::after { display: none !important; }
   .resizer, .col-resizer, .table-col-resizer, .no-print, .snap-guide-v, .snap-guide-h { display: none !important; }
-  .selected { outline: none !important; } /* تم إصلاح الـ CSS هنا */
+  .selected { outline: none !important; }
   .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
 }
 </style>
@@ -98,7 +98,6 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
   </div>
 
-  <!-- لوحة خصائص العنصر المحدد (ثابتة بأعلى اللوحة) -->
   <div class="sticky top-0 z-30 bg-[#0e1014] p-3 rounded-lg border-2 border-[#f5b700] flex flex-col gap-2 shadow-xl">
     <div class="flex justify-between items-center">
       <h2 class="text-[#f5b700] font-black text-xs">🎛️ خصائص العنصر المحدد</h2>
@@ -106,7 +105,6 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     </div>
     <div id="propsEmpty" class="text-[11px] text-gray-400 text-center py-1">انقر على أي عنصر في الصفحة لتظهر خياراته هنا</div>
     <div id="propsBody" style="display:none" class="flex-col gap-2">
-      <!-- تم إصلاح هيكلية الوسوم هنا -->
       <div id="propsText" class="flex-col gap-2" style="display:flex">
         <div class="flex gap-2 items-center">
           <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
@@ -295,12 +293,16 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 
 async function fetchSheetData() {
   const badge = document.getElementById('dataStatus');
+  // أضفنا هذا السطر للطباعة في الكونسول لتتبع المشكلة إن وجدت
+  console.log("جاري الاتصال بـ Google Sheets..."); 
   const load = gid => new Promise((resolve, reject) => Papa.parse(`https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=${gid}`, { download: true, header: true, complete: r => resolve(r.data), error: reject }));
   try {
     [database.skid_steers, database.pumps] = await Promise.all([load(546876457), load(1201691755)]);
+    console.log("تم الجلب بنجاح!");
     badge.innerHTML = 'متصل بالبيانات 🟢'; badge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
     updateModelsList();
   } catch (e) {
+    console.error("فشل الجلب:", e);
     badge.innerHTML = 'خطأ بالاتصال 🔴'; badge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
   }
 }
@@ -328,7 +330,7 @@ function updateHeadersAndFooters() {
   document.querySelectorAll('.is-last-footer').forEach(el => {
     const img = state.lastFooterImg || state.footerImg; if (img) el.style.backgroundImage = `url(${img})`;
   });
-  obs.takeRecords(); // تطبيق الصور المشتركة لا يُعدّ تعديلاً على القالب
+  obs.takeRecords();
 }
 
 // ================= أدوات مساعدة للإنشاء =================
@@ -471,7 +473,7 @@ document.getElementById('freeImageUpload').addEventListener('change', function (
   r.onload = ev => {
     const w = textBox('p-1', '', 'width:100mm;top:100mm;left:5mm;');
     const img = document.createElement('img'); img.src = ev.target.result; img.draggable = false;
-    img.style.cssText = 'width:100%;height:100%;object-fit:fill;'; // تمديد حر: الصورة تتبع الصندوق تماماً
+    img.style.cssText = 'width:100%;height:100%;object-fit:fill;';
     w.appendChild(img); addEl(page, w); e.target.value = '';
   };
   r.readAsDataURL(f);
@@ -514,7 +516,6 @@ function selectEl(el, sub) {
   selEl = el; selSub = sub; el.classList.add('selected'); updatePanel();
 }
 
-// الهدف النصي للوحة: جدول (عبر متغيرات CSS) أو عناصر نصية
 function textTargets() {
   const blk = selSub && selSub.closest('.spec-block');
   const b = blk || (!selSub && selEl.dataset.dynamicType === 'table' && selEl.querySelector('.spec-block'));
@@ -537,10 +538,7 @@ function syncText() {
     color = rgb2hex(cs.color); 
     size = Math.round(parseFloat(cs.fontSize)); 
     
-    // التعديل: قراءة الأوزان الخمسة لخط SCOR بدقة
     weight = w >= 900 ? '900' : w >= 800 ? '800' : w >= 700 ? '700' : w >= 600 ? '600' : '400';
-    
-    // التعرف على عائلة الخط
     fam = /scor/i.test(cs.fontFamily) ? 'scor' : 'cairo';
   }
   
@@ -590,12 +588,12 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Delete' && selEl && !e.target.isContentEditable && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) delSel();
 });
 
-// ================= التحريك والتحجيم: من أي مكان، بلا قيود =================
+// ================= التحريك والتحجيم =================
 function attachResizers(el) {
   if (el.querySelector(':scope > .resizer')) return;
   ['t','b','l','r','tl','tr','bl','br'].forEach(p => { const h = document.createElement('div'); h.className = 'resizer ' + p; el.appendChild(h); });
 }
-function makeBoundedDraggable() {} // للتوافق فقط — التحريك الآن عبر المستمع العام أدناه
+function makeBoundedDraggable() {}
 
 const box = $('pagesContainer');
 box.addEventListener('dragstart', e => e.preventDefault());
@@ -626,7 +624,7 @@ function startDrag(e, el, page) {
   function move(ev) {
     const dx = (ev.clientX - sx) / scale, dy = (ev.clientY - sy) / scale;
     if (!moving) {
-      if (Math.abs(dx * scale) + Math.abs(dy * scale) < 4) return; // نقرة عادية = تحرير نص
+      if (Math.abs(dx * scale) + Math.abs(dy * scale) < 4) return;
       moving = true; getSelection().removeAllRanges(); document.body.style.userSelect = 'none';
     }
     const w = el.offsetWidth, h = el.offsetHeight;
@@ -641,7 +639,6 @@ function startDrag(e, el, page) {
     const sX = snap(l, w, xs), sY = snap(t, h, ys);
     if (sX) { l = sX[0]; vG.style.left = sX[1] + 'px'; vG.style.display = 'block'; }
     if (sY) { t = sY[0]; hG.style.top = sY[1] + 'px'; hG.style.display = 'block'; }
-    // حرية كاملة؛ فقط يبقى 20px من العنصر داخل الصفحة حتى لا يضيع
     l = Math.max(20 - w, Math.min(l, page.clientWidth - 20));
     t = Math.max(20 - h, Math.min(t, page.clientHeight - 20));
     el.style.left = l + 'px'; el.style.top = t + 'px';
@@ -664,7 +661,7 @@ function startResize(e, el, rz) {
     if (pos.includes('l')) w = sw - dx;
     if (pos.includes('b')) h = sh + dy;
     if (pos.includes('t')) h = sh - dy;
-    if (pos.length === 2) { const k = Math.max(w / sw, h / sh, 10 / sw, 10 / sh); w = sw * k; h = sh * k; } // الزوايا: نفس النسبة
+    if (pos.length === 2) { const k = Math.max(w / sw, h / sh, 10 / sw, 10 / sh); w = sw * k; h = sh * k; }
     w = Math.max(10, w); h = Math.max(10, h);
     el.style.width = w + 'px'; el.style.height = h + 'px';
     if (pos.includes('l')) el.style.left = (sl + sw - w) + 'px';
@@ -699,14 +696,13 @@ function makeColResizable(leftCol, gutter, row) {
 
 // ================= القوالب والصفحات =================
 const params = new URLSearchParams(location.search);
-const DOC = params.get('doc') || 'catalog';                    // معرّف المستند (سيمرّره الـHub لاحقاً)
+const DOC = params.get('doc') || 'catalog';
 const DOC_TITLE = params.get('title') || (DOC === 'catalog' ? 'الكتالوج' : DOC);
 const currentCat = () => $('sheetCategory').value;
 const catName = (c = currentCat()) => [...$('sheetCategory').options].find(o => o.value === c)?.text || c;
 const tplKey = (c = currentCat()) => `${DOC}::${c}`;
 let lastCat = currentCat(), dirty = false, db = null;
 
-// ---- IndexedDB: templates (key = مستند::تصنيف) + kv (الترويسة والتذييل المشتركة) ----
 function idb() {
   return new Promise((res, rej) => {
     const r = indexedDB.open('scor_studio', 1);
@@ -727,7 +723,6 @@ const dbAll = st => tx(st, 'readonly', o => o.getAll());
 const dbPut = (st, v, k) => tx(st, 'readwrite', o => k === undefined ? o.put(v) : o.put(v, k));
 const saveAssets = () => dbPut('kv', state, 'assets').catch(() => {});
 
-// ---- المراقبة: مؤشر "غير محفوظ" ----
 const obs = new MutationObserver(() => setDirty(true));
 obs.observe(box, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style'] });
 function setDirty(v) { dirty = v; $('tplDirty').style.display = v ? 'inline' : 'none'; }
@@ -739,20 +734,18 @@ function updateTplUI(rec) {
 }
 const setMsg = t => { $('tplStatus').textContent = t; };
 
-// ---- بناء/تطبيق السجل ----
 function serializePages() {
   clearSel();
   const c = box.cloneNode(true);
   c.querySelectorAll('.snap-guide-v,.snap-guide-h').forEach(x => x.remove());
   c.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
-  // صور الترويسة والتذييل تُحفظ مرة واحدة (مشتركة) ولا تُكرَّر داخل كل قالب
   c.querySelectorAll('.page-header,.is-normal-footer,.is-last-footer').forEach(x => x.style.backgroundImage = '');
   return c.innerHTML;
 }
 const buildRecord = (key, cat) => ({ key, doc: DOC, category: cat, pageCount: parseInt($('pageCount').value) \vert{}\vert{} 1, hasCover:$('hasCover').checked, html: serializePages(), savedAt: Date.now(), v: 1 });
 const slimPrev = o => o ? { html: o.html, pageCount: o.pageCount, hasCover: o.hasCover, savedAt: o.savedAt } : undefined;
 
-function rewire() { // إعادة ربط الأحداث بعد تحميل HTML محفوظ
+function rewire() {
   box.querySelectorAll('.draggable-wrapper, .free-container').forEach(el => attachResizers(el));
   box.querySelectorAll('.spec-block').forEach(b => { const rs = b.querySelector(':scope > .table-col-resizer'); if (rs) makeTableColResizable(rs, b); });
   box.querySelectorAll('.grid-row').forEach(row => row.querySelectorAll('.col-resizer').forEach(g => { if (g.previousElementSibling) makeColResizable(g.previousElementSibling, g, row); }));
@@ -768,12 +761,11 @@ function applyRecord(rec) {
   obs.takeRecords(); setDirty(false);
 }
 
-// ---- العمليات ----
 async function loadCurrentTemplate(switching) {
   let rec = null;
   try { rec = await dbGet('templates', tplKey()); } catch (e) {}
   if (rec) applyRecord(rec);
-  else if (switching) setDirty(true); // المحتوى الحالي غير محفوظ لهذا التصنيف
+  else if (switching) setDirty(true);
   updateTplUI(rec);
   if (!rec && switching) setMsg('لا يوجد قالب لهذا التصنيف — المحتوى الحالي لم يُحفظ له بعد (احفظ لإنشائه)');
 }
@@ -835,7 +827,6 @@ $('tplImport').addEventListener('change', async e => {
   } catch (err) { alert('تعذّر الاستيراد: ' + err.message); }
 });
 
-// ترحيل قالب النسخة القديمة (localStorage) مرة واحدة إن وُجد
 async function migrateLegacy() {
   try {
     const lg = localStorage.getItem('scor_master_template_v10');
