@@ -292,17 +292,25 @@ const oneColKeys = ['std_equipment','opt_equipment','notes','dimensions'];
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 async function fetchSheetData() {
-  const badge = document.getElementById('dataStatus');
-  const load = gid => new Promise((resolve, reject) => Papa.parse(`https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=${gid}`, { download: true, header: true, complete: r => resolve(r.data), error: reject }));
-  try {
-    [database.skid_steers, database.pumps] = await Promise.all([load(546876457), load(1201691755)]);
-    badge.innerHTML = 'متصل بالبيانات 🟢'; badge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-    updateModelsList();
-  } catch (e) {
-    badge.innerHTML = 'خطأ بالاتصال 🔴'; badge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
+      const statusBadge = document.getElementById('dataStatus');
+      try {
+          // استخدام الروابط المنشورة كـ CSV مباشرةً
+          const skidUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=546876457&single=true&output=csv`;
+          const pumpUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=1201691755&single=true&output=csv`;
+          
+          await Promise.all([
+            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
+            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
+          ]);
+          
+          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
+          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
+          updateModelsList();
+      } catch (error) {
+          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
+          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
+      }
   }
-}
-  function updateModelsList() {
   const sel = document.getElementById('modelSelector');
   sel.innerHTML = '';
   const models = database[document.getElementById('sheetCategory').value];
