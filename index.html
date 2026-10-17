@@ -3,15 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SCOR Master Studio - V 10.2</title>
+<title>Alfa Master Studio - V 10.2</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; }
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; }
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; }
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Regular.woff2') format('woff2'), url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-SemiBold.woff2') format('woff2'), url('SCOR-Typeface-SemiBold.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Bold.woff2') format('woff2'), url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-ExtraBold.woff2') format('woff2'), url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; font-display: swap; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Black.woff2') format('woff2'), url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; font-display: swap; }
 
 :root { --main-font: 'Cairo', sans-serif; }
 body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
@@ -94,7 +95,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
 <div id="sidebar" class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50">
   <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
     <h1 class="text-2xl font-black text-[#f5b700]">SCOR Studio</h1>
-    <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
+    <div class="flex gap-1"><span id="fontStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">SCOR…</span><span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span></div>
   </div>
 
   <!-- لوحة خصائص العنصر المحدد (ثابتة بأعلى اللوحة) -->
@@ -110,7 +111,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
           <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
           <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
           <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
-            <option value="400">عادي</option><option value="700">بولد</option><option value="900">أسود</option>
+            <option value="400">عادي</option><option value="600">شبه عريض</option><option value="700">بولد</option><option value="800">عريض جداً</option><option value="900">أسود</option>
           </select>
           <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
             <option value="cairo">Cairo</option><option value="scor">SCOR</option>
@@ -192,23 +193,8 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
       <select id="targetPageSelect" class="w-3/4 bg-[#181b22] border border-[#343946] p-1.5 rounded text-[#f5b700] text-xs font-bold outline-none"></select>
     </div>
     <select id="dataSourceSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
-      <optgroup label="نصوص العناوين والوصف">
-        <option value="text:model_name">اسم الموديل (عنوان)</option>
-        <option value="text:marketing_slogan">العبارة التسويقية (نص)</option>
-        <option value="text:short_description">الوصف المختصر (نص)</option>
-        <option value="text:marketing_description">الوصف التسويقي (نص للمضخات)</option>
-      </optgroup>
-      <optgroup label="المواصفات الفنية">
-        <option value="table:engine">المحرك</option>
-        <option value="table:hydraulic">النظام الهيدروليكي</option>
-        <option value="table:drive">نظام الدفع</option>
-        <option value="table:performance">الأداء ونطاق العمل</option>
-        <option value="table:weights">الأوزان والسعات</option>
-        <option value="table:std_equipment">التجهيزات القياسية</option>
-        <option value="table:opt_equipment">التجهيزات الاختيارية</option>
-        <option value="table:notes">الملاحظات</option>
-        <option value="table:dimensions">الأبعاد</option>
-      </optgroup>
+      <optgroup label="نصوص العناوين والوصف" id="textOptGroup"></optgroup>
+      <optgroup label="المواصفات الفنية" id="tableOptGroup"></optgroup>
     </select>
     <input type="text" id="sectionTitle" placeholder="تخصيص عنوان الجدول (اختياري)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold outline-none mt-1">
     <button onclick="insertPlaceholder()" class="w-full bg-[#282c35] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-gray-300 hover:text-black transition border border-gray-600">+ إدراج كحاوية تخطيط فارغة بالمكان المطلوب</button>
@@ -256,31 +242,45 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
 const SHEETS_ID = "1TDSSCDfAQJxz_zeulBrM6M79p9fw7mE1xTSvD-P_fuQ";
 let database = { skid_steers: [], pumps: [] };
 
-const translationDict = {
-  'model_name':'الاسم','marketing_slogan':'العبارة التسويقية','short_description':'الوصف المختصر','sub_type':'النوع الفرعي','marketing_description':'الوصف التسويقي',
-  'engine_type':'نوع المحرك','engine_model':'موديل المحرك','engine_capacity':'سعة المحرك','engine_power':'قدرة المحرك','engine_torque':'عزم المحرك','engine_emissions':'الانبعاثات','engine_cooling':'تبريد المحرك','engine_start_system':'تشغيل المحرك',
-  'hydraulic_system_type':'نوع النظام','main_pump':'المضخة الرئيسية','standard_flow':'التدفق القياسي','max_pressure':'الضغط الأقصى','aux_hydraulic_system':'نظام هيدروليكي إضافي','aux_system_flow':'تدفق النظام الإضافي','quick_couplers':'توصيلات سريعة',
-  'drive_type':'نوع الدفع','travel_speed':'سرعة السير','max_travel_speed':'السرعة القصوى','gradeability':'قدرة التسلق','tires':'الإطارات','steering_type':'نمط التوجيه',
-  'rated_payload':'الحمولة المقدرة','rated_load':'الحمولة المقننة','bucket_capacity':'سعة الدلو','dump_height':'ارتفاع التفريغ','arm_length':'طول الذراع','breakout_force':'قوة الكسر','lifting_capacity':'قدرة الرفع','performance_productivity':'الإنتاجية','performance_pressure':'الضغط','pump_vertical_fine':'ضخ رأسي','pump_horizontal_fine':'ضخ أفقي','max_aggregate_size':'أقصى حجم للركام',
-  'operating_weight':'الوزن التشغيلي','total_weight':'الوزن الكلي','fuel_tank_capacity':'سعة خزان الوقود','hydraulic_capacity':'سعة الهيدروليك',
-  'std_equip_1':'تجهيز قياسي 1','std_equip_2':'تجهيز قياسي 2','std_equip_3':'تجهيز قياسي 3','std_equip_4':'تجهيز قياسي 4','std_equip_5':'تجهيز قياسي 5','std_equip_6':'تجهيز قياسي 6','std_equip_7':'تجهيز قياسي 7','std_equip_8':'تجهيز قياسي 8','std_equip_9':'تجهيز قياسي 9','std_equip_10':'تجهيز قياسي 10',
-  'opt_equip_1':'تجهيز اختياري 1','opt_equip_2':'تجهيز اختياري 2','opt_equip_3':'تجهيز اختياري 3','opt_equip_4':'تجهيز اختياري 4','opt_equip_5':'تجهيز اختياري 5','opt_equip_6':'تجهيز اختياري 6',
-  'note_1':'ملاحظة 1','note_2':'ملاحظة 2','note_3':'ملاحظة 3',
-  'dim_a':'الطول الكلي مع الدلو','dim_b':'الطول بدون الدلو','dim_c':'قاعدة العجلات','dim_d':'الارتفاع الكلي','dim_e':'ارتفاع الكابينة','dim_f':'ارتفاع محور الدوران','dim_g':'ارتفاع الدلو في أقصى وضع','dim_h':'ارتفاع التفريغ','dim_i':'مدى التفريغ','dim_j':'زاوية إرجاع الدلو عند الرفع','dim_k':'زاوية التفريغ عند أقصى ارتفاع','dim_l':'عمق الحفر أسفل مستوى الأرض','dim_m':'الخلوص الأرضي','dim_n':'العرض الكلي','dim_o':'عرض المسار','dim_p':'عرض الدلو','dim_q':'عرض الدلو الداخلي','dim_r':'نصف قطر الدوران الأمامي (بدون دلو)','dim_s':'نصف قطر الدوران الأمامي (مع دلو)'
+// ===== تعريف الجداول (مطابق للشرائح): كل صف [عمود الشيت، التسمية]؛ "a|b" = أول عمود غير فارغ =====
+const lst = (p, n) => Array.from({ length: n }, (_, i) => [`${p}_${i + 1}`, '']);
+const T = {
+  // --- معدات انزلاقية ---
+  engine: { title: 'المحرك', rows: [['engine_type','النوع'],['engine_model','الموديل'],['engine_capacity','السعة'],['engine_power','القدرة القصوى'],['engine_torque','عزم الدوران الأقصى'],['engine_emissions','معايير الانبعاثات']] },
+  hydraulic: { title: 'النظام الهيدروليكي', rows: [['hydraulic_system_type','نوع النظام'],['main_pump','المضخة الرئيسية'],['standard_flow','التدفق القياسي'],['max_pressure','الضغط الأقصى'],['aux_hydraulic_system','النظام الهيدروليكي الإضافي'],['aux_system_flow','تدفق النظام الإضافي'],['quick_couplers','توصيلات سريعة للملحقات']] },
+  drive: { title: 'نظام الحركة', rows: [['drive_type','نوع الدفع'],['travel_speed','سرعة السير القصوى'],['gradeability','قدرة التسلق القصوى'],['tires','الإطارات'],['steering_type','نمط التوجيه']] },
+  performance: { title: 'الأداء التشغيلي', rows: [['rated_payload','الحمولة التشغيلية المقدرة'],['bucket_capacity','سعة الدلو القياسية'],['dump_height','ارتفاع التفريغ'],['arm_length','طول الذراع'],['breakout_force','قوة الكسر (الدلو)'],['lifting_capacity','قدرة الرفع القصوى']] },
+  performance2: { title: 'الأداء التشغيلي (2)', rows: [['rated_load','الحمولة التشغيلية المقننة'],['std_bucket_capacity','سعة الدلو القياسية'],['operating_weight_2','وزن التشغيل'],['bucket_breakout_force','قوة الكسر (الدلو)'],['max_lifting_force','قوة الرفع القصوى'],['max_travel_speed','سرعة السير القصوى'],['max_gradeability','قدرة التسلق القصوى'],['steering_type_2','نمط التوجيه']] },
+  angles: { title: 'زوايا العمل', rows: [['rollback_angle_ground','زاوية إرجاع الدلو عند الأرض'],['max_dump_angle','زاوية التفريغ عند أقصى ارتفاع'],['rear_departure_angle','زاوية الخروج الخلفية'],['front_approach_angle','زاوية الاقتراب الأمامية']] },
+  weights: { title: 'السعات والأوزان', rows: [['fuel_tank_capacity','خزان الوقود'],['hydraulic_capacity','النظام الهيدروليكي'],['operating_weight','الوزن التشغيلي']] },
+  std_equipment: { title: 'التجهيزات القياسية', layout: 'list', rows: lst('std_equip', 10) },
+  opt_equipment: { title: 'التجهيزات الاختيارية', layout: 'list', rows: lst('opt_equip', 6) },
+  notes: { title: 'ملاحظات', layout: 'list', rows: lst('note', 3) },
+  dimensions: { title: 'الأبعاد الرئيسية', layout: 'dims', rows: ["الطول الكلي مع الدلو", "الطول بدون الدلو", "قاعدة العجلات", "الارتفاع الكلي", "ارتفاع الكابينة", "ارتفاع محور الدوران", "ارتفاع الدلو في أقصى وضع", "ارتفاع التفريغ", "مدى التفريغ", "زاوية إرجاع الدلو عند الرفع", "زاوية التفريغ عند أقصى ارتفاع", "عمق الحفر أسفل مستوى الأرض", "الخلوص الأرضي", "العرض الكلي", "عرض المسار", "عرض الدلو", "عرض الدلو الداخلي", "نصف قطر الدوران الأمامي (بدون دلو)", "نصف قطر الدوران الأمامي (مع دلو)"].map((l, i) => [`dim_${String.fromCharCode(97 + i)}`, l]) },
+  // --- مضخات بيتون ---
+  general: { title: 'المواصفات العامة', rows: [['general_model','الموديل'],['equipment_type','نوع المعدة'],['general_design','التصميم'],['operating_system','نظام التشغيل'],['general_usage','الاستخدام']] },
+  engine_p: { title: 'المحرك', rows: [['engine_type','نوع المحرك'],['engine_model','موديل / تفاصيل المحرك'],['engine_power','القدرة'],['engine_cooling','نظام التبريد'],['engine_start_system','نظام التحكم/التشغيل']] },
+  mixer: { title: 'نظام الخلط', rows: [['mixer_type','نوع الخلاط'],['mixer_capacity','سعة الخلاط'],['max_mixing_volume','أقصى حجم للخلط'],['mixing_system','نظام العمل']] },
+  dimweights: { title: 'الأبعاد والأوزان', rows: [['dim_length','الطول الكلي'],['dim_width','العرض الكلي'],['dim_height','الارتفاع الكلي'],['total_weight','الوزن الكلي']] },
+  pperformance: { title: 'الأداء التشغيلي', rows: [['performance_productivity','الإنتاجية القصوى'],['performance_pressure','أقصى ضغط ضخ'],['pump_vertical_fine','مسافة الضخ الرأسي (ركام ناعم/مونة)'],['pump_horizontal_fine','مسافة الضخ الأفقي (ركام ناعم/مونة)'],['pump_vertical_coarse','مسافة الضخ الرأسي (ركام كبير)'],['pump_horizontal_coarse','مسافة الضخ الأفقي (ركام كبير)'],['max_aggregate_size','أقصى حجم للركام'],['cooling_system_performance','نظام تبريد الزيت']] },
+  mechanical: { title: 'النظام الميكانيكي', rows: [['mech_oil_cylinder','أسطوانة الزيت'],['mech_material_cylinder','أسطوانة المادة'],['mech_valve_type','نوع الصمام'],['mech_inner_pipe_diameter','القطر الداخلي للأنبوب']] },
+  features: { title: 'الميزات', layout: 'list', rows: lst('feature', 6) }
 };
-
-const tableGroups = {
-  'engine': ['engine_type','engine_model','engine_capacity','engine_power','engine_torque','engine_emissions','engine_cooling','engine_start_system'],
-  'hydraulic': ['hydraulic_system_type','main_pump','standard_flow','max_pressure','aux_hydraulic_system','aux_system_flow','quick_couplers','total_hydraulic_system'],
-  'drive': ['drive_type','travel_speed','max_travel_speed','gradeability','max_gradeability','tires','steering_type','steering_type_2'],
-  'performance': ['rated_payload','rated_load','bucket_capacity','std_bucket_capacity','dump_height','arm_length','breakout_force','bucket_breakout_force','lifting_capacity','max_lifting_force','rollback_angle_ground','max_dump_angle','rear_departure_angle','front_approach_angle','performance_productivity','performance_pressure','pump_vertical_fine','pump_horizontal_fine','pump_vertical_coarse','pump_horizontal_coarse','max_aggregate_size','cooling_system_performance'],
-  'weights': ['operating_weight','operating_weight_2','total_weight','fuel_tank_capacity','fuel_tank_2','hydraulic_capacity'],
-  'std_equipment': ['std_equip_1','std_equip_2','std_equip_3','std_equip_4','std_equip_5','std_equip_6','std_equip_7','std_equip_8','std_equip_9','std_equip_10'],
-  'opt_equipment': ['opt_equip_1','opt_equip_2','opt_equip_3','opt_equip_4','opt_equip_5','opt_equip_6'],
-  'notes': ['note_1','note_2','note_3'],
-  'dimensions': ['dim_a','dim_b','dim_c','dim_d','dim_e','dim_f','dim_g','dim_h','dim_i','dim_j','dim_k','dim_l','dim_m','dim_n','dim_o','dim_p','dim_q','dim_r','dim_s']
+const CAT_TABLES = {
+  skid_steers: ['engine','hydraulic','drive','performance','performance2','angles','std_equipment','opt_equipment','weights','notes','dimensions'],
+  pumps: ['general','engine_p','mixer','dimweights','pperformance','mechanical','features','notes']
 };
-const oneColKeys = ['std_equipment','opt_equipment','notes','dimensions'];
+const oneColKeys = Object.keys(T).filter(k => (T[k].layout || 'kv') !== 'kv');
+const tableOptionsHTML = (cat = currentCat()) => (CAT_TABLES[cat] || []).map(k => `<option value="table:${k}">${T[k].title}</option>`).join('');
+const gridOptionsHTML = (cat = currentCat()) => (CAT_TABLES[cat] || []).map(k => `<option value="${k}">${T[k].title}</option>`).join('');
+const CAT_TEXT = {
+  skid_steers: [['model_name','اسم الموديل (عنوان)'],['marketing_slogan','العبارة التسويقية (نص)'],['short_description','الوصف المختصر (نص)']],
+  pumps: [['model_name','اسم الموديل (عنوان)'],['sub_type','النوع الفرعي (نص)'],['marketing_description','الوصف التسويقي (نص)']]
+};
+function buildTableOptions() {
+  $('textOptGroup').innerHTML = (CAT_TEXT[currentCat()] || []).map(([k, t]) => `<option value="text:${k}">${t}</option>`).join('');
+  $('tableOptGroup').innerHTML = tableOptionsHTML();
+}
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 async function fetchSheetData() {
@@ -378,25 +378,28 @@ function fillAllPlaceholders() {
     d.innerText = v.trim() ? v : '[ لا توجد بيانات ]';
   });
 
+  const missing = new Set();
   document.querySelectorAll('[data-dynamic-type="table"]').forEach(el => {
-    const key = el.dataset.dynamicKey, wrapper = el.querySelector('.table-rows-wrapper'); if (!wrapper) return;
-    let html = '';
-    tableGroups[key].forEach(k => {
-      const v = row[k]; if (!v || !v.trim()) return;
-      if (key === 'dimensions') {
-        const label = translationDict[k] || k;
+    const def = T[el.dataset.dynamicKey], wrapper = el.querySelector('.table-rows-wrapper'); if (!def || !wrapper) return;
+    const layout = def.layout || 'kv'; let html = '';
+    def.rows.forEach(([k, label], i) => {
+      const parts = k.split('|');
+      if (!parts.some(x => x in row)) missing.add(parts[0]);
+      const v = (parts.map(x => row[x]).find(x => x && x.trim()) || '').trim(); if (!v) return;
+      if (layout === 'dims') {
         html += `<div class="spec-row flex-1" style="padding:4px 12px">
-          <span contenteditable="true" style="width:15%;text-align:center;border-left:1px solid #e5e7eb;flex-shrink:0">${k.replace('dim_','').toUpperCase()}</span>
-          <span contenteditable="true" style="width:25%;text-align:center;border-left:1px solid #e5e7eb;flex-shrink:0">${esc(v)}</span>
-          <span contenteditable="true" style="width:60%;text-align:right;padding-right:10px;flex-grow:1">${esc(label)}</span></div>`;
-      } else if (oneColKeys.includes(key)) {
-        html += `<div class="spec-row flex-1"><span class="spec-val" contenteditable="true" style="width:100%;text-align:center;padding:4px">${esc(v)}</span></div>`;
+          <span contenteditable="true" style="width:22%;text-align:center;border-left:1px solid #e5e7eb;flex-shrink:0">${esc(v)}</span>
+          <span contenteditable="true" style="text-align:right;padding-right:10px;flex-grow:1">${esc(label)}</span>
+          <span contenteditable="true" style="width:12%;text-align:center;border-right:1px solid #e5e7eb;flex-shrink:0">${String.fromCharCode(65 + i)}</span></div>`;
+      } else if (layout === 'list') {
+        html += `<div class="spec-row flex-1"><span class="spec-val" contenteditable="true" style="width:100%;text-align:right;padding:4px 10px">${esc(v)}</span></div>`;
       } else {
-        html += `<div class="spec-row flex-1"><span class="spec-key" contenteditable="true">${esc(translationDict[k] || k)}</span><span class="spec-val" contenteditable="true">${esc(v)}</span></div>`;
+        html += `<div class="spec-row flex-1"><span class="spec-key" contenteditable="true">${esc(label)}</span><span class="spec-val" contenteditable="true">${esc(v)}</span></div>`;
       }
     });
     wrapper.innerHTML = html || `<div class="p-4 text-center text-red-400 font-bold bg-red-50 flex-1 border-t border-red-200">لا توفر المواصفات لهذا الموديل</div>`;
   });
+  if (missing.size) setMsg('أعمدة غير موجودة في الشيت: ' + [...missing].join('، '));
   if (selEl) updatePanel();
 }
 
@@ -430,7 +433,7 @@ function insertGridContent(btn, type) {
     col.innerHTML = `<div class="flex flex-col gap-2 p-2 w-full h-full justify-center bg-gray-50 border border-dashed border-gray-300 no-print">
       <label class="text-xs text-gray-700 font-bold text-center">اختر الجدول المرتبط بالبيانات:</label>
       <select class="grid-table-select text-xs p-1.5 border border-gray-300 rounded w-full outline-none">
-        <option value="engine">المحرك</option><option value="hydraulic">النظام الهيدروليكي</option><option value="drive">نظام الدفع</option><option value="performance">الأداء ونطاق العمل</option><option value="weights">الأوزان والسعات</option><option value="std_equipment">التجهيزات القياسية</option><option value="opt_equipment">التجهيزات الاختيارية</option><option value="notes">الملاحظات</option><option value="dimensions">الأبعاد</option>
+        ${gridOptionsHTML()}
       </select>
       <button onclick="insertGridTableConfirmed(this)" class="bg-[#f5b700] text-black text-xs font-bold py-1.5 rounded">تأكيد الإدراج</button>
       <button onclick="cancelGridTable(this)" class="bg-gray-300 text-black text-xs font-bold py-1 rounded">إلغاء</button></div>`;
@@ -520,7 +523,7 @@ function syncText() {
   let color = '#000000', size = 10, weight = '700', fam = 'cairo';
   if (s) {
     const cs = getComputedStyle(s), w = parseInt(cs.fontWeight);
-    color = rgb2hex(cs.color); size = Math.round(parseFloat(cs.fontSize)); weight = w >= 800 ? '900' : w >= 600 ? '700' : '400';
+    color = rgb2hex(cs.color); size = Math.round(parseFloat(cs.fontSize)); weight = String([400,600,700,800,900].reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a));
     fam = /scor/i.test(cs.fontFamily) ? 'scor' : 'cairo';
   }
   $('pColor').value = color; $('pSize').value = size; $('pWeight').value = weight; $('pFamily').value = fam;
@@ -755,7 +758,7 @@ async function onCategoryChange() {
   const sel = $('sheetCategory');
   if (dirty && !confirm(`توجد تعديلات غير محفوظة على قالب «${catName(lastCat)}». المتابعة دون حفظ؟`)) { sel.value = lastCat; return; }
   lastCat = sel.value;
-  updateModelsList();
+  buildTableOptions(); updateModelsList();
   await loadCurrentTemplate(true);
 }
 async function saveTemplate() {
@@ -845,9 +848,19 @@ function createPageElement(num, isLast = false) {
   return page;
 }
 
+async function checkFonts() {
+  const names = { 400: 'Regular', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Black' }, bad = [];
+  await Promise.all(Object.keys(names).map(async w => { try { const r = await document.fonts.load(`${w} 16px SCORFont`, 'SCOR'); if (!r.length) bad.push(names[w]); } catch (e) { bad.push(names[w]); } }));
+  const b = $('fontStatus');
+  b.textContent = bad.length ? 'SCOR ✗' : 'SCOR ✓';
+  b.className = 'text-xs text-white px-2 py-1 rounded ' + (bad.length ? 'bg-red-700' : 'bg-green-700');
+  b.title = bad.length ? 'لم تُحمَّل: ' + bad.join('، ') + ' — ضع ملفات woff2 في مجلد fonts/ بجانب هذا الملف' : 'جميع أوزان SCOR محمّلة';
+}
+
 window.onload = async () => {
   try { await idb(); if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); const a = await dbGet('kv', 'assets'); if (a) state = { ...state, ...a }; }
   catch (e) { console.warn(e); }
+  buildTableOptions(); checkFonts();
   renderPages(); obs.takeRecords(); setDirty(false);
   await loadCurrentTemplate(false);
   await migrateLegacy();
