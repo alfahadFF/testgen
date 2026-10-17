@@ -8,11 +8,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
-@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; }
-@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-SemiBold.woff2') format('woff2'); font-weight: 600; }
-@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; }
-@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; }
-@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; }
+@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; }
 
 :root { --main-font: 'Cairo', sans-serif; }
 body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
@@ -26,7 +25,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 .is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 .is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
 
-/* الجداول */
+/* الجداول: الافتراضي 10px كايرو بولد أسود — يمكن تغييره من لوحة التحكم عبر المتغيرات --t-* */
 .spec-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
 .spec-header { position: relative; background: #1f2937; color: #fff; height: 21px; line-height: 21px; padding: 0 15px 0 50px; flex-shrink: 0; overflow: hidden; font-weight: 900; font-size: 1.1em; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
 .spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
@@ -41,13 +40,13 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 .table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; }
 .table-col-resizer:hover, .table-col-resizer:active { background: rgba(245,183,0,0.6); }
 
-/* العناصر */
+/* العناصر: لا تظهر أي أدوات إلا بالنقر (حالة selected) */
 .free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248,249,250,0.9); display: flex; flex-direction: column; z-index: 5; cursor: move; }
 .draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; cursor: move; }
 [contenteditable="true"] { cursor: text; }
 .selected { outline: 2px solid #f5b700; }
 .draggable-wrapper img { -webkit-user-drag: none; user-select: none; }
-.drag-bar, .drag-handle, .delete-btn, .text-toolbar, .image-toolbar { display: none !important; }
+.drag-bar, .drag-handle, .delete-btn, .text-toolbar, .image-toolbar { display: none !important; } /* توافق مع قوالب قديمة */
 
 .grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
 .grid-col { flex: 1; min-width: 20px; position: relative; display: flex; flex-direction: column; }
@@ -56,7 +55,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 .selected .col-resizer::after { border-color: #f5b700; }
 .col-resizer:hover, .col-resizer:active { background: rgba(245,183,0,0.2); }
 
-/* مقابض التحجيم */
+/* مقابض التحجيم: تظهر فقط عند التحديد — الحواف كاملة قابلة للسحب */
 .resizer { display: none; position: absolute; z-index: 20; }
 .selected > .resizer { display: block; }
 .resizer.t, .resizer.b { left: 0; width: 100%; height: 12px; cursor: ns-resize; }
@@ -98,6 +97,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     <span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span>
   </div>
 
+  <!-- لوحة خصائص العنصر المحدد (ثابتة بأعلى اللوحة) -->
   <div class="sticky top-0 z-30 bg-[#0e1014] p-3 rounded-lg border-2 border-[#f5b700] flex flex-col gap-2 shadow-xl">
     <div class="flex justify-between items-center">
       <h2 class="text-[#f5b700] font-black text-xs">🎛️ خصائص العنصر المحدد</h2>
@@ -109,18 +109,11 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
         <div class="flex gap-2 items-center">
           <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
           <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
-          
           <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
-            <option value="400">عادي</option>
-            <option value="600">نصف غامق</option>
-            <option value="700">غامق</option>
-            <option value="800">عريض</option>
-            <option value="900">أسود</option>
+            <option value="400">عادي</option><option value="700">بولد</option><option value="900">أسود</option>
           </select>
-          
           <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
-            <option value="cairo">Cairo</option>
-            <option value="scor">SCOR</option>
+            <option value="cairo">Cairo</option><option value="scor">SCOR</option>
           </select>
         </div>
         <div class="flex gap-1">
@@ -130,7 +123,6 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
           <button class="pbtn" onclick="applyAlign('justify')">ضبط</button>
         </div>
       </div>
-      
       <div class="flex gap-2 items-center">
         <span class="text-[10px] text-gray-400">عرض</span><input type="number" id="pW" step="0.5" class="pin w-16 text-center" oninput="setGeom('width',this.value)">
         <span class="text-[10px] text-gray-400">ارتفاع</span><input type="number" id="pH" step="0.5" class="pin w-16 text-center" oninput="setGeom('height',this.value)">
@@ -292,25 +284,18 @@ const oneColKeys = ['std_equipment','opt_equipment','notes','dimensions'];
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 async function fetchSheetData() {
-      const statusBadge = document.getElementById('dataStatus');
-      try {
-          // استخدام الروابط المنشورة كـ CSV مباشرةً
-          const skidUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=546876457&single=true&output=csv`;
-          const pumpUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTYRcIuI2OH7ZfJK6wkUIHm6L8CzK9_Ct3Kgs483UWco43Ei1jbjvMYZ7_u5UlLWc-5dAMKCUsdHpd7/pub?gid=1201691755&single=true&output=csv`;
-          
-          await Promise.all([
-            new Promise((resolve, reject) => Papa.parse(skidUrl, { download: true, header: true, complete: res => { database.skid_steers = res.data; resolve(); }, error: err => reject(err)})),
-            new Promise((resolve, reject) => Papa.parse(pumpUrl, { download: true, header: true, complete: res => { database.pumps = res.data; resolve(); }, error: err => reject(err)}))
-          ]);
-          
-          statusBadge.innerHTML = 'متصل بالبيانات 🟢';
-          statusBadge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
-          updateModelsList();
-      } catch (error) {
-          statusBadge.innerHTML = 'خطأ بالاتصال 🔴';
-          statusBadge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
-      }
+  const badge = document.getElementById('dataStatus');
+  const load = gid => new Promise((resolve, reject) => Papa.parse(`https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&gid=${gid}`, { download: true, header: true, complete: r => resolve(r.data), error: reject }));
+  try {
+    [database.skid_steers, database.pumps] = await Promise.all([load(546876457), load(1201691755)]);
+    badge.innerHTML = 'متصل بالبيانات 🟢'; badge.className = 'text-xs bg-green-700 text-white px-2 py-1 rounded';
+    updateModelsList();
+  } catch (e) {
+    badge.innerHTML = 'خطأ بالاتصال 🔴'; badge.className = 'text-xs bg-red-700 text-white px-2 py-1 rounded';
   }
+}
+
+function updateModelsList() {
   const sel = document.getElementById('modelSelector');
   sel.innerHTML = '';
   const models = database[document.getElementById('sheetCategory').value];
@@ -333,7 +318,7 @@ function updateHeadersAndFooters() {
   document.querySelectorAll('.is-last-footer').forEach(el => {
     const img = state.lastFooterImg || state.footerImg; if (img) el.style.backgroundImage = `url(${img})`;
   });
-  obs.takeRecords();
+  obs.takeRecords(); // تطبيق الصور المشتركة لا يُعدّ تعديلاً على القالب
 }
 
 // ================= أدوات مساعدة للإنشاء =================
@@ -476,7 +461,7 @@ document.getElementById('freeImageUpload').addEventListener('change', function (
   r.onload = ev => {
     const w = textBox('p-1', '', 'width:100mm;top:100mm;left:5mm;');
     const img = document.createElement('img'); img.src = ev.target.result; img.draggable = false;
-    img.style.cssText = 'width:100%;height:100%;object-fit:fill;';
+    img.style.cssText = 'width:100%;height:100%;object-fit:fill;'; // تمديد حر: الصورة تتبع الصندوق تماماً
     w.appendChild(img); addEl(page, w); e.target.value = '';
   };
   r.readAsDataURL(f);
@@ -519,6 +504,7 @@ function selectEl(el, sub) {
   selEl = el; selSub = sub; el.classList.add('selected'); updatePanel();
 }
 
+// الهدف النصي للوحة: جدول (عبر متغيرات CSS) أو عناصر نصية
 function textTargets() {
   const blk = selSub && selSub.closest('.spec-block');
   const b = blk || (!selSub && selEl.dataset.dynamicType === 'table' && selEl.querySelector('.spec-block'));
@@ -526,36 +512,23 @@ function textTargets() {
   const scope = (selSub && selSub.closest('.grid-col')) || selEl;
   return { els: [...scope.querySelectorAll('.dynamic-content,.contact-text,[contenteditable="true"]')].filter(x => !x.closest('.spec-block')) };
 }
-
 const rgb2hex = c => '#' + (c.match(/\d+/g) || [0,0,0]).slice(0,3).map(n => (+n).toString(16).padStart(2,'0')).join('');
 
 function syncText() {
   const t = textTargets();
   const s = t.block ? t.block.querySelector('.spec-row span') : t.els[0];
   let color = '#000000', size = 10, weight = '700', fam = 'cairo';
-  
   if (s) {
-    const cs = getComputedStyle(s);
-    const w = parseInt(cs.fontWeight);
-    
-    color = rgb2hex(cs.color); 
-    size = Math.round(parseFloat(cs.fontSize)); 
-    
-    weight = w >= 900 ? '900' : w >= 800 ? '800' : w >= 700 ? '700' : w >= 600 ? '600' : '400';
+    const cs = getComputedStyle(s), w = parseInt(cs.fontWeight);
+    color = rgb2hex(cs.color); size = Math.round(parseFloat(cs.fontSize)); weight = w >= 800 ? '900' : w >= 600 ? '700' : '400';
     fam = /scor/i.test(cs.fontFamily) ? 'scor' : 'cairo';
   }
-  
-  $('pColor').value = color; 
-  $('pSize').value = size; 
-  $('pWeight').value = weight; 
-  $('pFamily').value = fam;
+  $('pColor').value = color; $('pSize').value = size; $('pWeight').value = weight; $('pFamily').value = fam;
 }
-
 function syncGeom() {
   if (!selEl) return;
-  $('pW').value = (selEl.offsetWidth / mmToPx).toFixed(1);$('pH').value = (selEl.offsetHeight / mmToPx).toFixed(1);
+  $('pW').value = (selEl.offsetWidth / mmToPx).toFixed(1); $('pH').value = (selEl.offsetHeight / mmToPx).toFixed(1);
 }
-
 function updatePanel() {
   const has = !!selEl;
   $('propsEmpty').style.display = has ? 'none' : 'block';
@@ -591,12 +564,12 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Delete' && selEl && !e.target.isContentEditable && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) delSel();
 });
 
-// ================= التحريك والتحجيم =================
+// ================= التحريك والتحجيم: من أي مكان، بلا قيود =================
 function attachResizers(el) {
   if (el.querySelector(':scope > .resizer')) return;
   ['t','b','l','r','tl','tr','bl','br'].forEach(p => { const h = document.createElement('div'); h.className = 'resizer ' + p; el.appendChild(h); });
 }
-function makeBoundedDraggable() {}
+function makeBoundedDraggable() {} // للتوافق فقط — التحريك الآن عبر المستمع العام أدناه
 
 const box = $('pagesContainer');
 box.addEventListener('dragstart', e => e.preventDefault());
@@ -627,7 +600,7 @@ function startDrag(e, el, page) {
   function move(ev) {
     const dx = (ev.clientX - sx) / scale, dy = (ev.clientY - sy) / scale;
     if (!moving) {
-      if (Math.abs(dx * scale) + Math.abs(dy * scale) < 4) return;
+      if (Math.abs(dx * scale) + Math.abs(dy * scale) < 4) return; // نقرة عادية = تحرير نص
       moving = true; getSelection().removeAllRanges(); document.body.style.userSelect = 'none';
     }
     const w = el.offsetWidth, h = el.offsetHeight;
@@ -642,6 +615,7 @@ function startDrag(e, el, page) {
     const sX = snap(l, w, xs), sY = snap(t, h, ys);
     if (sX) { l = sX[0]; vG.style.left = sX[1] + 'px'; vG.style.display = 'block'; }
     if (sY) { t = sY[0]; hG.style.top = sY[1] + 'px'; hG.style.display = 'block'; }
+    // حرية كاملة؛ فقط يبقى 20px من العنصر داخل الصفحة حتى لا يضيع
     l = Math.max(20 - w, Math.min(l, page.clientWidth - 20));
     t = Math.max(20 - h, Math.min(t, page.clientHeight - 20));
     el.style.left = l + 'px'; el.style.top = t + 'px';
@@ -664,7 +638,7 @@ function startResize(e, el, rz) {
     if (pos.includes('l')) w = sw - dx;
     if (pos.includes('b')) h = sh + dy;
     if (pos.includes('t')) h = sh - dy;
-    if (pos.length === 2) { const k = Math.max(w / sw, h / sh, 10 / sw, 10 / sh); w = sw * k; h = sh * k; }
+    if (pos.length === 2) { const k = Math.max(w / sw, h / sh, 10 / sw, 10 / sh); w = sw * k; h = sh * k; } // الزوايا: نفس النسبة
     w = Math.max(10, w); h = Math.max(10, h);
     el.style.width = w + 'px'; el.style.height = h + 'px';
     if (pos.includes('l')) el.style.left = (sl + sw - w) + 'px';
@@ -699,13 +673,14 @@ function makeColResizable(leftCol, gutter, row) {
 
 // ================= القوالب والصفحات =================
 const params = new URLSearchParams(location.search);
-const DOC = params.get('doc') || 'catalog';
+const DOC = params.get('doc') || 'catalog';                    // معرّف المستند (سيمرّره الـHub لاحقاً)
 const DOC_TITLE = params.get('title') || (DOC === 'catalog' ? 'الكتالوج' : DOC);
 const currentCat = () => $('sheetCategory').value;
 const catName = (c = currentCat()) => [...$('sheetCategory').options].find(o => o.value === c)?.text || c;
 const tplKey = (c = currentCat()) => `${DOC}::${c}`;
 let lastCat = currentCat(), dirty = false, db = null;
 
+// ---- IndexedDB: templates (key = مستند::تصنيف) + kv (الترويسة والتذييل المشتركة) ----
 function idb() {
   return new Promise((res, rej) => {
     const r = indexedDB.open('scor_studio', 1);
@@ -726,6 +701,7 @@ const dbAll = st => tx(st, 'readonly', o => o.getAll());
 const dbPut = (st, v, k) => tx(st, 'readwrite', o => k === undefined ? o.put(v) : o.put(v, k));
 const saveAssets = () => dbPut('kv', state, 'assets').catch(() => {});
 
+// ---- المراقبة: مؤشر "غير محفوظ" ----
 const obs = new MutationObserver(() => setDirty(true));
 obs.observe(box, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style'] });
 function setDirty(v) { dirty = v; $('tplDirty').style.display = v ? 'inline' : 'none'; }
@@ -737,18 +713,20 @@ function updateTplUI(rec) {
 }
 const setMsg = t => { $('tplStatus').textContent = t; };
 
+// ---- بناء/تطبيق السجل ----
 function serializePages() {
   clearSel();
   const c = box.cloneNode(true);
   c.querySelectorAll('.snap-guide-v,.snap-guide-h').forEach(x => x.remove());
   c.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
+  // صور الترويسة والتذييل تُحفظ مرة واحدة (مشتركة) ولا تُكرَّر داخل كل قالب
   c.querySelectorAll('.page-header,.is-normal-footer,.is-last-footer').forEach(x => x.style.backgroundImage = '');
   return c.innerHTML;
 }
-const buildRecord = (key, cat) => ({ key, doc: DOC, category: cat, pageCount: parseInt($('pageCount').value) \vert{}\vert{} 1, hasCover:$('hasCover').checked, html: serializePages(), savedAt: Date.now(), v: 1 });
+const buildRecord = (key, cat) => ({ key, doc: DOC, category: cat, pageCount: parseInt($('pageCount').value) || 1, hasCover: $('hasCover').checked, html: serializePages(), savedAt: Date.now(), v: 1 });
 const slimPrev = o => o ? { html: o.html, pageCount: o.pageCount, hasCover: o.hasCover, savedAt: o.savedAt } : undefined;
 
-function rewire() {
+function rewire() { // إعادة ربط الأحداث بعد تحميل HTML محفوظ
   box.querySelectorAll('.draggable-wrapper, .free-container').forEach(el => attachResizers(el));
   box.querySelectorAll('.spec-block').forEach(b => { const rs = b.querySelector(':scope > .table-col-resizer'); if (rs) makeTableColResizable(rs, b); });
   box.querySelectorAll('.grid-row').forEach(row => row.querySelectorAll('.col-resizer').forEach(g => { if (g.previousElementSibling) makeColResizable(g.previousElementSibling, g, row); }));
@@ -764,11 +742,12 @@ function applyRecord(rec) {
   obs.takeRecords(); setDirty(false);
 }
 
+// ---- العمليات ----
 async function loadCurrentTemplate(switching) {
   let rec = null;
   try { rec = await dbGet('templates', tplKey()); } catch (e) {}
   if (rec) applyRecord(rec);
-  else if (switching) setDirty(true);
+  else if (switching) setDirty(true); // المحتوى الحالي غير محفوظ لهذا التصنيف
   updateTplUI(rec);
   if (!rec && switching) setMsg('لا يوجد قالب لهذا التصنيف — المحتوى الحالي لم يُحفظ له بعد (احفظ لإنشائه)');
 }
@@ -830,6 +809,7 @@ $('tplImport').addEventListener('change', async e => {
   } catch (err) { alert('تعذّر الاستيراد: ' + err.message); }
 });
 
+// ترحيل قالب النسخة القديمة (localStorage) مرة واحدة إن وُجد
 async function migrateLegacy() {
   try {
     const lg = localStorage.getItem('scor_master_template_v10');
