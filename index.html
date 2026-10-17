@@ -47,7 +47,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 [contenteditable="true"] { cursor: text; }
 .selected { outline: 2px solid #f5b700; }
 .draggable-wrapper img { -webkit-user-drag: none; user-select: none; }
-.drag-bar, .drag-handle, .delete-btn, .text-toolbar, .image-toolbar { display: none !important; } /* توافق مع قوالب قديمة */
+.drag-bar, .drag-handle, .delete-btn, .text-toolbar, .image-toolbar { display: none !important; }
 
 .grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
 .grid-col { flex: 1; min-width: 20px; position: relative; display: flex; flex-direction: column; }
@@ -56,9 +56,9 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 .selected .col-resizer::after { border-color: #f5b700; }
 .col-resizer:hover, .col-resizer:active { background: rgba(245,183,0,0.2); }
 
-/* مقابض التحجيم: تظهر فقط عند التحديد — الحواف كاملة قابلة للسحب */
+/* مقابض التحجيم */
 .resizer { display: none; position: absolute; z-index: 20; }
-.ed > .resizer { display: block; }
+.selected > .resizer { display: block; } /* تم إصلاح الـ CSS هنا */
 .resizer.t, .resizer.b { left: 0; width: 100%; height: 12px; cursor: ns-resize; }
 .resizer.t { top: -6px; } .resizer.b { bottom: -6px; }
 .resizer.l, .resizer.r { top: 0; height: 100%; width: 12px; cursor: ew-resize; }
@@ -85,7 +85,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
   .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
   .a4-page::before, .a4-page::after { display: none !important; }
   .resizer, .col-resizer, .table-col-resizer, .no-print, .snap-guide-v, .snap-guide-h { display: none !important; }
-  .ed { outline: none !important; }
+  .selected { outline: none !important; } /* تم إصلاح الـ CSS هنا */
   .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
 }
 </style>
@@ -106,27 +106,25 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     </div>
     <div id="propsEmpty" class="text-[11px] text-gray-400 text-center py-1">انقر على أي عنصر في الصفحة لتظهر خياراته هنا</div>
     <div id="propsBody" style="display:none" class="flex-col gap-2">
+      <!-- تم إصلاح هيكلية الوسوم هنا -->
       <div id="propsText" class="flex-col gap-2" style="display:flex">
-  <div class="flex gap-2 items-center">
-    <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
-    <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
-    
-    <!-- تم إصلاح وسم select وإضافة الأوزان الخمسة -->
-    <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
-      <option value="400">عادي</option>
-      <option value="600">نصف غامق</option>
-      <option value="700">غامق</option>
-      <option value="800">عريض</option>
-      <option value="900">أسود</option>
-    </select>
-    
-    <!-- تم إصلاح وسم select لخيارات الخط -->
-    <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
-      <option value="cairo">Cairo</option>
-      <option value="scor">SCOR</option>
-    </select>
-  </div>
-</div>
+        <div class="flex gap-2 items-center">
+          <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
+          <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
+          
+          <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
+            <option value="400">عادي</option>
+            <option value="600">نصف غامق</option>
+            <option value="700">غامق</option>
+            <option value="800">عريض</option>
+            <option value="900">أسود</option>
+          </select>
+          
+          <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
+            <option value="cairo">Cairo</option>
+            <option value="scor">SCOR</option>
+          </select>
+        </div>
         <div class="flex gap-1">
           <button class="pbtn" onclick="applyAlign('right')">يمين</button>
           <button class="pbtn" onclick="applyAlign('center')">وسط</button>
@@ -134,6 +132,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
           <button class="pbtn" onclick="applyAlign('justify')">ضبط</button>
         </div>
       </div>
+      
       <div class="flex gap-2 items-center">
         <span class="text-[10px] text-gray-400">عرض</span><input type="number" id="pW" step="0.5" class="pin w-16 text-center" oninput="setGeom('width',this.value)">
         <span class="text-[10px] text-gray-400">ارتفاع</span><input type="number" id="pH" step="0.5" class="pin w-16 text-center" oninput="setGeom('height',this.value)">
@@ -550,10 +549,12 @@ function syncText() {
   $('pWeight').value = weight; 
   $('pFamily').value = fam;
 }
-  function syncGeom() {
+
+function syncGeom() {
   if (!selEl) return;
-  $('pW').value = (selEl.offsetWidth / mmToPx).toFixed(1); $('pH').value = (selEl.offsetHeight / mmToPx).toFixed(1);
+  $('pW').value = (selEl.offsetWidth / mmToPx).toFixed(1);$('pH').value = (selEl.offsetHeight / mmToPx).toFixed(1);
 }
+
 function updatePanel() {
   const has = !!selEl;
   $('propsEmpty').style.display = has ? 'none' : 'block';
@@ -748,7 +749,7 @@ function serializePages() {
   c.querySelectorAll('.page-header,.is-normal-footer,.is-last-footer').forEach(x => x.style.backgroundImage = '');
   return c.innerHTML;
 }
-const buildRecord = (key, cat) => ({ key, doc: DOC, category: cat, pageCount: parseInt($('pageCount').value) || 1, hasCover: $('hasCover').checked, html: serializePages(), savedAt: Date.now(), v: 1 });
+const buildRecord = (key, cat) => ({ key, doc: DOC, category: cat, pageCount: parseInt($('pageCount').value) \vert{}\vert{} 1, hasCover:$('hasCover').checked, html: serializePages(), savedAt: Date.now(), v: 1 });
 const slimPrev = o => o ? { html: o.html, pageCount: o.pageCount, hasCover: o.hasCover, savedAt: o.savedAt } : undefined;
 
 function rewire() { // إعادة ربط الأحداث بعد تحميل HTML محفوظ
