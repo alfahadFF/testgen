@@ -8,10 +8,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; }
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; }
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; }
-@font-face { font-family: 'SCORFont'; src: url('SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Regular.woff2') format('woff2'); font-weight: 400; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-SemiBold.woff2') format('woff2'); font-weight: 600; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Bold.woff2') format('woff2'); font-weight: 700; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-ExtraBold.woff2') format('woff2'); font-weight: 800; }
+@font-face { font-family: 'SCORFont'; src: url('fonts/SCOR-Typeface-Black.woff2') format('woff2'); font-weight: 900; }
 
 :root { --main-font: 'Cairo', sans-serif; }
 body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
@@ -57,7 +58,7 @@ body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
 
 /* مقابض التحجيم: تظهر فقط عند التحديد — الحواف كاملة قابلة للسحب */
 .resizer { display: none; position: absolute; z-index: 20; }
-.selected > .resizer { display: block; }
+.ed > .resizer { display: block; }
 .resizer.t, .resizer.b { left: 0; width: 100%; height: 12px; cursor: ns-resize; }
 .resizer.t { top: -6px; } .resizer.b { bottom: -6px; }
 .resizer.l, .resizer.r { top: 0; height: 100%; width: 12px; cursor: ew-resize; }
@@ -84,7 +85,7 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
   .a4-page { transform: scale(1) !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
   .a4-page::before, .a4-page::after { display: none !important; }
   .resizer, .col-resizer, .table-col-resizer, .no-print, .snap-guide-v, .snap-guide-h { display: none !important; }
-  .selected { outline: none !important; }
+  .ed { outline: none !important; }
   .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
 }
 </style>
@@ -106,16 +107,26 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     <div id="propsEmpty" class="text-[11px] text-gray-400 text-center py-1">انقر على أي عنصر في الصفحة لتظهر خياراته هنا</div>
     <div id="propsBody" style="display:none" class="flex-col gap-2">
       <div id="propsText" class="flex-col gap-2" style="display:flex">
-        <div class="flex gap-2 items-center">
-          <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
-          <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
-          <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
-            <option value="400">عادي</option><option value="700">بولد</option><option value="900">أسود</option>
-          </select>
-          <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
-            <option value="cairo">Cairo</option><option value="scor">SCOR</option>
-          </select>
-        </div>
+  <div class="flex gap-2 items-center">
+    <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
+    <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
+    
+    <!-- تم إصلاح وسم select وإضافة الأوزان الخمسة -->
+    <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
+      <option value="400">عادي</option>
+      <option value="600">نصف غامق</option>
+      <option value="700">غامق</option>
+      <option value="800">عريض</option>
+      <option value="900">أسود</option>
+    </select>
+    
+    <!-- تم إصلاح وسم select لخيارات الخط -->
+    <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
+      <option value="cairo">Cairo</option>
+      <option value="scor">SCOR</option>
+    </select>
+  </div>
+</div>
         <div class="flex gap-1">
           <button class="pbtn" onclick="applyAlign('right')">يمين</button>
           <button class="pbtn" onclick="applyAlign('center')">وسط</button>
@@ -139,9 +150,27 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     </div>
   </div>
 
-  <div class="bg-[#1f2937] p-2.5 rounded-lg border border-[#f5b700] flex gap-2">
-    <button onclick="saveTemplate()" class="w-1/2 bg-[#f5b700] text-black font-bold text-xs py-2 rounded hover:brightness-110">💾 حفظ كقالب افتراضي</button>
-    <button onclick="loadTemplate()" class="w-1/2 bg-[#374151] text-white font-bold text-xs py-2 rounded hover:bg-[#4b5563]">📂 استرجاع القالب</button>
+  <div class="bg-[#1f2937] p-2.5 rounded-lg border border-[#f5b700] flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <label class="text-[10px] font-bold text-[#f5b700] shrink-0">التصنيف:</label>
+      <select id="sheetCategory" class="flex-1 bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="onCategoryChange()">
+        <option value="skid_steers">معدات انزلاقية</option><option value="pumps">مضخات بيتون</option>
+      </select>
+    </div>
+    <div class="flex justify-between items-center">
+      <span id="tplTarget" class="text-[11px] font-black text-white"></span>
+      <span id="tplDirty" style="display:none" class="text-[10px] text-red-400 font-bold">● غير محفوظ</span>
+    </div>
+    <div id="tplStatus" class="text-[10px] text-gray-400"></div>
+    <div class="flex gap-2">
+      <button onclick="saveTemplate()" class="w-1/2 bg-[#f5b700] text-black font-bold text-xs py-2 rounded hover:brightness-110">💾 حفظ</button>
+      <button onclick="saveTemplateAs()" class="w-1/2 bg-[#374151] text-white font-bold text-xs py-2 rounded hover:bg-[#4b5563]">📋 حفظ باسم (نسخ لتصنيف)</button>
+    </div>
+    <div class="flex gap-1">
+      <button onclick="revertPrev()" class="pbtn flex-1">↩ النسخة السابقة</button>
+      <button onclick="exportTemplate()" class="pbtn flex-1">⬇ تصدير</button>
+      <label class="pbtn flex-1 text-center">⬆ استيراد<input type="file" id="tplImport" accept=".json,application/json" class="hidden"></label>
+    </div>
   </div>
 
   <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex flex-col gap-2">
@@ -196,14 +225,8 @@ a.contact-text, span.contact-text { text-decoration: none; outline: none; }
     <button onclick="insertPlaceholder()" class="w-full bg-[#282c35] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-gray-300 hover:text-black transition border border-gray-600">+ إدراج كحاوية تخطيط فارغة بالمكان المطلوب</button>
     <hr class="border-[#282c35] my-2">
     <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 2: اختيار الموديل وملء الحاويات بنقرة واحدة</label>
-    <div class="flex gap-2">
-      <div class="w-1/2"><label class="text-[10px] font-bold text-[#f5b700]">الفئة:</label>
-        <select id="sheetCategory" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="updateModelsList()">
-          <option value="skid_steers">معدات انزلاقية</option><option value="pumps">مضخات بيتون</option>
-        </select></div>
-      <div class="w-1/2"><label class="text-[10px] font-bold text-[#f5b700]">الموديل:</label>
-        <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none"><option value="">جاري التحميل...</option></select></div>
-    </div>
+    <div><label class="text-[10px] font-bold text-[#f5b700]">الموديل (من تصنيف القالب أعلاه):</label>
+      <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none"><option value="">جاري التحميل...</option></select></div>
     <button onclick="fillAllPlaceholders()" class="w-full bg-[#f5b700] text-black text-xs font-black py-3 mt-2 rounded shadow-lg hover:brightness-110 transition">🚀 تعبئة كافة الحاويات في المخطط</button>
   </div>
 
@@ -297,7 +320,7 @@ let state = { headerImg: '', footerImg: '', lastFooterImg: '' };
   const [id, key] = s.split(':');
   document.getElementById(id).addEventListener('change', e => {
     const f = e.target.files[0]; if (!f) return;
-    const r = new FileReader(); r.onload = ev => { state[key] = ev.target.result; updateHeadersAndFooters(); }; r.readAsDataURL(f);
+    const r = new FileReader(); r.onload = ev => { state[key] = ev.target.result; updateHeadersAndFooters(); saveAssets(); }; r.readAsDataURL(f);
   });
 });
 function updateHeadersAndFooters() {
@@ -306,6 +329,7 @@ function updateHeadersAndFooters() {
   document.querySelectorAll('.is-last-footer').forEach(el => {
     const img = state.lastFooterImg || state.footerImg; if (img) el.style.backgroundImage = `url(${img})`;
   });
+  obs.takeRecords(); // تطبيق الصور المشتركة لا يُعدّ تعديلاً على القالب
 }
 
 // ================= أدوات مساعدة للإنشاء =================
@@ -499,20 +523,34 @@ function textTargets() {
   const scope = (selSub && selSub.closest('.grid-col')) || selEl;
   return { els: [...scope.querySelectorAll('.dynamic-content,.contact-text,[contenteditable="true"]')].filter(x => !x.closest('.spec-block')) };
 }
+
 const rgb2hex = c => '#' + (c.match(/\d+/g) || [0,0,0]).slice(0,3).map(n => (+n).toString(16).padStart(2,'0')).join('');
 
 function syncText() {
   const t = textTargets();
   const s = t.block ? t.block.querySelector('.spec-row span') : t.els[0];
   let color = '#000000', size = 10, weight = '700', fam = 'cairo';
+  
   if (s) {
-    const cs = getComputedStyle(s), w = parseInt(cs.fontWeight);
-    color = rgb2hex(cs.color); size = Math.round(parseFloat(cs.fontSize)); weight = w >= 800 ? '900' : w >= 600 ? '700' : '400';
+    const cs = getComputedStyle(s);
+    const w = parseInt(cs.fontWeight);
+    
+    color = rgb2hex(cs.color); 
+    size = Math.round(parseFloat(cs.fontSize)); 
+    
+    // التعديل: قراءة الأوزان الخمسة لخط SCOR بدقة
+    weight = w >= 900 ? '900' : w >= 800 ? '800' : w >= 700 ? '700' : w >= 600 ? '600' : '400';
+    
+    // التعرف على عائلة الخط
     fam = /scor/i.test(cs.fontFamily) ? 'scor' : 'cairo';
   }
-  $('pColor').value = color; $('pSize').value = size; $('pWeight').value = weight; $('pFamily').value = fam;
+  
+  $('pColor').value = color; 
+  $('pSize').value = size; 
+  $('pWeight').value = weight; 
+  $('pFamily').value = fam;
 }
-function syncGeom() {
+  function syncGeom() {
   if (!selEl) return;
   $('pW').value = (selEl.offsetWidth / mmToPx).toFixed(1); $('pH').value = (selEl.offsetHeight / mmToPx).toFixed(1);
 }
@@ -659,30 +697,154 @@ function makeColResizable(leftCol, gutter, row) {
 }
 
 // ================= القوالب والصفحات =================
-function saveTemplate() {
-  clearSel();
-  const data = { pages: box.innerHTML, state, pageCount: $('pageCount').value, hasCover: $('hasCover').checked };
-  try { localStorage.setItem('scor_master_template_v10', JSON.stringify(data)); alert('تم حفظ ترتيب وتنسيق الصفحات كقالب بنجاح!'); }
-  catch (err) { alert('فشل الحفظ: حجم القالب (غالباً صور الترويسة/التذييل) يتجاوز سعة التخزين المحلي.'); }
-}
+const params = new URLSearchParams(location.search);
+const DOC = params.get('doc') || 'catalog';                    // معرّف المستند (سيمرّره الـHub لاحقاً)
+const DOC_TITLE = params.get('title') || (DOC === 'catalog' ? 'الكتالوج' : DOC);
+const currentCat = () => $('sheetCategory').value;
+const catName = (c = currentCat()) => [...$('sheetCategory').options].find(o => o.value === c)?.text || c;
+const tplKey = (c = currentCat()) => `${DOC}::${c}`;
+let lastCat = currentCat(), dirty = false, db = null;
 
-function loadTemplate() {
-  const str = localStorage.getItem('scor_master_template_v10');
-  if (!str) { alert('لا يوجد قالب محفوظ مسبقاً!'); return; }
-  const d = JSON.parse(str);
+// ---- IndexedDB: templates (key = مستند::تصنيف) + kv (الترويسة والتذييل المشتركة) ----
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('scor_studio', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('templates', { keyPath: 'key' }); r.result.createObjectStore('kv'); };
+    r.onsuccess = () => { db = r.result; res(); };
+    r.onerror = () => rej(r.error);
+  });
+}
+function tx(store, mode, fn) {
+  if (!db) return Promise.reject(new Error('التخزين المحلي غير متاح في هذا المتصفح'));
+  return new Promise((res, rej) => {
+    const t = db.transaction(store, mode), rq = fn(t.objectStore(store));
+    t.oncomplete = () => res(rq && rq.result); t.onerror = t.onabort = () => rej(t.error);
+  });
+}
+const dbGet = (st, k) => tx(st, 'readonly', o => o.get(k));
+const dbAll = st => tx(st, 'readonly', o => o.getAll());
+const dbPut = (st, v, k) => tx(st, 'readwrite', o => k === undefined ? o.put(v) : o.put(v, k));
+const saveAssets = () => dbPut('kv', state, 'assets').catch(() => {});
+
+// ---- المراقبة: مؤشر "غير محفوظ" ----
+const obs = new MutationObserver(() => setDirty(true));
+obs.observe(box, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style'] });
+function setDirty(v) { dirty = v; $('tplDirty').style.display = v ? 'inline' : 'none'; }
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+function updateTplUI(rec) {
+  $('tplTarget').textContent = `${DOC_TITLE} ← ${catName()}`;
+  $('tplStatus').textContent = rec ? 'محفوظ: ' + new Date(rec.savedAt).toLocaleString('ar') + (rec.prev ? ' • توجد نسخة سابقة' : '') : 'لا يوجد قالب محفوظ لهذا التصنيف';
+}
+const setMsg = t => { $('tplStatus').textContent = t; };
+
+// ---- بناء/تطبيق السجل ----
+function serializePages() {
   clearSel();
-  $('pageCount').value = d.pageCount; $('hasCover').checked = d.hasCover;
-  state = d.state || { headerImg: '', footerImg: '', lastFooterImg: '' };
-  box.innerHTML = d.pages;
-  box.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
-  // إعادة بناء قائمة الصفحات
-  const ts = $('targetPageSelect'); ts.innerHTML = '';
-  box.querySelectorAll('.a4-page').forEach(p => { const id = p.id.replace('page-', ''); ts.add(new Option(id === 'cover' ? 'الغلاف' : `صفحة ${id}`, id)); });
-  updateHeadersAndFooters();
-  box.querySelectorAll('.draggable-wrapper, .free-container').forEach(attachResizers);
+  const c = box.cloneNode(true);
+  c.querySelectorAll('.snap-guide-v,.snap-guide-h').forEach(x => x.remove());
+  c.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
+  // صور الترويسة والتذييل تُحفظ مرة واحدة (مشتركة) ولا تُكرَّر داخل كل قالب
+  c.querySelectorAll('.page-header,.is-normal-footer,.is-last-footer').forEach(x => x.style.backgroundImage = '');
+  return c.innerHTML;
+}
+const buildRecord = (key, cat) => ({ key, doc: DOC, category: cat, pageCount: parseInt($('pageCount').value) || 1, hasCover: $('hasCover').checked, html: serializePages(), savedAt: Date.now(), v: 1 });
+const slimPrev = o => o ? { html: o.html, pageCount: o.pageCount, hasCover: o.hasCover, savedAt: o.savedAt } : undefined;
+
+function rewire() { // إعادة ربط الأحداث بعد تحميل HTML محفوظ
+  box.querySelectorAll('.draggable-wrapper, .free-container').forEach(el => attachResizers(el));
   box.querySelectorAll('.spec-block').forEach(b => { const rs = b.querySelector(':scope > .table-col-resizer'); if (rs) makeTableColResizable(rs, b); });
   box.querySelectorAll('.grid-row').forEach(row => row.querySelectorAll('.col-resizer').forEach(g => { if (g.previousElementSibling) makeColResizable(g.previousElementSibling, g, row); }));
-  alert('تم استرجاع القالب بنجاح!');
+}
+function applyRecord(rec) {
+  clearSel();
+  $('pageCount').value = rec.pageCount; $('hasCover').checked = rec.hasCover;
+  box.innerHTML = rec.html;
+  box.querySelectorAll('.selected').forEach(x => x.classList.remove('selected'));
+  const ts = $('targetPageSelect'); ts.innerHTML = '';
+  box.querySelectorAll('.a4-page').forEach(p => { const id = p.id.replace('page-', ''); ts.add(new Option(id === 'cover' ? 'الغلاف' : `صفحة ${id}`, id)); });
+  updateHeadersAndFooters(); rewire();
+  obs.takeRecords(); setDirty(false);
+}
+
+// ---- العمليات ----
+async function loadCurrentTemplate(switching) {
+  let rec = null;
+  try { rec = await dbGet('templates', tplKey()); } catch (e) {}
+  if (rec) applyRecord(rec);
+  else if (switching) setDirty(true); // المحتوى الحالي غير محفوظ لهذا التصنيف
+  updateTplUI(rec);
+  if (!rec && switching) setMsg('لا يوجد قالب لهذا التصنيف — المحتوى الحالي لم يُحفظ له بعد (احفظ لإنشائه)');
+}
+async function onCategoryChange() {
+  const sel = $('sheetCategory');
+  if (dirty && !confirm(`توجد تعديلات غير محفوظة على قالب «${catName(lastCat)}». المتابعة دون حفظ؟`)) { sel.value = lastCat; return; }
+  lastCat = sel.value;
+  updateModelsList();
+  await loadCurrentTemplate(true);
+}
+async function saveTemplate() {
+  const key = tplKey();
+  try {
+    const old = await dbGet('templates', key);
+    if (old && !confirm(`يوجد قالب محفوظ لـ«${DOC_TITLE} ← ${catName()}». استبداله؟\n(تبقى نسخة سابقة واحدة للتراجع)`)) return;
+    const rec = buildRecord(key, currentCat()); if (old) rec.prev = slimPrev(old);
+    await dbPut('templates', rec); setDirty(false); updateTplUI(rec);
+  } catch (e) { alert('فشل الحفظ: ' + (e.message || e) + '\nجرّب «تصدير» لحفظ نسخة كملف.'); }
+}
+async function saveTemplateAs() {
+  const opts = [...$('sheetCategory').options].filter(o => o.value !== currentCat());
+  const ans = prompt('نسخ القالب الحالي إلى أي تصنيف؟ (اكتب الرقم)\n' + opts.map((o, i) => `${i + 1}) ${o.text}`).join('\n'));
+  const o = opts[(parseInt(ans) || 0) - 1]; if (!o) return;
+  try {
+    const key = tplKey(o.value), old = await dbGet('templates', key);
+    if (old && !confirm(`يوجد قالب محفوظ لتصنيف «${o.text}». استبداله؟`)) return;
+    const rec = buildRecord(key, o.value); if (old) rec.prev = slimPrev(old);
+    await dbPut('templates', rec); setMsg(`تم نسخ القالب إلى «${o.text}». القالب المفتوح الآن ما زال: ${catName()}`);
+  } catch (e) { alert('فشل الحفظ: ' + (e.message || e)); }
+}
+async function revertPrev() {
+  try {
+    const rec = await dbGet('templates', tplKey());
+    if (!rec || !rec.prev) { setMsg('لا توجد نسخة سابقة لهذا القالب'); return; }
+    if (!confirm('تحميل النسخة السابقة في المحرر؟ (لن تُثبَّت إلا إذا ضغطت حفظ)')) return;
+    applyRecord(rec.prev); setDirty(true); setMsg('عُرضت النسخة السابقة — اضغط حفظ لتثبيتها');
+  } catch (e) { alert(e.message || e); }
+}
+function exportTemplate() {
+  const rec = buildRecord(tplKey(), currentCat());
+  const out = { format: 'scor-template', v: 1, doc: DOC, category: currentCat(), pageCount: rec.pageCount, hasCover: rec.hasCover, html: rec.html, assets: state, exportedAt: Date.now() };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+  a.download = `${DOC}-${currentCat()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('tplImport').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.format !== 'scor-template') throw new Error('الملف ليس قالب SCOR');
+    if (dirty && !confirm('سيُستبدل المحتوى الحالي غير المحفوظ. متابعة؟')) return;
+    applyRecord(d);
+    const a = d.assets || {};
+    if (['headerImg', 'footerImg', 'lastFooterImg'].some(k => a[k]) && confirm('استبدال الترويسة والتذييل المشتركة بالموجودة في الملف؟')) {
+      ['headerImg', 'footerImg', 'lastFooterImg'].forEach(k => { if (a[k]) state[k] = a[k]; });
+      updateHeadersAndFooters(); saveAssets();
+    }
+    setDirty(true); setMsg(`استُورد القالب إلى «${catName()}» — اضغط حفظ لتثبيته`);
+  } catch (err) { alert('تعذّر الاستيراد: ' + err.message); }
+});
+
+// ترحيل قالب النسخة القديمة (localStorage) مرة واحدة إن وُجد
+async function migrateLegacy() {
+  try {
+    const lg = localStorage.getItem('scor_master_template_v10');
+    if (!lg || (await dbAll('templates')).length) return;
+    if (!confirm(`عُثر على قالب محفوظ بالنسخة القديمة. استيراده إلى «${catName()}»؟`)) return;
+    const d = JSON.parse(lg);
+    if (d.state) ['headerImg', 'footerImg', 'lastFooterImg'].forEach(k => { if (!state[k] && d.state[k]) state[k] = d.state[k]; });
+    applyRecord({ html: d.pages, pageCount: d.pageCount, hasCover: d.hasCover });
+    saveAssets(); setDirty(true); setMsg('استُورد القالب القديم — اضغط حفظ لتثبيته');
+  } catch (e) {}
 }
 
 function renderPages() {
@@ -708,7 +870,14 @@ function createPageElement(num, isLast = false) {
   return page;
 }
 
-window.onload = () => { renderPages(); fetchSheetData(); };
+window.onload = async () => {
+  try { await idb(); if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); const a = await dbGet('kv', 'assets'); if (a) state = { ...state, ...a }; }
+  catch (e) { console.warn(e); }
+  renderPages(); obs.takeRecords(); setDirty(false);
+  await loadCurrentTemplate(false);
+  await migrateLegacy();
+  fetchSheetData();
+};
 </script>
 </body>
 </html>
