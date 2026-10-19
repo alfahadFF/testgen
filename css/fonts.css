@@ -1,0 +1,7 @@
+/* مُولَّد تلقائياً بواسطة db/fix_fonts.py — لا تعدّله يدوياً */
+/* SCOR Typeface — 5 أوزان · woff2 + ttf احتياطي · متوافق مع GitHub Pages */
+@font-face{font-family:'SCORFont';font-style:normal;font-weight:900;font-display:swap;src:url('../fonts/SCOR-Typeface-Black.woff2?v=2') format('woff2'),url('../fonts/SCOR-Typeface-Black.ttf?v=2') format('truetype')}
+@font-face{font-family:'SCORFont';font-style:normal;font-weight:700;font-display:swap;src:url('../fonts/SCOR-Typeface-Bold.woff2?v=2') format('woff2'),url('../fonts/SCOR-Typeface-Bold.ttf?v=2') format('truetype')}
+@font-face{font-family:'SCORFont';font-style:normal;font-weight:800;font-display:swap;src:url('../fonts/SCOR-Typeface-ExtraBold.woff2?v=2') format('woff2'),url('../fonts/SCOR-Typeface-ExtraBold.ttf?v=2') format('truetype')}
+@font-face{font-family:'SCORFont';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/SCOR-Typeface-Regular.woff2?v=2') format('woff2'),url('../fonts/SCOR-Typeface-Regular.ttf?v=2') format('truetype')}
+@font-face{font-family:'SCORFont';font-style:normal;font-weight:600;font-display:swap;src:url('../fonts/SCOR-Typeface-SemiBold.woff2?v=2') format('woff2'),url('../fonts/SCOR-Typeface-SemiBold.ttf?v=2') format('truetype')}

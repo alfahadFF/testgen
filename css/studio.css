@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+
+:root { --main-font: 'Cairo', sans-serif; }
+body { font-family: var(--main-font); background-color: #0b0c0e; color: #fff; }
+
+.canvas-container { height: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 40px; padding-bottom: 100px; overflow-y: auto; gap: 30px; }
+.a4-page { font-family: var(--main-font); font-weight: 700; width: 210mm; height: 297mm; background-color: #fff; color: #000; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.5); /* zoom بدل transform: يصغّر الصندوق فعلياً فيتوسّط بلا قصّ */
+  zoom: var(--page-scale, 0.65); overflow: hidden; flex-shrink: 0; background-size: cover; background-position: center; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+.a4-page::before { content: ''; position: absolute; top: 0; bottom: 0; left: 5mm; width: 1px; border-left: 1px dashed rgba(245,183,0,0.4); pointer-events: none; z-index: 1; }
+.a4-page::after { content: ''; position: absolute; top: 0; bottom: 0; right: 5mm; width: 1px; border-right: 1px dashed rgba(245,183,0,0.4); pointer-events: none; z-index: 1; }
+
+.page-header { position: absolute; top: 0; left: 0; width: 100%; height: 35mm; background-size: 100% auto; background-position: top center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
+.is-normal-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 25mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
+.is-last-footer { position: absolute; bottom: 0; left: 0; width: 100%; height: 80mm; background-size: 100% auto; background-position: bottom center; background-repeat: no-repeat; pointer-events: none; z-index: 2; }
+
+/* الجداول: الافتراضي 10px كايرو بولد أسود — يمكن تغييره من لوحة التحكم عبر المتغيرات --t-* */
+.spec-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; position: relative; }
+.spec-header { position: relative; background: #1f2937; color: #fff; height: 21px; line-height: 21px; padding: 0 15px 0 50px; flex-shrink: 0; overflow: hidden; font-weight: 900; font-size: 1.1em; clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%); z-index: 2; }
+.spec-header::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40px; background: #f5b700; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); }
+.table-rows-wrapper { display: flex; flex-direction: column; background: #fff; flex: 1; }
+.table-rows-wrapper .spec-row span { font-family: var(--t-family, 'Cairo', sans-serif); font-size: var(--t-size, 10px); font-weight: var(--t-weight, 700); color: var(--t-color, #000); outline: none; }
+.spec-row { display: flex; justify-content: space-between; padding: 6px 12px; align-items: center; border-bottom: 1px solid #e5e7eb; }
+.spec-block .spec-row:nth-child(even) { background-color: #fef0c7 !important; }
+.spec-block .spec-row:nth-child(odd) { background-color: #fff !important; }
+.table-rows-wrapper > .spec-row:last-child { border-bottom: none; }
+.spec-key { width: var(--key-width, 50%); flex-shrink: 0; border-left: 1px solid #e5e7eb; padding-left: 10px; }
+.spec-val { text-align: right; flex-grow: 1; padding-right: 10px; }
+.table-col-resizer { position: absolute; top: 0; bottom: 0; width: 8px; margin-right: -4px; cursor: col-resize; z-index: 10; background: transparent; }
+.table-col-resizer:hover, .table-col-resizer:active { background: rgba(245,183,0,0.6); }
+
+/* العناصر: لا تظهر أي أدوات إلا بالنقر (حالة selected) */
+.free-container { position: absolute; border: 1px dashed #ccc; background: rgba(248,249,250,0.9); display: flex; flex-direction: column; z-index: 5; cursor: move; }
+.draggable-wrapper { position: absolute; z-index: 6; border: 2px solid transparent; min-height: 20px; min-width: 30px; cursor: move; }
+[contenteditable="true"] { cursor: text; }
+.selected { outline: 2px solid #f5b700; }
+.draggable-wrapper img { -webkit-user-drag: none; user-select: none; }
+.drag-bar, .drag-handle, .delete-btn, .text-toolbar, .image-toolbar { display: none !important; } /* توافق مع قوالب قديمة */
+
+.grid-row { display: flex; flex: 1; width: 100%; height: 100%; position: relative; }
+.grid-col { flex: 1; min-width: 20px; position: relative; display: flex; flex-direction: column; }
+.col-resizer { width: 5mm; background: transparent; position: relative; cursor: col-resize; display: flex; justify-content: center; align-items: center; flex-shrink: 0; z-index: 10; }
+.col-resizer::after { content: ''; position: absolute; width: 1px; top: 0; bottom: 0; border-left: 1px dashed rgba(0,0,0,0.15); }
+.selected .col-resizer::after { border-color: #f5b700; }
+.col-resizer:hover, .col-resizer:active { background: rgba(245,183,0,0.2); }
+
+/* مقابض التحجيم: تظهر فقط عند التحديد — الحواف كاملة قابلة للسحب */
+.resizer { display: none; position: absolute; z-index: 20; }
+.selected > .resizer { display: block; }
+.resizer.t, .resizer.b { left: 0; width: 100%; height: 12px; cursor: ns-resize; }
+.resizer.t { top: -6px; } .resizer.b { bottom: -6px; }
+.resizer.l, .resizer.r { top: 0; height: 100%; width: 12px; cursor: ew-resize; }
+.resizer.l { left: -6px; } .resizer.r { right: -6px; }
+.resizer.tl, .resizer.tr, .resizer.bl, .resizer.br { width: 14px; height: 14px; background: #f5b700; border: 1px solid #000; z-index: 21; }
+.resizer.tl { top: -7px; left: -7px; cursor: nwse-resize; } .resizer.tr { top: -7px; right: -7px; cursor: nesw-resize; }
+.resizer.bl { bottom: -7px; left: -7px; cursor: nesw-resize; } .resizer.br { bottom: -7px; right: -7px; cursor: nwse-resize; }
+
+.snap-guide-v { position: absolute; width: 1px; top: 0; bottom: 0; background: #ef4444; z-index: 9999; display: none; pointer-events: none; }
+.snap-guide-h { position: absolute; height: 1px; left: 0; right: 0; background: #ef4444; z-index: 9999; display: none; pointer-events: none; }
+a.contact-text, span.contact-text { text-decoration: none; outline: none; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #15171c; }
+::-webkit-scrollbar-thumb { background: #f5b700; border-radius: 4px; }
+.pin { background: #181b22; border: 1px solid #343946; color: #fff; border-radius: 4px; font-size: 12px; padding: 4px; outline: none; }
+.pbtn { background: #282c35; color: #fff; border: 1px solid #4b5563; border-radius: 4px; font-size: 11px; font-weight: 700; padding: 4px 8px; cursor: pointer; }
+.pbtn:hover { background: #f5b700; color: #000; }
+
+@media print {
+  body { background: none; }
+  #sidebar { display: none !important; }
+  #pagesContainer { width: 100% !important; padding: 0 !important; background: none !important; overflow: visible !important; }
+  .canvas-container { overflow: visible !important; height: auto !important; padding-bottom: 0 !important; }
+  .a4-page { zoom: 1 !important; transform: none !important; margin: 0 !important; box-shadow: none !important; page-break-after: always; }
+  .a4-page::before, .a4-page::after { display: none !important; }
+  .resizer, .col-resizer, .table-col-resizer, .no-print, .snap-guide-v, .snap-guide-h { display: none !important; }
+  .selected { outline: none !important; }
+  .free-container, .draggable-wrapper { border: none !important; background: transparent !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   التجاوب — الهاتف واللوح
+   اللوحة الجانبية تصبح دُرجاً منزلقاً، والكانفس يتكيّف مع العرض.
+   لا يُحذف أي زر أو وظيفة: كل ما في اللوحة يبقى، لكنه قابل للفتح والطي.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root { --page-scale: 0.65; }
+
+/* زر فتح اللوحة — يظهر على الشاشات الصغيرة فقط */
+#mnav {
+  display: none;
+  position: fixed; top: 10px; left: 10px; z-index: 120;
+  gap: 6px; align-items: center;
+}
+#mnav button {
+  background: #f5b700; color: #000; font-weight: 900; font-size: 13px;
+  border: 0; border-radius: 10px; padding: 9px 13px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.45); font-family: inherit;
+  touch-action: manipulation;
+}
+#mnav .zbtn { background: #374151; color: #fff; font-size: 15px; padding: 9px 12px; }
+#mnav .zval { color: #fff; font-size: 11px; font-weight: 700; min-width: 34px; text-align: center; }
+
+/* غطاء معتم خلف اللوحة */
+#mscrim {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  z-index: 90; backdrop-filter: blur(2px);
+}
+
+@media (max-width: 900px) {
+  body { flex-direction: column; }
+
+  #mnav { display: flex; }
+
+  #sidebar {
+    position: fixed !important; inset: 0;
+    width: 100% !important; max-width: 100% !important;
+    height: 100% !important;
+    padding: 56px 14px 90px !important;
+    transform: translateX(100%);
+    transition: transform .25s ease;
+    z-index: 100 !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #sidebar.open { transform: translateX(0); }
+  #mscrim.open { display: block; }
+
+  /* أهداف لمس مريحة */
+  #sidebar button, #sidebar select, #sidebar input { min-height: 40px; }
+  #sidebar .pbtn { font-size: 13px; padding: 9px 10px; }
+
+  /* الكانفس يأخذ كامل العرض */
+  #pagesContainer {
+    width: 100% !important;
+    padding: 56px 8px 24px !important;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: center !important;
+    justify-content: flex-start;
+  }
+
+  /* لوحة الخصائص أول ما يظهر في الدُرج — أقرب للإبهام وأوضح */
+  #sidebar > * { order: 0; }
+  #sidebar > div:first-child { order: -2; }
+  #sidebar > .sticky { position: static !important; order: -1; }
+
+  /* الترويسة: لا تتقاطع مع الشارات */
+  #sidebar > div:first-child { flex-wrap: wrap; gap: 8px; }
+  #sidebar h1 { font-size: 20px !important; line-height: 1.2; }
+
+  /* أزرار التكبير/التصغير على الهاتف أكبر */
+  #mnav .zbtn { min-width: 42px; }
+}
+
+/* هاتف صغير جداً */
+@media (max-width: 420px) {
+  #sidebar { padding: 54px 10px 90px !important; }
+  #sidebar h1 { font-size: 18px !important; }
+  #pagesContainer { padding-top: 58px !important; }
+}
+
+/* لوح أفقي */
+@media (min-width: 901px) and (max-width: 1200px) {
+  #sidebar { width: 38% !important; }
+}
+
+/* سحب الحواف على اللمس أنسب من المؤشر */
+@media (hover: none) {
+  .resizer { width: 16px; height: 16px; }
+}

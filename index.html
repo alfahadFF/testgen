@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alfa Master Studio - V 10.2</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/studio.css">
+</head>
+<body class="h-screen flex overflow-hidden">
+
+<div id="mscrim" onclick="toggleSidebar(false)"></div>
+
+<div id="mnav">
+  <button onclick="toggleSidebar()" aria-label="القائمة">☰ الأدوات</button>
+  <button class="zbtn" onclick="zoomBy(-1)">−</button>
+  <span class="zval" id="zoomVal">65%</span>
+  <button class="zbtn" onclick="zoomBy(1)">+</button>
+</div>
+
+<div id="sidebar" class="w-[45%] max-w-md h-full bg-[#15171c] border-l border-[#282c35] p-5 overflow-y-auto flex flex-col gap-4 shadow-2xl z-50">
+  <div class="flex justify-between items-center border-b border-[#282c35] pb-2">
+    <h1 class="text-2xl font-black text-[#f5b700]">SCOR Studio</h1>
+    <div class="flex gap-1"><span id="fontStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">SCOR…</span><span id="dataStatus" class="text-xs bg-gray-700 text-white px-2 py-1 rounded">جاري الاتصال...</span></div>
+  </div>
+
+  <!-- لوحة خصائص العنصر المحدد (ثابتة بأعلى اللوحة) -->
+  <div class="sticky top-0 z-30 bg-[#0e1014] p-3 rounded-lg border-2 border-[#f5b700] flex flex-col gap-2 shadow-xl">
+    <div class="flex justify-between items-center">
+      <h2 class="text-[#f5b700] font-black text-xs">🎛️ خصائص العنصر المحدد</h2>
+      <span id="selLabel" class="text-[10px] text-gray-400">لا يوجد تحديد</span>
+    </div>
+    <div id="propsEmpty" class="text-[11px] text-gray-400 text-center py-1">انقر على أي عنصر في الصفحة لتظهر خياراته هنا</div>
+    <div id="propsBody" style="display:none" class="flex-col gap-2">
+      <div id="propsText" class="flex-col gap-2" style="display:flex">
+        <div class="flex gap-2 items-center">
+          <input type="color" id="pColor" value="#000000" title="لون النص" class="w-9 h-7 p-0 border-0 rounded cursor-pointer" oninput="applyText('color',this.value)">
+          <input type="number" id="pSize" value="10" min="4" max="300" title="حجم الخط" class="pin w-16 text-center" oninput="applyText('size',this.value)">
+          <select id="pWeight" title="وزن الخط" class="pin" onchange="applyText('weight',this.value)">
+            <option value="400">عادي</option><option value="600">شبه عريض</option><option value="700">بولد</option><option value="800">عريض جداً</option><option value="900">أسود</option>
+          </select>
+          <select id="pFamily" title="الخط" class="pin" onchange="applyText('family',this.value)">
+            <option value="cairo">Cairo</option><option value="scor">SCOR</option>
+          </select>
+        </div>
+        <div class="flex gap-1">
+          <button class="pbtn" onclick="applyAlign('right')">يمين</button>
+          <button class="pbtn" onclick="applyAlign('center')">وسط</button>
+          <button class="pbtn" onclick="applyAlign('left')">يسار</button>
+          <button class="pbtn" onclick="applyAlign('justify')">ضبط</button>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span class="text-[10px] text-gray-400">عرض</span><input type="number" id="pW" step="0.5" class="pin w-16 text-center" oninput="setGeom('width',this.value)">
+        <span class="text-[10px] text-gray-400">ارتفاع</span><input type="number" id="pH" step="0.5" class="pin w-16 text-center" oninput="setGeom('height',this.value)">
+        <span class="text-[10px] text-gray-400">مم</span>
+      </div>
+      <div class="flex gap-1 items-center">
+        <button class="pbtn" title="مقدمة" onclick="zOrder('front')">⏫</button>
+        <button class="pbtn" title="للأمام" onclick="zOrder('up')">🔼</button>
+        <button class="pbtn" title="للخلف" onclick="zOrder('down')">🔽</button>
+        <button class="pbtn" title="مؤخرة" onclick="zOrder('back')">⏬</button>
+        <button class="pbtn mr-auto" style="color:#f87171" onclick="delSel()">🗑 حذف (Delete)</button>
+      </div>
+      <div class="text-[10px] text-gray-500">اسحب العنصر من أي مكان • الزوايا = تحجيم بنفس النسبة • الحواف = تحجيم حر</div>
+    </div>
+  </div>
+
+  <div class="bg-[#1f2937] p-2.5 rounded-lg border border-[#f5b700] flex flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <label class="text-[10px] font-bold text-[#f5b700] shrink-0">التصنيف:</label>
+      <select id="sheetCategory" class="flex-1 bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none" onchange="onCategoryChange()">
+        <option value="skid_steers">معدات انزلاقية</option><option value="pumps">مضخات بيتون</option>
+      </select>
+    </div>
+    <div class="flex justify-between items-center">
+      <span id="tplTarget" class="text-[11px] font-black text-white"></span>
+      <span id="tplDirty" style="display:none" class="text-[10px] text-red-400 font-bold">● غير محفوظ</span>
+    </div>
+    <div id="tplStatus" class="text-[10px] text-gray-400"></div>
+    <div class="flex gap-2">
+      <button onclick="saveTemplate()" class="w-1/2 bg-[#f5b700] text-black font-bold text-xs py-2 rounded hover:brightness-110">💾 حفظ</button>
+      <button onclick="saveTemplateAs()" class="w-1/2 bg-[#374151] text-white font-bold text-xs py-2 rounded hover:bg-[#4b5563]">📋 حفظ باسم (نسخ لتصنيف)</button>
+    </div>
+    <div class="flex gap-1">
+      <button onclick="revertPrev()" class="pbtn flex-1">↩ النسخة السابقة</button>
+      <button onclick="exportTemplate()" class="pbtn flex-1">⬇ تصدير</button>
+      <label class="pbtn flex-1 text-center">⬆ استيراد<input type="file" id="tplImport" accept=".json,application/json" class="hidden"></label>
+    </div>
+  </div>
+
+  <div class="bg-[#0e1014] p-3 rounded-lg border border-[#282c35] flex flex-col gap-2">
+    <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">1. إعدادات المستند والهوية البصرية</h2>
+    <div class="flex items-center justify-between">
+      <label class="text-xs font-bold text-gray-300">تضمين غلاف أمامي:</label>
+      <input type="checkbox" id="hasCover" class="w-4 h-4 accent-[#f5b700]" onchange="renderPages()">
+    </div>
+    <div class="flex items-center justify-between">
+      <label class="text-xs font-bold text-gray-300">عدد الصفحات الداخلية:</label>
+      <input type="number" id="pageCount" min="1" max="20" value="2" class="w-14 bg-[#181b22] border border-[#343946] p-1 rounded text-white text-center text-xs" onchange="renderPages()">
+    </div>
+    <div class="flex gap-2 mt-2">
+      <div class="w-1/2"><label class="block text-[10px] font-bold text-gray-400">الترويسة (Header):</label>
+        <input type="file" id="globalHeader" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1"></div>
+      <div class="w-1/2"><label class="block text-[10px] font-bold text-gray-400">التذييل (Footer العادي):</label>
+        <input type="file" id="globalFooter" accept="image/*" class="w-full text-[10px] text-gray-400 bg-[#181b22] rounded p-1 mt-1"></div>
+    </div>
+    <div class="mt-1 pt-1 border-t border-[#282c35]">
+      <label class="block text-[10px] font-bold text-[#f5b700] mb-1">تذييل الصفحة الأخيرة فقط:</label>
+      <input type="file" id="lastFooter" accept="image/*" class="w-full text-[10px] text-[#f5b700] bg-[#181b22] border border-[#f5b700] rounded p-1">
+    </div>
+  </div>
+
+  <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2 shadow-lg">
+    <h2 class="font-black text-sm border-b border-[#282c35] pb-2 text-center text-[#f5b700]">2. بناء القالب الآلي (بيانات الشيت)</h2>
+    <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 1: تخطيط الصفحة (إدراج الحاويات الفارغة)</label>
+    <div class="flex items-center gap-2 mt-1">
+      <label class="text-[10px] text-gray-400 w-1/4">العمل على صفحة:</label>
+      <select id="targetPageSelect" class="w-3/4 bg-[#181b22] border border-[#343946] p-1.5 rounded text-[#f5b700] text-xs font-bold outline-none"></select>
+    </div>
+    <select id="dataSourceSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none">
+      <optgroup label="نصوص العناوين والوصف" id="textOptGroup"></optgroup>
+      <optgroup label="المواصفات الفنية" id="tableOptGroup"></optgroup>
+    </select>
+    <input type="text" id="sectionTitle" placeholder="تخصيص عنوان الجدول (اختياري)" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs font-bold outline-none mt-1">
+    <button onclick="insertPlaceholder()" class="w-full bg-[#282c35] text-white text-xs font-bold py-2 mt-1 rounded hover:bg-gray-300 hover:text-black transition border border-gray-600">+ إدراج كحاوية تخطيط فارغة بالمكان المطلوب</button>
+    <hr class="border-[#282c35] my-2">
+    <label class="text-[11px] font-bold text-gray-300 mt-1 bg-[#1f2937] p-1 rounded text-center">الخطوة 2: اختيار الموديل وملء الحاويات بنقرة واحدة</label>
+    <div><label class="text-[10px] font-bold text-[#f5b700]">الموديل (من تصنيف القالب أعلاه):</label>
+      <select id="modelSelector" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-xs outline-none"><option value="">جاري التحميل...</option></select></div>
+    <button onclick="fillAllPlaceholders()" class="w-full bg-[#f5b700] text-black text-xs font-black py-3 mt-2 rounded shadow-lg hover:brightness-110 transition">🚀 تعبئة كافة الحاويات في المخطط</button>
+  </div>
+
+  <div class="bg-[#0e1014] p-3 rounded-lg border border-[#f5b700] flex flex-col gap-2">
+    <h2 class="text-[#f5b700] font-bold text-xs border-b border-[#282c35] pb-1">3. إضافة الحاويات، الصور، والنصوص الحرة</h2>
+    <div class="grid grid-cols-5 gap-1 mt-1">
+      <button onclick="addFloatingContainer(1)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">1 عمود</button>
+      <button onclick="addFloatingContainer(2)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">2 عمود</button>
+      <button onclick="addFloatingContainer(3)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">3 أعمدة</button>
+      <button onclick="addFloatingContainer(4)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">4 أعمدة</button>
+      <button onclick="addFloatingContainer(5)" class="bg-[#282c35] text-white text-[10px] font-bold py-1.5 rounded hover:bg-[#f5b700] hover:text-black">5 أعمدة</button>
+    </div>
+    <div class="flex gap-1 mt-1">
+      <button onclick="addFreeText()" class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-[10px] font-bold py-1.5 rounded hover:bg-gray-700">+ نص حر</button>
+      <label class="w-1/2 bg-[#181b22] text-white border border-[#343946] text-center text-[10px] font-bold py-1.5 rounded cursor-pointer hover:bg-gray-700">+ صورة حرة
+        <input type="file" id="freeImageUpload" accept="image/*" class="hidden"></label>
+    </div>
+    <div class="mt-1 pt-2 border-t border-[#282c35]">
+      <select id="contactPresetSelect" class="w-full bg-[#181b22] border border-[#343946] p-1.5 rounded text-white text-[10px] mb-1 outline-none">
+        <option value="4915118316638" data-type="phone">004915118316638</option>
+        <option value="4917634389434" data-type="phone">004917634389434</option>
+        <option value="963939062887" data-type="phone">00963939062887</option>
+        <option value="963941435541" data-type="phone">00963941435541</option>
+        <option value="https://www.scor-sy.de" data-type="web">www.scor-sy.de</option>
+        <option value="mailto:info@scor-sy.de" data-type="web">info@scor-sy.de</option>
+      </select>
+      <button onclick="addContactBlock()" class="w-full bg-[#f5b700] text-black text-[10px] font-bold py-1.5 rounded hover:brightness-110">+ بيانات تواصل (للفوتر)</button>
+    </div>
+  </div>
+
+  <button onclick="clearSel(); window.print()" class="w-full bg-white text-black font-black py-3 rounded-lg mt-auto hover:bg-gray-200 border-2 border-black">طباعة / تصدير KTLG النهائي (PDF)</button>
+</div>
+
+<div id="pagesContainer" class="flex-1 bg-[#181b22] canvas-container"></div>
+
+<script>
+/* ── التحكم بالهاتف: طي اللوحة + تكبير الصفحة ─────────────────── */
+function toggleSidebar(force) {
+  const sb = document.getElementById('sidebar'), sc = document.getElementById('mscrim');
+  const open = force === undefined ? !sb.classList.contains('open') : force;
+  sb.classList.toggle('open', open);
+  sc.classList.toggle('open', open);
+}
+function pageScale() {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-scale')) || 0.65;
+}
+function setScale(v) {
+  v = Math.max(0.2, Math.min(1.5, v));
+  document.documentElement.style.setProperty('--page-scale', v);
+  const el = document.getElementById('zoomVal');
+  if (el) el.textContent = Math.round(v * 100) + '%';
+}
+function zoomBy(d) {
+  const steps = [0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.65, 0.75, 0.85, 1, 1.15, 1.3];
+  const cur = pageScale();
+  let i = steps.findIndex(x => x > cur + 0.001);
+  if (i < 0) i = steps.length;
+  setScale(steps[d > 0 ? i : i - 1] || cur);
+}
+/* ملاءمة العرض عند الفتح وعند تدوير الهاتف */
+function fitWidth() {
+  const box = document.getElementById('pagesContainer');
+  if (!box) return;
+  const avail = box.clientWidth - 24;
+  if (avail < 120) return;   // مخفي أو غير مقيس بعد
+  const pageW = 210 * 3.7795275591;
+  setScale(Math.min(0.65, avail / pageW));
+}
+window.addEventListener('load', () => setTimeout(() => {
+  fitWidth();
+  // فتح اللوحة تلقائياً على الهاتف فقط — لإخفاء الغطاء بعد أول لمسة
+  if (window.innerWidth > 900) return;
+}, 400));
+let rzT;
+window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(fitWidth, 200); });
+/* الضغط على أي زر داخل اللوحة لا يغلقها، والإغلاق بزر ✕ في الشريط */
+</script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/studio-db.js"></script>
+</body>
+</html>

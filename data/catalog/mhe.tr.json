@@ -1,0 +1,1027 @@
+{
+  "category": {
+    "id": 4,
+    "code": "mhe",
+    "name_ar": "معدات مناولة المواد"
+  },
+  "template": {
+    "id": 9,
+    "code": "mixers",
+    "doc_type": "bulletin_2p",
+    "layout": {}
+  },
+  "models": [
+    {
+      "id": 52,
+      "code": "MX05",
+      "status": "active",
+      "values_count": 15,
+      "values": {
+        "chassis_tire_brand": "10/16.5",
+        "source_link": "https://www.sqmg.com/?0-5-cubic-meters/147.html",
+        "dim_height": "2350",
+        "note_diff": "Q345 çelik gövde, 5 mm kalınlık; belirtilen tüketim ≤5 L/sa",
+        "drum_capacity": "700",
+        "dim_length": "4200",
+        "eng_power": "16",
+        "wheelbase": "1500",
+        "dim_width": "1600",
+        "weight_total": "1860",
+        "eng_model": "Dizel",
+        "drive_type": "4WD",
+        "drum_speed": "18–21",
+        "swing_radius_min": "4000",
+        "mix_batch": "0.5"
+      }
+    },
+    {
+      "id": 87,
+      "code": "MX08",
+      "status": "active",
+      "values_count": 13,
+      "values": {
+        "dim_length": "3389",
+        "travel_speed": "30",
+        "source_link": "https://www.sqmg.com/?0-8-cubic-meters/65.html",
+        "note_diff": "Ürün sayfasındaki ağırlık 3700 kg, fabrika tablosunda 3620 kg; depo değeri kontrol edilmeli",
+        "dim_height": "2295",
+        "drum_capacity": "1450",
+        "gradeability": "40%",
+        "fuel_tank": "62",
+        "output_hourly": "3.2",
+        "drum_speed": "13",
+        "mix_batch": "0.8",
+        "dim_width": "2876",
+        "weight_total": "3620"
+      }
+    },
+    {
+      "id": 90,
+      "code": "MX12",
+      "status": "active",
+      "values_count": 15,
+      "values": {
+        "swing_radius_min": "4700",
+        "mix_batch": "1.2",
+        "drum_speed": "13",
+        "eng_model": "Yunnei 490 Turbo",
+        "weight_total": "4920",
+        "dim_width": "1800",
+        "eng_power": "58",
+        "travel_speed": "30",
+        "wheelbase": "2560",
+        "dim_length": "7300",
+        "note_diff": "Dönüş yarıçapı maksimum olarak belirtilmiştir",
+        "dim_height": "3450",
+        "source_link": "https://www.sqmg.com/?1-2-cubic-meters/66.html",
+        "gradeability": "30°",
+        "drum_capacity": "1700"
+      }
+    },
+    {
+      "id": 94,
+      "code": "MX18",
+      "status": "active",
+      "values_count": 12,
+      "values": {
+        "travel_speed": "30",
+        "eng_power": "58",
+        "dim_length": "7300",
+        "gradeability": "30°",
+        "source_link": "https://www.sqmg.com/?1-8-Cubic-Meters/67.html",
+        "dim_height": "2750",
+        "note_diff": "Dönüş yarıçapı maksimum olarak belirtilmiştir",
+        "mix_batch": "1.8",
+        "swing_radius_min": "5270",
+        "eng_model": "Yunnei 490 Turbo",
+        "weight_total": "6000",
+        "dim_width": "2650"
+      }
+    },
+    {
+      "id": 61,
+      "code": "MX20",
+      "status": "active",
+      "values_count": 20,
+      "values": {
+        "trans_gearbox": "ZL-265 Power Shift",
+        "mixer_hydraulic_motor": "HYTEK",
+        "fuel_tank": "120",
+        "eng_model": "Yuchai 4102 Turbo",
+        "drum_speed": "18–21",
+        "mix_batch": "2",
+        "reducer": "HJ80-43",
+        "dim_width": "2720",
+        "weight_total": "6300",
+        "drum_rotation": "270°",
+        "dim_length": "6950",
+        "eng_power": "75",
+        "travel_speed": "30",
+        "wheelbase": "2520",
+        "hyd_pump": "CBG9 50/32",
+        "source_link": "https://www.sqmg.com/?2-0-Cubic-Meters/139.html",
+        "note_diff": "Tork konvertörü; belirtilen tüketim 3,5 L/s",
+        "water_tank": "500",
+        "dim_height": "3850",
+        "drum_capacity": "3500"
+      }
+    },
+    {
+      "id": 50,
+      "code": "MX26-1",
+      "status": "active",
+      "values_count": 12,
+      "values": {
+        "drum_speed": "13",
+        "mix_batch": "2",
+        "weight_total": "7000",
+        "drum_rotation": "270°",
+        "dim_width": "2750",
+        "eng_power": "75",
+        "wheelbase": "2800",
+        "dim_length": "7860",
+        "source_link": "https://www.sqmg.com/?2-6-Cubic-Meters/60.html",
+        "dim_height": "4100",
+        "note_diff": "Anma kapasitesi 2,6 m³, yayımlanan parti üretimi ise 2,0 m³",
+        "drum_capacity": "3000"
+      }
+    },
+    {
+      "id": 66,
+      "code": "MX26-2",
+      "status": "active",
+      "values_count": 20,
+      "values": {
+        "trans_gearbox": "ZL-280 Power Shift",
+        "mixer_hydraulic_motor": "HYTEK",
+        "weight_total": "7800",
+        "drum_rotation": "270°",
+        "reducer": "HJ80-43",
+        "dim_width": "2750",
+        "drum_speed": "13–20",
+        "mix_batch": "2.6",
+        "fuel_tank": "120",
+        "eng_model": "Yuchai 4102 Turbo",
+        "source_link": "https://www.sqmg.com/?2-6-Cubic-Meters/140.html",
+        "dim_height": "4100",
+        "water_tank": "500",
+        "note_diff": "Başka bir sayfada 15–20 rpm belirtilmiş; açıklanan tüketim 3,5 l/sa",
+        "drum_capacity": "3580",
+        "eng_power": "75",
+        "wheelbase": "2650",
+        "hyd_pump": "CBG9 2050/2032",
+        "travel_speed": "30",
+        "dim_length": "7100"
+      }
+    },
+    {
+      "id": 74,
+      "code": "MX35A",
+      "status": "active",
+      "values_count": 18,
+      "values": {
+        "eng_power": "85",
+        "wheelbase": "2900",
+        "travel_speed": "30",
+        "dim_length": "7830",
+        "dim_height": "4170",
+        "water_tank": "620",
+        "note_diff": "Opsiyonel elektronik tartım sistemi",
+        "source_link": "https://www.sqmg.com/?3-5-Cubic-Meters/70.html",
+        "gradeability": "30°",
+        "drum_capacity": "4740",
+        "swing_radius_min": "5300",
+        "mix_batch": "3.5",
+        "drum_speed": "18–21",
+        "fuel_tank": "120",
+        "eng_model": "Yuchai 4105 Turbo",
+        "weight_total": "7800",
+        "drum_rotation": "270°",
+        "dim_width": "2680"
+      }
+    },
+    {
+      "id": 85,
+      "code": "MX35B",
+      "status": "active",
+      "values_count": 19,
+      "values": {
+        "mixer_hydraulic_motor": "HYTEK",
+        "water_tank": "620",
+        "note_diff": "Ürün sayfasında dingil mesafesi 2650 mm, karşılaştırma tablosunda 2605 mm; isteğe bağlı elektronik ağırlık",
+        "dim_height": "4180",
+        "source_link": "https://www.sqmg.com/?3-5-Cubic-Meters/71.html",
+        "gradeability": "30°",
+        "drum_capacity": "4740",
+        "dim_length": "7730",
+        "eng_power": "85",
+        "travel_speed": "30",
+        "wheelbase": "2605",
+        "dim_width": "2700",
+        "drum_rotation": "270°",
+        "weight_total": "7900",
+        "fuel_tank": "120",
+        "eng_model": "Yuchai 4105 Turbo",
+        "mix_batch": "3.5",
+        "swing_radius_min": "5300",
+        "drum_speed": "18–21"
+      }
+    },
+    {
+      "id": 62,
+      "code": "MX35C",
+      "status": "active",
+      "values_count": 19,
+      "values": {
+        "mixer_hydraulic_motor": "HYTEK",
+        "wheelbase": "2640",
+        "travel_speed": "30",
+        "eng_power": "85",
+        "dim_length": "7600",
+        "drum_capacity": "4740",
+        "gradeability": "30°",
+        "source_link": "https://www.sqmg.com/?3-5-Cubic-Meters/72.html",
+        "dim_height": "4180",
+        "note_diff": "920 L su deposu; opsiyonel elektronik tartım",
+        "water_tank": "920",
+        "drum_speed": "18–21",
+        "mix_batch": "3.5",
+        "swing_radius_min": "5300",
+        "eng_model": "Yuchai 4105 Turbo",
+        "fuel_tank": "120",
+        "drum_rotation": "270°",
+        "weight_total": "8300",
+        "dim_width": "2800"
+      }
+    },
+    {
+      "id": 1,
+      "code": "MX35D",
+      "status": "active",
+      "values_count": 59,
+      "values": {
+        "mixer_hydraulic_motor": "HYTEK",
+        "eng_model": "Yuchai 4105 Turbo",
+        "chassis_tire_brand": "Chaoyang arazi",
+        "mixer_discharge_chute": "Elektrik kontrollü hidrolik tahrik",
+        "tank_fuel": "120 L",
+        "chassis_cleaning": "Yüksek basınçlı yıkayıcı",
+        "dim_length": "7,590 mm",
+        "fuel_tank": "120",
+        "mix_batch": "3.5",
+        "swing_radius_min": "5300",
+        "cabin_vision": "Sürüş yardım kamerası",
+        "drum_speed": "18–21",
+        "eng_power": "85 kW",
+        "tank_water_supply_method": "Zaman rölesi",
+        "tank_water_fill_system": "Hidrolik harici emme pompası",
+        "dim_height": "4,270 mm",
+        "dim_width": "2600",
+        "note_2": "Görseller yalnızca tanıtım amaçlıdır",
+        "chassis_front_wheels": "Çift",
+        "chassis_lubrication": "Otomatik",
+        "mixer_motor_make": "Hytek",
+        "mixer_drum_system": "Kaldırılabilir tambur",
+        "perf_gradeability": "30°",
+        "mixer_drum_rotation": "270°",
+        "chassis_axles": "Tekerlek son indirgemeli akslar",
+        "note_3": "SCOR, özelliklerde önceden bildirimde bulunmaksızın değişiklik yapma hakkını saklı tutar",
+        "drum_rotation": "180°",
+        "weight_total": "8050",
+        "tank_water_measure": "Debi ölçer",
+        "opt_equip_1": "Çimento hunisi",
+        "note_1": "Özellikler ve ölçüler yaklaşık olup ek donanıma göre değişebilir.",
+        "chassis_tire_size": "295/80 R22.5",
+        "chassis_brakes": "Çift fren kaliperleri",
+        "equipment_type": "Kendinden yüklemeli beton mikseri (3.5D)",
+        "axle_wheel_base": "2,687 mm",
+        "perf_min_turning_radius": "5,300 mm",
+        "cabin_ac": "Soğutma ve ısıtma",
+        "mixer_weighing": "Elektronik tartım sistemi",
+        "travel_speed": "30",
+        "perf_total_weight": "8,050 kg",
+        "wheelbase": "2687",
+        "tank_water": "620 L",
+        "chassis_driving": "Çift yönlü sürüş",
+        "model_name": "SCOR PM 35",
+        "gradeability": "30°",
+        "drum_capacity": "4740",
+        "cabin_stickers": "İngilizce olarak",
+        "water_tank": "620",
+        "mixer_chute_extension": "Sabitleme kancalı iki uzatma parçası",
+        "note_diff": "Opsiyonel elektronik tartım sistemi",
+        "source_link": "https://www.sqmg.com/?3-5-Cubic-Meters/141.html",
+        "cabin_seat": "Lüks koltuk",
+        "perf_max_speed": "30 km/h"
+      }
+    },
+    {
+      "id": 75,
+      "code": "MX40-مفصلية",
+      "status": "active",
+      "values_count": 19,
+      "values": {
+        "mixer_hydraulic_motor": "HYTEK",
+        "dim_length": "8450",
+        "wheelbase": "3300",
+        "travel_speed": "35",
+        "eng_power": "91",
+        "drum_capacity": "6000",
+        "gradeability": "40°",
+        "dim_height": "4500",
+        "note_diff": "Opsiyonel elektronik tartım sistemi",
+        "water_tank": "750",
+        "source_link": "https://www.sqmg.com/?4-0-Cubic-Meters/142.html",
+        "eng_model": "Yuchai 4108 Turbo",
+        "fuel_tank": "120",
+        "swing_radius_min": "5300",
+        "mix_batch": "4",
+        "drum_speed": "20",
+        "dim_width": "3000",
+        "weight_total": "9700",
+        "drum_rotation": "270°"
+      }
+    },
+    {
+      "id": 84,
+      "code": "MX40-هيكل-كامل",
+      "status": "active",
+      "values_count": 12,
+      "values": {
+        "eng_power": "91",
+        "wheelbase": "2480",
+        "dim_length": "7640",
+        "dim_height": "4750",
+        "note_diff": "Tam şasi versiyonu",
+        "source_link": "https://www.sqmg.com/?4-0-Cubic-Meters/76.html",
+        "drum_capacity": "6000",
+        "mix_batch": "4",
+        "drum_speed": "18–21",
+        "drum_rotation": "290°",
+        "weight_total": "9000",
+        "dim_width": "2870"
+      }
+    },
+    {
+      "id": 78,
+      "code": "MX55",
+      "status": "active",
+      "values_count": 17,
+      "values": {
+        "trans_gearbox": "Tork konvertörü",
+        "dim_width": "3100",
+        "weight_total": "11200",
+        "drum_rotation": "270°",
+        "fuel_tank": "342",
+        "swing_radius_min": "6200",
+        "mix_batch": "5.5",
+        "drum_speed": "20",
+        "note_diff": "Mafsallı şase; 81 ve 143. sayfalar aynı verileri gösteriyor",
+        "dim_height": "4580",
+        "source_link": "https://www.sqmg.com/?5-5-Cubic-Meters/143.html",
+        "gradeability": "45°",
+        "drum_capacity": "7800",
+        "ground_clearance": "380",
+        "dim_length": "8450",
+        "travel_speed": "42",
+        "wheelbase": "3350"
+      }
+    },
+    {
+      "id": 83,
+      "code": "MX65",
+      "status": "active",
+      "values_count": 18,
+      "values": {
+        "trans_gearbox": "Tork konvertörü",
+        "dim_width": "3050",
+        "drum_rotation": "290°",
+        "weight_total": "12520",
+        "fuel_tank": "342",
+        "output_hourly": "26",
+        "drum_speed": "16.5",
+        "mix_batch": "6.5",
+        "swing_radius_min": "4800",
+        "gradeability": "45°",
+        "drum_capacity": "9000",
+        "source_link": "https://www.sqmg.com/?6-5-Cubic-Meters/82.html",
+        "dim_height": "4830",
+        "note_diff": "Başka bir tabloda yakıt deposu 370 litre, 342 değil; tek parça şase",
+        "ground_clearance": "350",
+        "dim_length": "8450",
+        "wheelbase": "2850",
+        "travel_speed": "40"
+      }
+    },
+    {
+      "id": 15,
+      "code": "WX30F",
+      "status": "active",
+      "values_count": 45,
+      "values": {
+        "model": "Rated load",
+        "3000kg": "Load center distance",
+        "500mm": "Fork lift maximum height (with back rack)",
+        "4260mm": "maximum lift height",
+        "the_full_height_of_the_gantry_the_fork_is_on_the_ground_the_": "2081mm",
+        "free_lift_height": "100mm",
+        "shelf_height_from_the_fork_surface_of_the_gantry": "1227mm",
+        "distance_from_seat_surface_to_overhead_guard": "1022mm",
+        "full_height_overhead_guard": "2186mm",
+        "full_length_without_fork": "2652mm",
+        "front_overhang": "455mm",
+        "rear_overhang": "498mm",
+        "wheelbase": "1700mm",
+        "draw_pin_height": "310mm",
+        "minimum_ground_clearance_at_the_gantry": "174mm",
+        "full_width": "1234mm",
+        "outer_fork_distance_max_min": "1100/240mm",
+        "wheel_base_front_rear": "1030/992mm",
+        "outside_the_minimum_turning_radius": "2407mm",
+        "inside_the_minimum_turning_radius": "1582mm",
+        "minimum_right_angle_radius_width": "2507mm",
+        "gantry_inclination_front_rear": "Front gear 6 rear gear 12",
+        "fork_size": "1070*45*120mm",
+        "maximum_travel_speed_full_load_no_load": "18/20km/h",
+        "speed_boost_full_load_no_load": "350/500mm/s",
+        "speed_drop_full_load_no_load": "550/450 mm/s",
+        "maximum_traction_full_load_no_load": "15KN",
+        "maximum_gradeability_full_load_no_load": "15/20%",
+        "gross_weight": "4320kg",
+        "weight_distribution_full_load_front_rear": "6480/920kg",
+        "weight_distribution_empty_front_rear": "1730/2580kg",
+        "number_of_wheels_x_drive_wheel": "2X/2",
+        "tyre_type_front_rear": "solid tire",
+        "front_tire": "28*9-15",
+        "rear_tire": "6.50-10",
+        "service_brake": "hydraulic brake",
+        "parking_brake": "mechanical",
+        "engine_model": "Isuzu",
+        "packaging_for_shipment": "Customer Visits",
+        "client_testimonials": "Materials Handling Equipment(MHE) TF30",
+        "julie_titanhi_com": "Wechat:",
+        "inquire_now": "Related Product",
+        "still_deciding_get_samples_first": "Contact US !",
+        "products_category": "Materials Handling Equipment(MHE)",
+        "powerful_engine_machanical_joystick": "Email:"
+      }
+    },
+    {
+      "id": 16,
+      "code": "WX35F",
+      "status": "active",
+      "values_count": 50,
+      "values": {
+        "model": "TF35",
+        "perf_rated_load": "3500kg",
+        "load_center_distance": "500mm",
+        "fork_lift_maximum_height_with_back_rack": "4135mm",
+        "maximum_lift_height": "3000mm",
+        "the_full_height_of_the_gantry_the_fork_is_on_the_ground_the_": "2060mm",
+        "free_lift_height": "100mm",
+        "shelf_height_from_the_fork_surface_of_the_gantry": "1090mm",
+        "distance_from_seat_surface_to_overhead_guard": "976mm",
+        "full_height_overhead_guard": "2118mm",
+        "full_length_without_fork": "2654mm",
+        "front_overhang": "475mm",
+        "rear_overhang": "425mm",
+        "wheelbase": "1700mm",
+        "draw_pin_height": "410mm",
+        "minimum_ground_clearance_at_the_gantry": "145mm",
+        "full_width": "1268mm",
+        "outer_fork_distance_max_min": "1100/240mm",
+        "wheel_base_front_rear": "1057/990mm",
+        "outside_the_minimum_turning_radius": "2422mm",
+        "inside_the_minimum_turning_radius": "1648mm",
+        "minimum_right_angle_radius_width": "2522mm",
+        "gantry_inclination_front_rear": "Front gear 6 rear gear 12",
+        "fork_size": "1070*45*120mm",
+        "maximum_travel_speed_full_load_no_load": "12.5/14km/h",
+        "speed_boost_full_load_no_load": "270/420mm/s",
+        "speed_drop_full_load_no_load": "550/450 mm/s",
+        "maximum_traction_full_load_no_load": "19KN",
+        "maximum_gradeability_full_load_no_load": "15/20%",
+        "gross_weight": "4790kg",
+        "weight_distribution_full_load_front_rear": "7250/1100kg",
+        "weight_distribution_empty_front_rear": "1890/2860kg",
+        "number_of_wheels_x_drive_wheel": "2X/2",
+        "tyre_type_front_rear": "solid tire",
+        "front_tire": "23*9-10",
+        "rear_tire": "18*7-8",
+        "service_brake": "hydraulic brake",
+        "parking_brake": "mechanical",
+        "battery_voltage_capacity": "76.8/206-412",
+        "travel_motor_model": "HPQ16.6-80",
+        "oil_pump_motor_model": "HPB16-80XG",
+        "controller": "INMOTION",
+        "engine_model": "Xinchai",
+        "packaging_for_shipment": "Customer Visits",
+        "client_testimonials": "Materials Handling Equipment(MHE) TF35",
+        "julie_titanhi_com": "Wechat:",
+        "inquire_now": "Related Product",
+        "still_deciding_get_samples_first": "Contact US !",
+        "products_category": "Materials Handling Equipment(MHE)",
+        "powerful_engine_machanical_joystick": "Email:"
+      }
+    },
+    {
+      "id": 17,
+      "code": "WX50F",
+      "status": "active",
+      "values_count": 49,
+      "values": {
+        "characteristics": "Fuel type",
+        "diesel": "Load capacity",
+        "kg": "5000",
+        "1220x150x55": "Mast tilting angle",
+        "front_rear": "Deg.",
+        "min_width_of_right_angle": "stacking channel",
+        "mm": "4740",
+        "min_width_of_right": "angle channel",
+        "performance": "Max. travel speed",
+        "mm_s": "400",
+        "kn": "22",
+        "max_gradeability": "%",
+        "dimensions": "Total length",
+        "chassis": "Tyres",
+        "front": "300-15-18PR",
+        "rear": "7.00-12-12PR",
+        "tread": "Front/Rear",
+        "drive": "Battery",
+        "v_ah": "（12/80)x2",
+        "motor": "Model",
+        "xinchai_498": "Rated power:",
+        "kw": "60KW",
+        "transmission": "Hydraulic",
+        "operating_pressure": "Mpa",
+        "packaging_for_shipment": "Customer Visits",
+        "client_testimonials": "Materials Handling Equipment(MHE) TF50",
+        "julie_titanhi_com": "Wechat:",
+        "inquire_now": "Related Product",
+        "still_deciding_get_samples_first": "Contact US !",
+        "products_category": "Materials Handling Equipment(MHE)",
+        "perf_min_turning_radius": "mm",
+        "axle_wheel_base": "mm",
+        "overhead_guard_height": "mm",
+        "fork_dimension": "mm",
+        "mast_extended_height": "mm",
+        "full_free_lift_height": "mm",
+        "load_center": "mm",
+        "powerful_engine_machanical_joystick": "Email:",
+        "full_load": "km/h",
+        "groud_clearance": "mm",
+        "service_weight": "Kg",
+        "lift_height": "mm",
+        "mast_lowered_height": "mm",
+        "max_traction_power": "Full load",
+        "front_overhang": "mm",
+        "with_fork": "mm",
+        "total_width": "mm",
+        "max_lift_speed": "Full load",
+        "total_length": "Without fork"
+      }
+    },
+    {
+      "id": 19,
+      "code": "WXR40F",
+      "status": "draft",
+      "values_count": 0,
+      "values": {}
+    },
+    {
+      "id": 20,
+      "code": "WXR50F",
+      "status": "active",
+      "values_count": 43,
+      "values": {
+        "model": "Unit",
+        "tfr50": "Name",
+        "rough_terrain_forklift": "Capacity Weight",
+        "kg": "5000",
+        "gantry_inclination_forward_backward": "o",
+        "load_grade": "o",
+        "full_load_lifting_speed": "mm/s",
+        "cummins": "Manufacturer",
+        "four_cylinder_in_line_four_stroke_water_cooled": "Rated power/speed",
+        "kw_r_min": "75/2400",
+        "battery": "Voltage",
+        "v": "24",
+        "capacity": "Ah",
+        "frame": "Hyun-joined frame",
+        "fixed_front_axle": "Rear axle swing",
+        "transmission": "Dedicated torque converter gearbox",
+        "work_system": "Mechanical joystick Operating System",
+        "drive_axle": "Special wheel side reduction axle",
+        "four_wheel_drive": "Pneumatic caliper brake",
+        "steering_system": "Full hydraulic steering",
+        "steering_angle": "35degree",
+        "tire_model": "Front 16/70-20 Steel tire",
+        "rear_16_70_20_steel_tire": "Cabin",
+        "the_evolution_of_this_sector_is_increasingly_intertwined_wit": "handling equipment",
+        "often_features_connectivity_for_the_internet_of_things_iot_a": "In conclusion, modern",
+        "is_far_more_than_a_simple_tool_for_moving_objects_it_is_a_cr": "handling equipment",
+        "will_remain_indispensable_forming_the_dynamic_framework_upon": "Packaging for shipment",
+        "materials_handling_equipment_mhe_tfr50": "Powerful engine : machanical joystick",
+        "email": "julie@titanhi.com",
+        "wechat": "+86-15318976676",
+        "inquire_now": "Related Product",
+        "still_deciding_get_samples_first": "Contact US !",
+        "products_category": "Materials Handling Equipment(MHE)",
+        "wheel_tread": "mm",
+        "wheel_base": "mm",
+        "maximum_travel_speed": "Km/h",
+        "load_center_distance": "mm",
+        "customer_visits": "Client Testimonials",
+        "machine_weight": "Kg",
+        "minimum_ground_clearance": "mm",
+        "dimensions_length_x_width_x_height": "mm",
+        "minimum_turning_radius": "mm",
+        "field": "Model"
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "id": 50,
+      "key": "engine",
+      "title": "Motor",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": true,
+      "is_optional": false,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "model_name",
+          "Adı"
+        ],
+        [
+          "marketing_slogan",
+          "Pazarlama sloganı"
+        ]
+      ]
+    },
+    {
+      "id": 51,
+      "key": "dimensions",
+      "title": "Ölçüler",
+      "layout": "dims",
+      "page_no": 1,
+      "is_enabled": true,
+      "is_optional": false,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "short_description",
+          "Kısa açıklama"
+        ],
+        [
+          "equipment_type",
+          "Ekipman tipi"
+        ],
+        [
+          "perf_total_weight",
+          "Toplam ağırlık"
+        ],
+        [
+          "perf_max_speed",
+          "Maks. hız"
+        ]
+      ]
+    },
+    {
+      "id": 52,
+      "key": "tanks",
+      "title": "Depolar",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": true,
+      "is_optional": false,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "perf_gradeability",
+          "Maks. tırmanma kabiliyeti"
+        ],
+        [
+          "perf_min_turning_radius",
+          "Min. dönüş yarıçapı"
+        ],
+        [
+          "eng_model",
+          "Motor modeli"
+        ],
+        [
+          "eng_power",
+          "Güç"
+        ],
+        [
+          "dim_length",
+          "Toplam uzunluk"
+        ]
+      ]
+    },
+    {
+      "id": 53,
+      "key": "dimensions_2",
+      "title": "Ölçüler",
+      "layout": "dims",
+      "page_no": 1,
+      "is_enabled": false,
+      "is_optional": true,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "dim_width",
+          "Toplam genişlik"
+        ],
+        [
+          "dim_height",
+          "Toplam yükseklik"
+        ]
+      ]
+    },
+    {
+      "id": 54,
+      "key": "other",
+      "title": "Diğer",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": false,
+      "is_optional": true,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "tank_water_measure",
+          "Su ölçümü"
+        ]
+      ]
+    },
+    {
+      "id": 55,
+      "key": "cabin",
+      "title": "Kabin",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": true,
+      "is_optional": false,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "chassis_tire_brand",
+          "Lastikler"
+        ],
+        [
+          "chassis_tire_size",
+          "Lastik ölçüsü"
+        ],
+        [
+          "chassis_front_wheels",
+          "Ön tekerler"
+        ],
+        [
+          "chassis_axles",
+          "Akslar"
+        ]
+      ]
+    },
+    {
+      "id": 56,
+      "key": "opt_equipment",
+      "title": "Opsiyonel donanım",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": true,
+      "is_optional": false,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "chassis_brakes",
+          "Frenler"
+        ],
+        [
+          "chassis_driving",
+          "Tahrik"
+        ],
+        [
+          "chassis_lubrication",
+          "Yağlama sistemi"
+        ],
+        [
+          "chassis_cleaning",
+          "Temizleme sistemi"
+        ],
+        [
+          "cabin_ac",
+          "Kabin kliması"
+        ],
+        [
+          "cabin_seat",
+          "Koltuk"
+        ]
+      ]
+    },
+    {
+      "id": 57,
+      "key": "notes",
+      "title": "Notlar",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": true,
+      "is_optional": false,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "cabin_vision",
+          "Görüş sistemi"
+        ],
+        [
+          "cabin_stickers",
+          "Kullanım etiketleri"
+        ],
+        [
+          "opt_equip_1",
+          "Opsiyonel donanım 1"
+        ]
+      ]
+    },
+    {
+      "id": 58,
+      "key": "opt_equipment_2",
+      "title": "Opsiyonel donanım",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": false,
+      "is_optional": true,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 0,
+      "rows": [
+        [
+          "opt_equip_2",
+          "Opsiyonel donanım 2"
+        ],
+        [
+          "opt_equip_3",
+          "Opsiyonel donanım 3"
+        ],
+        [
+          "opt_equip_4",
+          "Opsiyonel donanım 4"
+        ],
+        [
+          "opt_equip_5",
+          "Opsiyonel donanım 5"
+        ],
+        [
+          "opt_equip_6",
+          "Opsiyonel donanım 6"
+        ]
+      ]
+    },
+    {
+      "id": 78,
+      "key": "other_2",
+      "title": "Diğer",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": false,
+      "is_optional": true,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 12,
+      "rows": [
+        [
+          "axle_wheel_base",
+          "Aks aralığı"
+        ],
+        [
+          "tank_fuel",
+          "Yakıt deposu kapasitesi"
+        ],
+        [
+          "tank_water",
+          "Su deposu kapasitesi"
+        ],
+        [
+          "tank_water_supply_method",
+          "Su besleme yöntemi"
+        ],
+        [
+          "tank_water_fill_system",
+          "Su doldurma sistemi"
+        ]
+      ]
+    },
+    {
+      "id": 79,
+      "key": "features",
+      "title": "Özellikler",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": false,
+      "is_optional": true,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 19,
+      "rows": [
+        [
+          "mixer_drum_rotation",
+          "Tambur dönüşü"
+        ],
+        [
+          "mixer_drum_system",
+          "Tambur sistemi"
+        ],
+        [
+          "mixer_hydraulic_motor",
+          "Hidrolik motor"
+        ],
+        [
+          "mixer_motor_make",
+          "Hidrolik motor markası"
+        ],
+        [
+          "mixer_discharge_chute",
+          "Boşaltma oluğu"
+        ],
+        [
+          "mixer_chute_extension",
+          "Boşaltma oluğu uzatması"
+        ],
+        [
+          "mixer_weighing",
+          "Tartı sistemi"
+        ]
+      ]
+    },
+    {
+      "id": 80,
+      "key": "notes_2",
+      "title": "Notlar",
+      "layout": "kv",
+      "page_no": 1,
+      "is_enabled": false,
+      "is_optional": true,
+      "x_pct": null,
+      "y_pct": null,
+      "w_pct": null,
+      "h_pct": null,
+      "sort_order": 40,
+      "rows": [
+        [
+          "note_1",
+          "Not 1"
+        ],
+        [
+          "note_2",
+          "Not 2"
+        ],
+        [
+          "note_3",
+          "Not 3"
+        ]
+      ]
+    }
+  ],
+  "chrome": [],
+  "lang": "tr"
+}
